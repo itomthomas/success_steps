@@ -10,9 +10,9 @@
 }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-soft);
-  color: var(--text-main);
+  color: #1f2933;
 }
 
 .card {
@@ -28,4 +28,26 @@ body {
 
 .btn-primary:hover {
   background-color: #172036;
+}
+
+.hero {
+  background: radial-gradient(circle at top, #1e293b, #020617);
+  color: #ffffff;
+}
+.btn-premium {
+  background-color: #0ea5a4;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+}
+.btn-premium:hover {
+  background-color: #0d9488;
+}
+.section-muted {
+  background-color: #f8fafc;
+}
+.card-premium {
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  border: none;
 }
