@@ -1,0 +1,31 @@
+/* src/styles/theme.css (Psychology-Inspired Colors) */
+
+:root {
+  --bs-primary: #1e3a8a;
+  --bs-success: #2dd4bf;
+  --primary: #1f2a44;     /* Deep Indigo */
+  --secondary: #2fa4a9;   /* Soft Teal */
+  --bg-soft: #f8fafc;
+  --text-main: #1f2933;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background-color: var(--bg-soft);
+  color: var(--text-main);
+}
+
+.card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #172036;
+}

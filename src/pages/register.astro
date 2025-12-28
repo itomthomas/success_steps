@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>User Registration</title>
+  </Fragment>
+  <div class="container min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card p-4 w-100" style="max-width:480px">
+      <h4 class="text-center mb-2" style="color:var(--primary)">
+        Assessment Registration
+      </h4>
+
+      <p class="text-muted text-center mb-4">
+        Request access to begin your assessment
+      </p>
+
+      <form id="regForm">
+        <!-- Honeypot (anti-bot) -->
+        <input
+          type="text"
+          name="company"
+          style="display:none"
+          tabindex="-1"
+          autocomplete="off"
+        />
+
+        <input
+          class="form-control mb-3"
+          name="name"
+          placeholder="Name"
+          required
+        />
+
+        <input
+          class="form-control mb-3"
+          name="mobile"
+          placeholder="Mobile"
+          required
+        />
+
+        <input
+          class="form-control mb-3"
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+        />
+
+        <textarea
+          class="form-control mb-3"
+          name="address"
+          placeholder="Address"
+        ></textarea>
+
+        <select
+          class="form-select mb-3"
+          name="userType"
+          required
+        >
+          <option value="">User Type</option>
+          <option>MiddleSchool</option>
+          <option>Highschool</option>
+          <option>Collegian</option>
+          <option>Graduation</option>
+          <option>Professional</option>
+          <option>Business</option>
+        </select>
+
+        <input
+          class="form-control mb-4"
+          type="number"
+          name="age"
+          placeholder="Age"
+          min="10"
+          max="80"
+        />
+
+        <button class="btn btn-primary w-100">
+          Submit
+        </button>
+      </form>
+
+      <div
+        id="msg"
+        class="alert alert-success mt-3 d-none"
+      >
+        Registration submitted. You’ll receive a link after approval.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateSecurityToken() {
+      const ts = Date.now();
+      return btoa(ts + ".SS_ASTRO");
+    }
+
+    const form = document.getElementById("regForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        action: "register",
+        name: form.name.value,
+        mobile: form.mobile.value,
+        email: form.email.value,
+        address: form.address.value,
+        userType: form.userType.value,
+        age: form.age.value,
+        company: form.company.value, // honeypot
+        securityToken: generateSecurityToken()
+      };
+
+      await fetch("YOUR_GAS_WEBAPP_URL", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Client": "success-steps-astro"
+        },
+        body: JSON.stringify(data)
+      });
+
+      form.reset();
+      document.getElementById("msg").classList.remove("d-none");
+    });
+  </script>
+</BaseLayout>

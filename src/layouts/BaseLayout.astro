@@ -1,0 +1,25 @@
+---
+// src/layouts/BaseLayout.astro
+import "../styles/theme.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+---
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Default title -->
+    <slot name="head">
+        <title>Success Steps</title>
+    </slot>
+  </head>
+
+</head>
+
+<body>
+  <slot />
+</body>
+</html>
