@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const reason = Astro.url.searchParams.get("reason");
+
+const messages = {
+  missing: {
+    title: "Invalid Access",
+    text: "Your assessment link is incomplete or incorrect."
+  },
+  expired: {
+    title: "Link Expired",
+    text: "Your assessment access has expired. Please request a new link."
+  },
+  completed: {
+    title: "Assessment Completed",
+    text: "You have already completed this assessment."
+  },
+  notapproved: {
+    title: "Approval Pending",
+    text: "Your registration has not yet been approved."
+  },
+  invalid: {
+    title: "Invalid Link",
+    text: "This assessment link is no longer valid."
+  }
+};
+
+const msg = messages[reason] ?? messages.invalid;
+---
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{msg.title}</title>
+  </Fragment>
+
+  <section class="container py-5 text-center" style="max-width:560px">
+    <h2 class="mb-3">{msg.title}</h2>
+    <p class="text-muted mb-4">{msg.text}</p>
+
+    <a href="/" class="btn btn-primary">Go to Home</a>
+  </section>
+</BaseLayout>

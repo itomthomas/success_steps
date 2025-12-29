@@ -20,12 +20,14 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
 
     const {
-      name,
+      firstname,
+      lastname,
       mobile,
       email,
       address,
       userType,
       age,
+      gender,
       company,       // honeypot
       securityToken
     } = body;
@@ -65,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
     /* ---------------------------------
      * 5. Field validation
      * --------------------------------- */
-    if (!name || !mobile || !email || !userType || !age) {
+    if (!firstname || !lastname || !mobile || !email || !userType || !age || !gender) {
       return reject(400, "Missing required fields");
     }
 
@@ -83,13 +85,16 @@ export const POST: APIRoute = async ({ request }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        action: "register",
         regId,
-        name,
+        firstname,
+        lastname,
         mobile,
         email,
         address,
         userType,
         age,
+        gender,
         createdAt: new Date().toISOString()
       })
     });

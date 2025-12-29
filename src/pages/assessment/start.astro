@@ -1,0 +1,60 @@
+---
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token");
+
+if (!token) {
+  return Astro.redirect("/assessment/error?reason=missing");
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Starting Assessment</title>
+</head>
+<body>
+  <p style="text-align:center;margin-top:3rem;">
+    Validating your access…
+  </p>
+
+  <script is:inline>
+    (async () => {
+      const token = new URLSearchParams(window.location.search).get("token");
+
+      if (!token) {
+        window.location.replace("/assessment/error?reason=missing");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/validate-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          window.location.replace(
+            `/assessment/error?reason=${data.reason || "invalid"}`
+          );
+          return;
+        }
+
+        // ✅ THIS is the missing link
+        sessionStorage.setItem("assessmentSession", "active");
+        sessionStorage.setItem("assessmentToken", token);
+        sessionStorage.setItem("assessmentStartedAt", Date.now().toString());
+
+        // Remove token from URL
+        window.location.replace("/assessment");
+      } catch (err) {
+        window.location.replace("/assessment/error?reason=server");
+      }
+    })();
+  </script>
+</body>
+</html>

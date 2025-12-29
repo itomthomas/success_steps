@@ -4,8 +4,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout>
   <Fragment slot="head">
-    <title>User Registration</title>
+    <title>User Registration | Success Steps</title>
   </Fragment>
+
   <div class="container min-vh-100 d-flex align-items-center justify-content-center">
     <div class="card p-4 w-100" style="max-width:480px">
       <h4 class="text-center mb-2" style="color:var(--primary)">
@@ -16,111 +17,131 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         Request access to begin your assessment
       </p>
 
-      <form id="regForm">
-        <!-- Honeypot (anti-bot) -->
-        <input
-          type="text"
-          name="company"
-          style="display:none"
-          tabindex="-1"
-          autocomplete="off"
-        />
+      <form id="regForm" novalidate>
+        <!-- Honeypot -->
+        <input type="text" name="company" class="d-none" tabindex="-1" autocomplete="off" />
 
-        <input
-          class="form-control mb-3"
-          name="name"
-          placeholder="Name"
-          required
-        />
+        <div class="mb-3">
+          <label class="form-label">First Name</label>
+          <input name="firstName" class="form-control" required pattern="^[A-Za-z\s']+$" />
+          <div class="invalid-feedback">Enter a valid first name.</div>
+        </div>
 
-        <input
-          class="form-control mb-3"
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-        />
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input name="lastName" class="form-control" required pattern="^[A-Za-z\s']+$" />
+          <div class="invalid-feedback">Enter a valid last name.</div>
+        </div>
 
-        <input
-          class="form-control mb-3"
-          name="mobile"
-          placeholder="Mobile"
-          required
-        />
-        
-        <input
-          class="form-control mb-4"
-          type="number"
-          name="age"
-          placeholder="Age"
-          min="3"
-          max="80"
-        />
+        <div class="mb-3">
+          <label class="form-label">Mobile Number</label>
+          <input
+            name="mobile"
+            type="tel"
+            class="form-control"
+            required
+            placeholder="9876543210 or +919876543210"
+          />
+          <div class="invalid-feedback">
+            Enter a valid Mobile number (10–13 digits, country code allowed).
+          </div>
+        </div>
 
-        <select
-          class="form-select mb-3"
-          name="userType"
-          required
-        >
-          <option value="">User Type</option>
-          <option>MiddleSchool</option>
-          <option>Highschool</option>
-          <option>Collegian</option>
-          <option>Graduation</option>
-          <option>Professional</option>
-          <option>Business</option>
-        </select>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input name="email" type="email" class="form-control" required />
+          <div class="invalid-feedback">Enter a valid email.</div>
+        </div>
 
-        <textarea
-          class="form-control mb-3"
-          name="address"
-          placeholder="Address"
-        ></textarea>
+        <div class="mb-3">
+          <label class="form-label">Age</label>
+          <input name="age" type="number" min="3" max="80" class="form-control" required />
+          <div class="invalid-feedback">Age must be between 3 and 80.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Gender</label>
+          <select name="gender" class="form-select" required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <div class="invalid-feedback">Please select gender.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">User Type</label>
+          <select name="userType" class="form-select" required>
+            <option value="">Select</option>
+            <option>MiddleSchool</option>
+            <option>Highschool</option>
+            <option>Collegian</option>
+            <option>Graduation</option>
+            <option>Professional</option>
+            <option>Business</option>
+          </select>
+          <div class="invalid-feedback">Please select user type.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Address</label>
+          <textarea name="address" class="form-control" rows="2"></textarea>
+        </div>
 
         <div class="form-check mb-4">
           <input class="form-check-input" type="checkbox" required />
           <label class="form-check-label">
             I consent to the assessment and data usage
           </label>
+          <div class="invalid-feedback">Consent is required.</div>
         </div>
-      
-        <button class="btn btn-primary w-100">
-          Submit
-        </button>
+
+        <button class="btn btn-primary w-100" type="submit">Submit</button>
       </form>
-      
-      <div
-        id="msg"
-        class="alert alert-success mt-3 d-none"
-      >
+
+      <div id="msg" class="alert alert-success mt-3 d-none">
         Registration submitted. You’ll receive a link after approval.
       </div>
     </div>
   </div>
-  
+
   <script>
+    const form = document.getElementById("regForm");
+
     function generateSecurityToken() {
-      const ts = Date.now();
-      return btoa(ts + ".SS_ASTRO");
+      return btoa(Date.now() + ".SS_ASTRO");
     }
 
-    const form = document.getElementById("regForm");
+    function validMobile(value) {
+      const digits = value.replace(/\D/g, "");
+      return digits.length >= 10 && digits.length <= 13;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      form.classList.add("was-validated");
+
+      if (!form.checkValidity()) return;
+
+      if (!validMobile(form.mobile.value)) {
+        form.mobile.classList.add("is-invalid");
+        return;
+      }
 
       const payload = {
         action: "register",
-        name: form.name.value,
-        mobile: form.mobile.value,
-        email: form.email.value,
-        address: form.address.value,
-        userType: form.userType.value,
+        firstname: form.firstName.value.trim(),
+        lastname: form.lastName.value.trim(),
+        mobile: form.mobile.value.trim(),
+        email: form.email.value.trim(),
         age: form.age.value,
-        company: form.company.value, // honeypot
+        gender: form.gender.value,
+        userType: form.userType.value,
+        address: form.address.value.trim(),
+        company: form.company.value,
         securityToken: generateSecurityToken()
       };
-
+      
       const res = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -130,12 +151,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         body: JSON.stringify(payload)
       });
 
+      if (!res.ok) return;
+
       const data = await res.json();
 
+      //if (data?.regId) {
+        //sessionStorage.setItem("regId", data.regId);
+      //}
+
       form.reset();
+      form.classList.remove("was-validated");
       document.getElementById("msg").classList.remove("d-none");
-      // Store registration token
-      sessionStorage.setItem("regId", data.regId);
     });
   </script>
 </BaseLayout>
