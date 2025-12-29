@@ -35,24 +35,27 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         <input
           class="form-control mb-3"
-          name="mobile"
-          placeholder="Mobile"
-          required
-        />
-
-        <input
-          class="form-control mb-3"
           type="email"
           name="email"
           placeholder="Email"
           required
         />
 
-        <textarea
+        <input
           class="form-control mb-3"
-          name="address"
-          placeholder="Address"
-        ></textarea>
+          name="mobile"
+          placeholder="Mobile"
+          required
+        />
+        
+        <input
+          class="form-control mb-4"
+          type="number"
+          name="age"
+          placeholder="Age"
+          min="3"
+          max="80"
+        />
 
         <select
           class="form-select mb-3"
@@ -68,20 +71,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <option>Business</option>
         </select>
 
-        <input
-          class="form-control mb-4"
-          type="number"
-          name="age"
-          placeholder="Age"
-          min="10"
-          max="80"
-        />
+        <textarea
+          class="form-control mb-3"
+          name="address"
+          placeholder="Address"
+        ></textarea>
 
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" required />
+          <label class="form-check-label">
+            I consent to the assessment and data usage
+          </label>
+        </div>
+      
         <button class="btn btn-primary w-100">
           Submit
         </button>
       </form>
-
+      
       <div
         id="msg"
         class="alert alert-success mt-3 d-none"
@@ -90,7 +97,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </div>
   </div>
-
+  
   <script>
     function generateSecurityToken() {
       const ts = Date.now();
@@ -102,7 +109,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const data = {
+      const payload = {
         action: "register",
         name: form.name.value,
         mobile: form.mobile.value,
@@ -114,17 +121,21 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         securityToken: generateSecurityToken()
       };
 
-      await fetch("YOUR_GAS_WEBAPP_URL", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Client": "success-steps-astro"
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
+
+      const data = await res.json();
 
       form.reset();
       document.getElementById("msg").classList.remove("d-none");
+      // Store registration token
+      sessionStorage.setItem("regId", data.regId);
     });
   </script>
 </BaseLayout>

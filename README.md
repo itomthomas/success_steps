@@ -1,3 +1,40 @@
+SYSTEM FLOW (WITH SECURITY)
+Astro Register Form
+ ├─ adds securityToken (timestamp)
+ ├─ adds X-Client header
+ ├─ includes honeypot field
+ └─ POST → GAS
+
+GAS
+ ├─ validate origin
+ ├─ validate token freshness
+ ├─ check honeypot
+ ├─ rate-limit (email/mobile)
+ └─ store in Google Sheet
+
+Admin approves user
+ └─ GAS generates test token
+
+Astro Test Gate
+ ├─ validates token with GAS
+ └─ allows test access
+
+[ Astro Form ]
+      ↓
+[ GAS: registerUser ]
+      ↓
+[ Google Sheet: USERS ]
+      ↓
+(Admin marks APPROVED)
+      ↓
+[ GAS: generateTestLink ]
+      ↓
+[ Email / WhatsApp ]
+      ↓
+[ Astro Test Assessment Page ]
+      ↓
+[ GAS: validateToken → allow test ]
+
 # Astro Starter Kit: Minimal
 
 ```sh

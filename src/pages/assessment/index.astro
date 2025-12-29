@@ -35,6 +35,13 @@
     </section>
 
     <script is:inline>
+      
+      const regId = sessionStorage.getItem("regId");
+
+      if (!regId) {
+        window.location.href = "/register";
+      }
+      
       const startBtn = document.getElementById("startBtn");
       const selector = document.getElementById("testSelector");
       const dropdown = document.getElementById("testDropdown");
