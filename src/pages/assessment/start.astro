@@ -1,28 +1,32 @@
 ---
 export const prerender = false;
-
+import BaseLayout from "../../layouts/BaseLayout.astro";
 const token = Astro.url.searchParams.get("token");
 
 if (!token) {
   return Astro.redirect("/assessment/error?reason=missing");
 }
 ---
+<BaseLayout>
+  <!-- Page-specific HEAD -->
+  <Fragment slot="head">
+    <title>Starting Assessment | Success Steps</title>
+  </Fragment>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Starting Assessment</title>
-</head>
-<body>
-  <p style="text-align:center;margin-top:3rem;">
-    Validating your access…
-  </p>
+  <div class="d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-sm border-0 p-4 text-center" style="max-width:420px;">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+
+      <h5 class="fw-semibold mb-2">Preparing Your Assessment</h5>
+      <p class="text-muted mb-0">
+        Verifying access and setting things up…
+      </p>
+    </div>
+  </div>
 
   <script is:inline>
     (async () => {
       const token = new URLSearchParams(window.location.search).get("token");
-
       if (!token) {
         window.location.replace("/assessment/error?reason=missing");
         return;
@@ -44,17 +48,14 @@ if (!token) {
           return;
         }
 
-        // ✅ THIS is the missing link
         sessionStorage.setItem("assessmentSession", "active");
         sessionStorage.setItem("assessmentToken", token);
         sessionStorage.setItem("assessmentStartedAt", Date.now().toString());
 
-        // Remove token from URL
         window.location.replace("/assessment");
-      } catch (err) {
+      } catch {
         window.location.replace("/assessment/error?reason=server");
       }
     })();
   </script>
-</body>
-</html>
+</BaseLayout>
