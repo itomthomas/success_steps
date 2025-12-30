@@ -1,0 +1,224 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Pricing | SuccessSteps">
+  <!-- Hero Section -->
+  <section class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container text-center">
+      <h1 class="display-4 fw-bold mb-4">Choose Your Assessment Package</h1>
+      <p class="lead mb-5">93 test sections • 500+ questions across 20 categories</p>
+      <a href="#custom-builder" class="btn btn-light btn-lg px-5 py-3">🎯 Build Custom Package</a>
+    </div>
+  </section>
+
+  <!-- Pre-built Packages -->
+  <section class="py-5 mb-5">
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+        
+        <!-- High School Package -->
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 shadow-lg border-0 hover-lift">
+            <div class="card-body text-center p-5">
+              <div class="bg-warning rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
+                <i class="bi bi-mortarboard-fill fs-1 text-white"></i>
+              </div>
+              <h3 class="card-title fw-bold mb-3">High Schoolers</h3>
+              <p class="text-muted mb-4">12 essential tests for career exploration</p>
+              <div class="h2 fw-bold text-warning mb-4">₹7,500</div>
+              <ul class="list-unstyled mb-4 text-start">
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Career Interest Inventory</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Personality Assessment</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Academic Aptitude</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Study Skills</li>
+              </ul>
+              <a href="#" class="btn btn-warning btn-lg w-100" data-package="highschool">
+                Purchase Package
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- College Package -->
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 shadow-lg border-0 hover-lift">
+            <div class="card-body text-center p-5">
+              <div class="bg-info rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
+                <i class="bi bi-book-half fs-1 text-white"></i>
+              </div>
+              <h3 class="card-title fw-bold mb-3">College Students</h3>
+              <p class="text-muted mb-4">15 comprehensive tests</p>
+              <div class="h2 fw-bold text-info mb-4">₹8,500</div>
+              <ul class="list-unstyled mb-4 text-start">
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Emotional Intelligence</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Leadership Potential</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Career Values</li>
+              </ul>
+              <a href="#" class="btn btn-info btn-lg w-100" data-package="college">
+                Purchase Package
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Professional Package -->
+        <div class="col-lg-4 col-md-12">
+          <div class="card h-100 shadow-lg border-0 hover-lift popular">
+            <div class="position-relative">
+              <span class="badge bg-danger position-absolute top-0 start-50 translate-middle-x mt-2 z-3">Most Popular</span>
+            </div>
+            <div class="card-body text-center p-5">
+              <div class="bg-success rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
+                <i class="bi bi-briefcase-fill fs-1 text-white"></i>
+              </div>
+              <h3 class="card-title fw-bold mb-3">Professionals</h3>
+              <p class="text-muted mb-4">17 advanced tests + career mapping</p>
+              <div class="h2 fw-bold text-success mb-4">₹9,500</div>
+              <ul class="list-unstyled mb-4 text-start">
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Executive Aptitude</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Team Dynamics</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Stress Management</li>
+              </ul>
+              <a href="#" class="btn btn-success btn-lg w-100" data-package="professional">
+                Purchase Package
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom Mix & Match Builder -->
+  <section id="custom-builder" class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-5">🎨 Build Your Perfect Package</h2>
+      
+      <div class="row">
+        <!-- Test Categories Selection -->
+        <div class="col-lg-8">
+          <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+                Select from 20 Test Categories (93 sections total)
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <div class="row g-3" id="testCategories">
+                <!-- Sample categories - expand to 20 -->
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-check">
+                    <input class="form-check-input test-checkbox" type="checkbox" id="career" value="750">
+                    <label class="form-check-label fw-medium" for="career">Career Interest</label>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-check">
+                    <input class="form-check-input test-checkbox" type="checkbox" id="personality" value="650">
+                    <label class="form-check-label fw-medium" for="personality">Personality</label>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-check">
+                    <input class="form-check-input test-checkbox" type="checkbox" id="aptitude" value="800">
+                    <label class="form-check-label fw-medium" for="aptitude">Aptitude</label>
+                  </div>
+                </div>
+                <!-- Add 17 more categories here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Pricing Sidebar -->
+        <div class="col-lg-4">
+          <div class="card sticky-top" style="top: 100px;">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">Your Custom Package</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">Selected Tests</label>
+                <span class="badge bg-primary fs-6" id="selectedCount">0</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="h3 fw-bold">Total</span>
+                <span class="h2 fw-bold text-success" id="totalPrice">₹0</span>
+              </div>
+              <button class="btn btn-success w-100 btn-lg" id="customPurchaseBtn" disabled>
+                💳 Pay Securely Now
+              </button>
+              <div class="mt-3 small text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Min 5 tests • Max 17 tests
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hover-lift:hover {
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+  .popular {
+    border: 2px solid #10b981 !important;
+  }
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+</style>
+
+<script>
+  // Custom Package Builder Logic
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.test-checkbox');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const purchaseBtn = document.getElementById('customPurchaseBtn');
+    
+    let total = 0;
+    let count = 0;
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const price = parseInt(this.value);
+        
+        if (this.checked) {
+          total += price;
+          count++;
+        } else {
+          total -= price;
+          count--;
+        }
+        
+        updateUI();
+      });
+    });
+    
+    function updateUI() {
+      selectedCountEl.textContent = count;
+      totalPriceEl.textContent = `₹${total.toLocaleString()}`;
+      
+      const isValid = count >= 5 && count <= 17;
+      purchaseBtn.disabled = !isValid;
+      purchaseBtn.classList.toggle('disabled', !isValid);
+    }
+    
+    // Package purchase buttons
+    document.querySelectorAll('[data-package]').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pkg = this.dataset.package;
+        alert(`Redirecting to purchase ${pkg} package...`);
+        // Integrate with your payment flow
+      });
+    });
+  });
+</script>

@@ -4,103 +4,203 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout>
   <Fragment slot="head">
-    <title>User Registration | Success Steps</title>
+    <title>Assessment Registration | SuccessSteps</title>
+    <meta name="description" content="Register for premium psychometric assessments. Get personalized career guidance." />
   </Fragment>
 
-  <div class="container min-vh-100 d-flex align-items-center justify-content-center">
-    <div class="card p-4 w-100" style="max-width:480px">
-      <h4 class="text-center mb-2" style="color:var(--primary)">
-        Assessment Registration
-      </h4>
+  <!-- Mobile-First Hero Background -->
+  <div class="d-flex flex-column min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
 
-      <p class="text-muted text-center mb-4">
-        Request access to begin your assessment
-      </p>
+    <!-- Mobile Header Spacer (for fixed navbar) -->
+    <div class="py-4"></div>
 
-      <form id="regForm" novalidate>
-        <!-- Honeypot -->
-        <input type="text" name="company" class="d-none" tabindex="-1" autocomplete="off" />
-
-        <div class="mb-3">
-          <label class="form-label">First Name</label>
-          <input name="firstName" class="form-control" required pattern="^[A-Za-z\s']+$" />
-          <div class="invalid-feedback">Enter a valid first name.</div>
+    <div class="container-fluid px-3 px-md-4 flex-grow-1 d-flex align-items-center justify-content-center py-4 py-md-5">
+      <div class="card shadow-lg border-0 w-100 mx-2 mx-md-0" style="max-width: 480px; border-radius: 20px; overflow: hidden;">
+        
+        <!-- Card Header -->
+        <div class="card-header bg-white border-0 pb-0 text-center pt-5 pt-md-4">
+          <div class="bg-gradient-primary rounded-circle mx-auto mb-4 p-4 d-inline-block shadow" 
+               style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <i class="bi bi-check-circle-fill text-white fs-2"></i>
+          </div>
+          <h3 class="fw-bold mb-3 text-primary fs-3 fs-md-2">Assessment Registration</h3>
+          <p class="text-muted mb-0 lead fs-6 fs-md-5">Request access to begin your psychometric journey</p>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Last Name</label>
-          <input name="lastName" class="form-control" required pattern="^[A-Za-z\s']+$" />
-          <div class="invalid-feedback">Enter a valid last name.</div>
-        </div>
+        <!-- Card Body -->
+        <div class="card-body p-4 p-md-5">
+          <form id="regForm" novalidate>
 
-        <div class="mb-3">
-          <label class="form-label">Mobile Number</label>
-          <input
-            name="mobile"
-            type="tel"
-            class="form-control"
-            required
-            placeholder="9876543210 or +919876543210"
-          />
-          <div class="invalid-feedback">
-            Enter a valid Mobile number (10–13 digits, country code allowed).
+            <!-- Honeypot -->
+            <input type="text" name="company" class="d-none" tabindex="-1" autocomplete="off" />
+
+            <!-- Row 1: Names -->
+            <div class="row g-3 g-md-4 mb-4">
+              <div class="col-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">First Name <span class="text-danger">*</span></label>
+                <input name="firstName" class="form-control form-control-lg rounded-3 shadow-sm" required pattern="^[A-Za-z\s']+$" />
+                <div class="invalid-feedback">Enter a valid first name</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">Last Name <span class="text-danger">*</span></label>
+                <input name="lastName" class="form-control form-control-lg rounded-3 shadow-sm" required pattern="^[A-Za-z\s']+$" />
+                <div class="invalid-feedback">Enter a valid last name</div>
+              </div>
+            </div>
+
+            <!-- Mobile + Email Row -->
+            <div class="row g-3 g-md-4 mb-4">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">Mobile Number <span class="text-danger">*</span></label>
+                <input name="mobile" type="tel" class="form-control form-control-lg rounded-3 shadow-sm" 
+                       required placeholder="9876543210 or +919876543210" />
+                <div class="invalid-feedback">Enter valid mobile (10-13 digits)</div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">Email <span class="text-danger">*</span></label>
+                <input name="email" type="email" class="form-control form-control-lg rounded-3 shadow-sm" required />
+                <div class="invalid-feedback">Enter a valid email</div>
+              </div>
+            </div>
+
+            <!-- Age + Gender Row -->
+            <div class="row g-3 g-md-4 mb-4">
+              <div class="col-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">Age <span class="text-danger">*</span></label>
+                <input name="age" type="number" min="3" max="80" class="form-control form-control-lg rounded-3 shadow-sm" required />
+                <div class="invalid-feedback">Age 3-80</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-medium fs-6 fs-md-5">Gender <span class="text-danger">*</span></label>
+                <select name="gender" class="form-select form-control-lg rounded-3 shadow-sm" required>
+                  <option value="">Select</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+                <div class="invalid-feedback">Please select gender</div>
+              </div>
+            </div>
+
+            <!-- User Type -->
+            <div class="mb-4">
+              <label class="form-label fw-medium fs-6 fs-md-5">User Type <span class="text-danger">*</span></label>
+              <select name="userType" class="form-select form-control-lg rounded-3 shadow-sm" required>
+                <option value="">Choose your profile</option>
+                <option>MiddleSchool</option>
+                <option>Highschool</option>
+                <option>Collegian</option>
+                <option>Graduation</option>
+                <option>Professional</option>
+                <option>Business</option>
+              </select>
+              <div class="invalid-feedback">Please select user type</div>
+            </div>
+
+            <!-- Address -->
+            <div class="mb-4">
+              <label class="form-label fw-medium fs-6 fs-md-5">Address (Optional)</label>
+              <textarea name="address" class="form-control form-control-lg rounded-3 shadow-sm" rows="3" 
+                        placeholder="Enter your complete address"></textarea>
+            </div>
+
+            <!-- Consent Checkbox with Terms Link -->
+            <div class="form-check mb-5 p-4 bg-light rounded-3 position-relative border">
+              <input class="form-check-input" type="checkbox" id="consent" name="consent" required />
+              <label class="form-check-label fs-6 pe-5" for="consent">
+                <i class="bi bi-shield-check text-success me-2"></i>
+                I have read and agree to the <a href="#" class="text-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a>
+              </label>
+              <div class="invalid-feedback d-block">You must agree to terms to proceed</div>
+            </div>
+
+            <!-- Submit Button -->
+            <button class="btn btn-primary btn-lg w-100 fw-bold py-4 rounded-3 shadow-lg mb-4" type="submit" style="font-size: 1.1rem;">
+              <i class="bi bi-arrow-right me-2"></i>Submit Registration
+            </button>
+          </form>
+
+          <!-- Success Message -->
+          <div id="msg" class="alert alert-success mt-4 d-none border-0 shadow-sm">
+            <i class="bi bi-check-circle-fill me-2 text-success fs-5"></i>
+            <strong>Success!</strong> Registration submitted. You'll receive your assessment link after approval (24-48 hours).
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input name="email" type="email" class="form-control" required />
-          <div class="invalid-feedback">Enter a valid email.</div>
+  <!-- Terms & Conditions Modal -->
+  <div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content rounded-4 shadow-lg">
+        <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+          <h5 class="modal-title fw-bold mb-0">
+            <i class="bi bi-file-text me-2"></i>Terms & Conditions
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body p-4" style="font-size: 0.95rem; line-height: 1.6;">
+          
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">🎯 Test Purpose</h6>
+            <p class="text-muted mb-0">Designed to assess cognitive abilities, personality traits for academic, career, and personal development.</p>
+          </div>
 
-        <div class="mb-3">
-          <label class="form-label">Age</label>
-          <input name="age" type="number" min="3" max="80" class="form-control" required />
-          <div class="invalid-feedback">Age must be between 3 and 80.</div>
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">🔒 Test Confidentiality</h6>
+            <p class="text-muted mb-0">All responses kept strictly confidential. Personal information never shared with third parties.</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">📱 Test Access</h6>
+            <p class="text-muted mb-0">You must provide stable internet & equipment. We're not responsible for technical issues on your end.</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">✅ Test Honesty</h6>
+            <p class="text-muted mb-0"><strong>Required:</strong> Complete independently and honestly for accurate results.</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">⏱️ Test Duration</h6>
+            <p class="text-muted mb-0">Must be completed within the specified time limit.</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">📊 Test Results</h6>
+            <p class="text-muted mb-0">Results provided for your personal reference only. No guaranteed outcomes.</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-semibold text-dark mb-2">© Test Ownership</h6>
+            <p class="text-muted mb-0">All test materials protected by copyright laws.</p>
+          </div>
+
+          <div class="mb-5 p-3 bg-warning bg-opacity-10 border-start border-warning border-3 ps-4 rounded-end">
+            <h6 class="fw-bold text-warning mb-2">⚠️ Important Disclaimer</h6>
+            <p class="text-muted small mb-2">
+              Report is for <strong>reference only</strong>. You assume full responsibility for decisions made. 
+              Consult professional counselors for major life choices. Company not liable for any outcomes.
+            </p>
+            <p class="text-muted small mb-0">
+              For minors, legal guardians hold information rights.
+            </p>
+          </div>
+
+          <div class="text-center border-top pt-3">
+            <p class="text-muted small mb-2">Questions? Contact:</p>
+            <a href="mailto:successtepsnlpa@gmail.com" class="fw-semibold text-primary d-block mb-2">successtepsnlpa@gmail.com</a>
+            <label class="form-check-label d-block fw-semibold text-success small">
+              ⛔ By registering, you agree to all terms above
+            </label>
+          </div>
+
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Gender</label>
-          <select name="gender" class="form-select" required>
-            <option value="">Select</option>
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-          <div class="invalid-feedback">Please select gender.</div>
+        <div class="modal-footer border-0 bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Agree</button>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">User Type</label>
-          <select name="userType" class="form-select" required>
-            <option value="">Select</option>
-            <option>MiddleSchool</option>
-            <option>Highschool</option>
-            <option>Collegian</option>
-            <option>Graduation</option>
-            <option>Professional</option>
-            <option>Business</option>
-          </select>
-          <div class="invalid-feedback">Please select user type.</div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Address</label>
-          <textarea name="address" class="form-control" rows="2"></textarea>
-        </div>
-
-        <div class="form-check mb-4">
-          <input class="form-check-input" type="checkbox" required />
-          <label class="form-check-label">
-            I consent to the assessment and data usage
-          </label>
-          <div class="invalid-feedback">Consent is required.</div>
-        </div>
-
-        <button class="btn btn-primary w-100" type="submit">Submit</button>
-      </form>
-
-      <div id="msg" class="alert alert-success mt-3 d-none">
-        Registration submitted. You’ll receive a link after approval.
       </div>
     </div>
   </div>
@@ -128,6 +228,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         return;
       }
 
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Submitting...';
+      submitBtn.disabled = true;
+
       const payload = {
         action: "register",
         firstname: form.firstName.value.trim(),
@@ -142,26 +247,30 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         securityToken: generateSecurityToken()
       };
       
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Client": "success-steps-astro"
-        },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Client": "success-steps-astro"
+          },
+          body: JSON.stringify(payload)
+        });
 
-      if (!res.ok) return;
+        if (!res.ok) throw new Error('Submission failed');
 
-      const data = await res.json();
-
-      //if (data?.regId) {
-        //sessionStorage.setItem("regId", data.regId);
-      //}
-
-      form.reset();
-      form.classList.remove("was-validated");
-      document.getElementById("msg").classList.remove("d-none");
+        form.reset();
+        form.classList.remove("was-validated");
+        document.getElementById("msg").classList.remove("d-none");
+        
+        // Scroll to success message
+        document.getElementById("msg").scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert('Submission failed. Please try again.');
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
     });
   </script>
 </BaseLayout>
