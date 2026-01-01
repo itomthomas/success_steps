@@ -1,7 +1,6 @@
 ---
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/theme.css";
-
 ---
 
 <!DOCTYPE html>
@@ -49,8 +48,53 @@ import "../styles/theme.css";
       <slot />
     </main>
 
+    <!-- Back to Top Button -->
+    <button
+      id="backToTop"
+      type="button"
+      class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center"
+      style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        display: none;
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-size: 24px;
+        line-height: 1;
+        font-weight: 700;
+      "
+      aria-label="Back to top"
+    >
+      ↑
+    </button>
+
+
     <footer class="border-top py-4 text-center small">
       © SuccessSteps. Created by Tom Thomas.
     </footer>
+
+    <script>
+      // Simple "Back to Top" behaviour
+      document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('backToTop');
+        if (!btn) return;
+
+        window.addEventListener('scroll', function () {
+          if (window.scrollY > 300) {
+            btn.style.display = 'inline-flex';
+          } else {
+            btn.style.display = 'none';
+          }
+        });
+
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    </script>
   </body>
 </html>
