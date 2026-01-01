@@ -3,16 +3,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Pricing | SuccessSteps">
-  <!-- Hero Section -->
+  <!-- MAIN HERO -->
   <section class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="container text-center">
-      <h1 class="display-4 fw-bold mb-3">Success Steps Programs & Pricing</h1>
-      <p class="lead mb-4">Certification courses • 1‑to‑1 coaching • Assessments • Corporate training</p>
+      <h1 class="display-4 fw-bold mb-3">SuccessSteps Programs & Pricing</h1>
+      <p class="lead mb-4">Certification courses • 1‑to‑1 coaching • Psychometric tests • Corporate training</p>
       <div class="d-flex justify-content-center flex-wrap gap-2">
         <a href="#certifications" class="btn btn-light btn-lg px-4 py-2">🎓 Certification Courses</a>
         <a href="#combo-program" class="btn btn-outline-light btn-lg px-4 py-2">⭐ Best‑Selling Combo</a>
         <a href="#coaching" class="btn btn-outline-light btn-lg px-4 py-2">🧠 Coaching & Therapy</a>
-        <a href="#assessments" class="btn btn-outline-light btn-lg px-4 py-2">📊 Psychometric Tests</a>
+        <a href="#psychometric-tests" class="btn btn-outline-light btn-lg px-4 py-2">📊 Psychometric Tests</a>
       </div>
     </div>
   </section>
@@ -22,7 +22,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="container">
       <h2 class="text-center mb-4">Certification Courses – NLP, Coaching & Therapy</h2>
       <p class="text-center text-muted mb-5">
-        Structured tracks so learners can clearly see their path from foundation to advanced mastery.
+        Structured tracks from foundational learning to advanced professional certifications.
       </p>
 
       <!-- NLP Track -->
@@ -194,19 +194,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <span class="badge bg-danger mb-3">Best‑Selling Professional Combo</span>
             <h2 class="fw-bold mb-3">NLP Practitioner + Emotional Intelligence + Applied Neuroscience<br/>Life Coaching & Leadership Coaching</h2>
             <p class="text-muted mb-3">
-              A comprehensive combo for powerful personal transformation, practical coaching skills, and leadership impact.
+              A comprehensive combo for personal transformation, practical coaching skills, and leadership impact.
             </p>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <h5 class="fw-bold">What You’ll Learn</h5>
+                <h5 class="fw-bold mb-2">What You’ll Learn</h5>
                 <ul class="small mb-0">
                   <li>Master thoughts, emotions, and behaviours with NLP</li>
-                  <li>Develop emotional intelligence for work and life</li>
-                  <li>Apply brain‑based tools for focus and performance</li>
+                  <li>Build emotional intelligence for work and life</li>
+                  <li>Use brain‑based tools for focus and performance</li>
                 </ul>
               </div>
               <div class="col-md-6 mb-3">
-                <h5 class="fw-bold">Who It’s For</h5>
+                <h5 class="fw-bold mb-2">Who It’s For</h5>
                 <ul class="small mb-0">
                   <li>Coaches, counsellors, trainers, and therapists</li>
                   <li>Leaders, managers, HR & L&D professionals</li>
@@ -303,12 +303,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- Audience Tabs (optional simple version) -->
+      <!-- Audience Tabs -->
       <div class="mt-5">
         <ul class="nav nav-pills justify-content-center mb-3" id="coachingTabs">
-          <li class="nav-item"><button class="nav-link active" data-group="adults">Adults</button></li>
-          <li class="nav-item"><button class="nav-link" data-group="children">Children</button></li>
-          <li class="nav-item"><button class="nav-link" data-group="professionals">Professionals</button></li>
+          <li class="nav-item"><button class="nav-link active" data-group="adults" type="button">Adults</button></li>
+          <li class="nav-item"><button class="nav-link" data-group="children" type="button">Children</button></li>
+          <li class="nav-item"><button class="nav-link" data-group="professionals" type="button">Professionals</button></li>
         </ul>
         <div class="card shadow-sm">
           <div class="card-body">
@@ -412,21 +412,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </section>
 
-  <!-- EXISTING ASSESSMENT PRICING (ANCHOR ADDED) -->
-  <section id="assessments" class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <!-- PSYCHOMETRIC TESTS HERO -->
+  <section id="psychometric-tests" class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="container text-center">
-      <h2 class="display-6 fw-bold mb-3">Assessment Packages</h2>
+      <h2 class="display-6 fw-bold mb-3">Psychometric Tests</h2>
       <p class="lead mb-4">93 test sections • 500+ questions across 20 categories</p>
       <a href="#custom-builder" class="btn btn-light btn-lg px-5 py-3">🎯 Build Custom Package</a>
     </div>
   </section>
 
-  <!-- Pre-built Packages - 4 Tiers -->
+  <!-- Age-based Psychometric Packages -->
   <section class="py-5 mb-5">
     <div class="container">
       <div class="row g-4 justify-content-center">
         
-        <!-- Middle School Package - NEW -->
+        <!-- Middle School Package -->
         <div class="col-lg-3 col-md-6">
           <div class="card h-100 shadow-lg border-0 hover-lift">
             <div class="card-body text-center p-4">
@@ -516,9 +516,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
+
   <!-- Package Comparison Table -->
   <section class="py-5 bg-light">
     <div class="container">
@@ -566,7 +568,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
             <div class="card-body p-4">
               <div class="row g-3" id="testCategories">
-                <!-- 20 Categories with pricing -->
                 <div class="col-md-6 col-lg-4">
                   <div class="form-check">
                     <input class="form-check-input test-checkbox" type="checkbox" id="learning" value="400">
@@ -597,7 +598,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                     <label class="form-check-label fw-medium" for="career">Career Interest</label>
                   </div>
                 </div>
-                <!-- Continue with remaining 15 categories... -->
+                <!-- Add remaining categories similarly... -->
                 <div class="col-12 mt-3">
                   <small class="text-muted">* Min 5 tests • Max 17 tests • Volume discounts for 10+</small>
                 </div>
@@ -631,52 +632,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Test Coverage Matrix -->
-  <section class="py-5 bg-light">
-    <div class="container">
-      <h2 class="text-center mb-4">📋 Test Coverage by Age Group</h2>
-      <p class="text-center text-muted mb-5">See which assessments are included in each package</p>
-
-      <!-- DESKTOP TABLE - Updated with Middle School -->
-      <div class="table-responsive d-none d-md-block">
-        <table class="table table-bordered align-middle text-center">
-          <thead class="table-light">
-            <tr>
-              <th class="text-start">Assessment</th>
-              <th>Middle<br>School</th>
-              <th>High<br>School</th>
-              <th>College</th>
-              <th>Professional</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td class="text-start">Learning Style</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
-            <tr><td class="text-start">Multiple Intelligence</td><td>✔</td><td>✔</td><td>✔</td><td>✖</td></tr>
-            <tr><td class="text-start">Study Skills</td><td>✔</td><td>✔</td><td>✔</td><td>✖</td></tr>
-            <tr><td class="text-start">Personality</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
-            <tr><td class="text-start">Career Interest</td><td>✖</td><td>✔</td><td>✔</td><td>✔</td></tr>
-            <tr><td class="text-start">Emotional Intelligence</td><td>✖</td><td>✔</td><td>✔</td><td>✔</td></tr>
-            <!-- Add more rows as needed -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- MOBILE VIEW - Updated -->
-      <div class="d-md-none">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Select Age Group</label>
-          <select id="groupSelect" class="form-select">
-            <option value="middleschool">Middle School</option>
-            <option value="highschool">High School</option>
-            <option value="college">College</option>
-            <option value="professional">Professional</option>
-          </select>
-        </div>
-        <ul class="list-group" id="mobileTestList"></ul>
       </div>
     </div>
   </section>
@@ -697,7 +653,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </style>
 
 <script>
-  // Custom Package Builder Logic (existing)
+  // Custom Package Builder Logic
   document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.test-checkbox');
     const totalPriceEl = document.getElementById('totalPrice');
@@ -724,7 +680,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
     
     function updateUI() {
-      if (!totalPriceEl) return;
+      if (!totalPriceEl || !selectedCountEl || !purchaseBtn) return;
       selectedCountEl.textContent = count;
       totalPriceEl.textContent = `₹${total.toLocaleString()}`;
       
@@ -760,52 +716,4 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
     }
   });
-</script>
-
-<script>
-  // Existing testMatrix script unchanged
-  const testMatrix = [
-    { name: "Integrity Assessment", highschool: true, college: true, professional: true },
-    { name: "Leadership Skills", highschool: false, college: true, professional: true },
-    { name: "Leadership Style", highschool: false, college: true, professional: true },
-    { name: "Left-Right Brain Dominance", highschool: true, college: true, professional: false },
-    { name: "Aptitude", highschool: true, college: true, professional: true },
-    { name: "Cyber Dependency", highschool: true, college: true, professional: false },
-    { name: "Competitive State Anxiety Inventory", highschool: true, college: true, professional: false },
-    { name: "Emotional Intelligence", highschool: true, college: true, professional: true },
-    { name: "Entrepreneurship Suitability Assessment", highschool: false, college: true, professional: true },
-    { name: "Learning Style", highschool: true, college: true, professional: false },
-    { name: "Multiple Intelligence", highschool: true, college: true, professional: false },
-    { name: "Parenting Style", highschool: false, college: false, professional: true },
-    { name: "Personality", highschool: true, college: true, professional: true },
-    { name: "Professional Suitability Assessment", highschool: false, college: true, professional: true },
-    { name: "Professional Skills Set Assessment", highschool: false, college: true, professional: true },
-    { name: "Study Skills Profile Assessment", highschool: true, college: true, professional: false },
-    { name: "Students Wheel of Life", highschool: true, college: true, professional: false },
-    { name: "Work Life Balance", highschool: false, college: false, professional: true },
-    { name: "Wheel of Life", highschool: false, college: true, professional: true }
-  ];
-
-  const list = document.getElementById("mobileTestList");
-  const select = document.getElementById("groupSelect");
-
-  function renderMobile(group) {
-    if (!list) return;
-    list.innerHTML = "";
-    testMatrix.forEach(t => {
-      if (t[group]) {
-        list.innerHTML += `
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${t.name}
-            <span class="badge bg-success">✔</span>
-          </li>
-        `;
-      }
-    });
-  }
-
-  if (select) {
-    renderMobile(select.value);
-    select.addEventListener("change", e => renderMobile(e.target.value));
-  }
 </script>
