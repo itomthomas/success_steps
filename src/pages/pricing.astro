@@ -6,83 +6,405 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <!-- Hero Section -->
   <section class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="container text-center">
-      <h1 class="display-4 fw-bold mb-4">Choose Your Assessment Package</h1>
-      <p class="lead mb-5">93 test sections • 500+ questions across 20 categories</p>
-      <a href="#custom-builder" class="btn btn-light btn-lg px-5 py-3">🎯 Build Custom Package</a>
+      <h1 class="display-4 fw-bold mb-3">Success Steps Programs & Pricing</h1>
+      <p class="lead mb-4">Certification courses • 1‑to‑1 coaching • Assessments • Corporate training</p>
+      <div class="d-flex justify-content-center flex-wrap gap-2">
+        <a href="#certifications" class="btn btn-light btn-lg px-4 py-2">🎓 Certification Courses</a>
+        <a href="#combo-program" class="btn btn-outline-light btn-lg px-4 py-2">⭐ Best‑Selling Combo</a>
+        <a href="#coaching" class="btn btn-outline-light btn-lg px-4 py-2">🧠 Coaching & Therapy</a>
+        <a href="#assessments" class="btn btn-outline-light btn-lg px-4 py-2">📊 Psychometric Tests</a>
+      </div>
     </div>
   </section>
 
-  <!-- Pre-built Packages -->
-  <section class="py-5 mb-5">
+  <!-- CERTIFICATION COURSES -->
+  <section id="certifications" class="py-5 bg-light">
     <div class="container">
-      <div class="row g-4 justify-content-center">
-        
-        <!-- High School Package -->
-        <div class="col-lg-4 col-md-6">
-          <div class="card h-100 shadow-lg border-0 hover-lift">
-            <div class="card-body text-center p-5">
-              <div class="bg-warning rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
-                <i class="bi bi-mortarboard-fill fs-1 text-white"></i>
+      <h2 class="text-center mb-4">Certification Courses – NLP, Coaching & Therapy</h2>
+      <p class="text-center text-muted mb-5">
+        Structured tracks so learners can clearly see their path from foundation to advanced mastery.
+      </p>
+
+      <!-- NLP Track -->
+      <div class="mb-4">
+        <button class="btn btn-link text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#nlpTrack">
+          <span class="fw-bold">NLP Track</span>
+          <span class="small text-muted">Basic → Diploma → Advanced Diploma → Practitioner → Master Practitioner</span>
+        </button>
+        <div id="nlpTrack" class="collapse show">
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certification Course</th>
+                      <th>Duration</th>
+                      <th>Fees (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>NLP Basic</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>NLP Diploma</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>NLP Advanced Diploma</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>NLP Practitioner</td><td>40 hours</td><td>30,000</td></tr>
+                    <tr><td>NLP Master Practitioner</td><td>50 hours</td><td>40,000</td></tr>
+                  </tbody>
+                </table>
               </div>
-              <h3 class="card-title fw-bold mb-3">High Schoolers</h3>
-              <p class="text-muted mb-4">12 essential tests for career exploration</p>
-              <div class="h2 fw-bold text-warning mb-4">₹7,500</div>
-              <ul class="list-unstyled mb-4 text-start">
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Career Interest Inventory</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Personality Assessment</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Academic Aptitude</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Study Skills</li>
-              </ul>
-              <a href="#" class="btn btn-warning btn-lg w-100" data-package="highschool">
-                Purchase Package
-              </a>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- College Package -->
-        <div class="col-lg-4 col-md-6">
-          <div class="card h-100 shadow-lg border-0 hover-lift">
-            <div class="card-body text-center p-5">
-              <div class="bg-info rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
-                <i class="bi bi-book-half fs-1 text-white"></i>
+      <!-- Coaching Track -->
+      <div class="mb-4">
+        <button class="btn btn-link text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#coachingTrack">
+          <span class="fw-bold">Coaching Track</span>
+          <span class="small text-muted">Life, EI, leadership & performance coaching</span>
+        </button>
+        <div id="coachingTrack" class="collapse">
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certification Course</th>
+                      <th>Duration</th>
+                      <th>Fees (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Certified Life Coach</td><td>15 hours</td><td>20,000</td></tr>
+                    <tr><td>Emotional Intelligence Coach</td><td>20 hours</td><td>20,000</td></tr>
+                    <tr><td>Peak Performance Coach</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>Accelerated Learning Coach</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>Executive Leadership Coach</td><td>10 hours</td><td>12,000</td></tr>
+                  </tbody>
+                </table>
               </div>
-              <h3 class="card-title fw-bold mb-3">College Students</h3>
-              <p class="text-muted mb-4">15 comprehensive tests</p>
-              <div class="h2 fw-bold text-info mb-4">₹8,500</div>
-              <ul class="list-unstyled mb-4 text-start">
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Emotional Intelligence</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Leadership Potential</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Career Values</li>
-              </ul>
-              <a href="#" class="btn btn-info btn-lg w-100" data-package="college">
-                Purchase Package
-              </a>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Professional Package -->
-        <div class="col-lg-4 col-md-12">
-          <div class="card h-100 shadow-lg border-0 hover-lift popular">
-            <div class="position-relative">
-              <span class="badge bg-danger position-absolute top-0 start-50 translate-middle-x mt-2 z-3">Most Popular</span>
-            </div>
-            <div class="card-body text-center p-5">
-              <div class="bg-success rounded-circle mx-auto mb-4 p-4 d-inline-block" style="width: 100px; height: 100px;">
-                <i class="bi bi-briefcase-fill fs-1 text-white"></i>
+      <!-- Therapy & Counselling Track -->
+      <div class="mb-4">
+        <button class="btn btn-link text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#therapyTrack">
+          <span class="fw-bold">Therapy & Counselling Track</span>
+          <span class="small text-muted">Counselling models & therapeutic approaches</span>
+        </button>
+        <div id="therapyTrack" class="collapse">
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certification Course</th>
+                      <th>Duration</th>
+                      <th>Fees (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Foundations of Behaviour & Basic Counselling Skills</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>CBT – Cognitive Behaviour Therapy</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>REBT – Rational Emotive Behaviour Therapy</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>Gestalt Therapy</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>Transpersonal Hypnosis</td><td>10 hours</td><td>22,000</td></tr>
+                    <tr><td>Access Bars Therapy</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>Transactional Analysis</td><td>10 hours</td><td>10,000</td></tr>
+                  </tbody>
+                </table>
               </div>
-              <h3 class="card-title fw-bold mb-3">Professionals</h3>
-              <p class="text-muted mb-4">17 advanced tests + career mapping</p>
-              <div class="h2 fw-bold text-success mb-4">₹9,500</div>
-              <ul class="list-unstyled mb-4 text-start">
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Executive Aptitude</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Team Dynamics</li>
-                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Stress Management</li>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neuroscience & EI Track -->
+      <div class="mb-4">
+        <button class="btn btn-link text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#neuroTrack">
+          <span class="fw-bold">Neuroscience & Emotional Intelligence Track</span>
+          <span class="small text-muted">Brain‑based and EI‑focused development</span>
+        </button>
+        <div id="neuroTrack" class="collapse">
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certification Course</th>
+                      <th>Duration</th>
+                      <th>Fees (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Applied Neuroscience</td><td>10 hours</td><td>12,000</td></tr>
+                    <tr><td>EI Master Coach</td><td>20 hours</td><td>20,000</td></tr>
+                    <tr><td>Energy Healing Psychology & Practices</td><td>10 hours</td><td>10,000</td></tr>
+                    <tr><td>EFT – Emotional Freedom Technique</td><td>10 hours</td><td>10,000</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Career & Psychometric Track -->
+      <div class="mb-4">
+        <button class="btn btn-link text-decoration-none w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#careerTrack">
+          <span class="fw-bold">Career & Psychometric Track</span>
+          <span class="small text-muted">Career counselling and psychometric testing</span>
+        </button>
+        <div id="careerTrack" class="collapse">
+          <div class="card shadow-sm">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certification Course</th>
+                      <th>Duration</th>
+                      <th>Fees (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Career Counselling, Guidance, Psychometric Test & Analysis</td><td>20 hours</td><td>25,000</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BEST-SELLING COMBO -->
+  <section id="combo-program" class="py-5">
+    <div class="container">
+      <div class="card shadow-lg border-0 popular">
+        <div class="row g-0 align-items-stretch">
+          <div class="col-lg-8 p-4 p-lg-5">
+            <span class="badge bg-danger mb-3">Best‑Selling Professional Combo</span>
+            <h2 class="fw-bold mb-3">NLP Practitioner + Emotional Intelligence + Applied Neuroscience<br/>Life Coaching & Leadership Coaching</h2>
+            <p class="text-muted mb-3">
+              A comprehensive combo for powerful personal transformation, practical coaching skills, and leadership impact.
+            </p>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <h5 class="fw-bold">What You’ll Learn</h5>
+                <ul class="small mb-0">
+                  <li>Master thoughts, emotions, and behaviours with NLP</li>
+                  <li>Develop emotional intelligence for work and life</li>
+                  <li>Apply brain‑based tools for focus and performance</li>
+                </ul>
+              </div>
+              <div class="col-md-6 mb-3">
+                <h5 class="fw-bold">Who It’s For</h5>
+                <ul class="small mb-0">
+                  <li>Coaches, counsellors, trainers, and therapists</li>
+                  <li>Leaders, managers, HR & L&D professionals</li>
+                  <li>Anyone serious about growth and impact</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 p-4 p-lg-5 bg-light border-start">
+            <p class="mb-1 text-muted">Program Fee</p>
+            <div class="d-flex align-items-baseline gap-2 mb-1">
+              <span class="text-muted text-decoration-line-through">₹85,000</span>
+              <span class="h3 fw-bold text-success mb-0">₹65,000</span>
+            </div>
+            <p class="small text-success mb-2">You save ₹20,000</p>
+            <p class="mb-3"><strong>Duration:</strong> 60 hours (approx. 2.5 months)</p>
+            <button class="btn btn-success w-100 mb-2">Enroll in Combo</button>
+            <button class="btn btn-outline-secondary w-100 mb-3">Download Detailed Curriculum</button>
+            <ul class="small text-muted mb-0">
+              <li>Multiple certifications in one integrated pathway</li>
+              <li>Rooted in psychology, neuroscience, NLP & EI</li>
+              <li>Suitable for both personal and professional growth</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COACHING & THERAPY -->
+  <section id="coaching" class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-4">Counselling, Therapy & Life Coaching</h2>
+      <p class="text-center text-muted mb-5">
+        One‑to‑one sessions focused on deep emotional work, mindset change, and practical strategies for lasting results.
+      </p>
+
+      <!-- Single Session -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h4 class="fw-bold mb-2">Individual Session</h4>
+              <p class="text-muted mb-3">60‑minute personalised session (online or in‑person)</p>
+              <div class="d-flex align-items-baseline gap-2 mb-2">
+                <span class="h3 fw-bold">₹3,500</span>
+                <span class="small text-muted">per session</span>
+              </div>
+              <p class="small text-muted mb-2">Additional hour: ₹1,000</p>
+              <button class="btn btn-primary w-100">Book a Single Session</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Packages -->
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="fw-bold mb-1">5‑Session Package</h5>
+              <p class="small text-muted mb-3">Ideal for short‑term clarity or a specific issue.</p>
+              <p class="mb-1"><strong>Total:</strong> ₹16,000</p>
+              <p class="mb-3"><strong>Per session:</strong> ₹3,200</p>
+              <p class="small text-muted mb-4">Great for stress, decision‑making, or confidence boosts.</p>
+              <button class="btn btn-outline-primary mt-auto w-100">Get 5‑Session Package</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm popular">
+            <div class="card-body d-flex flex-column">
+              <span class="badge bg-success mb-2">Most Popular</span>
+              <h5 class="fw-bold mb-1">10‑Session Package</h5>
+              <p class="small text-muted mb-3">Best for emotional healing and mindset change.</p>
+              <p class="mb-1"><strong>Total:</strong> ₹30,000</p>
+              <p class="mb-3"><strong>Per session:</strong> ₹3,000</p>
+              <p class="small text-muted mb-4">Allows deeper exploration and consistent progress.</p>
+              <button class="btn btn-primary mt-auto w-100">Get 10‑Session Package</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="fw-bold mb-1">15‑Session Package</h5>
+              <p class="small text-muted mb-3">For long‑term transformation and complex goals.</p>
+              <p class="mb-1"><strong>Total:</strong> ₹42,000</p>
+              <p class="mb-3"><strong>Per session:</strong> ₹2,800</p>
+              <p class="small text-muted mb-4">Supports deep behavioural change over time.</p>
+              <button class="btn btn-outline-primary mt-auto w-100">Get 15‑Session Package</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audience Tabs (optional simple version) -->
+      <div class="mt-5">
+        <ul class="nav nav-pills justify-content-center mb-3" id="coachingTabs">
+          <li class="nav-item"><button class="nav-link active" data-group="adults">Adults</button></li>
+          <li class="nav-item"><button class="nav-link" data-group="children">Children</button></li>
+          <li class="nav-item"><button class="nav-link" data-group="professionals">Professionals</button></li>
+        </ul>
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div data-group-panel="adults">
+              <h5 class="fw-bold mb-2">Adults – Individual Sessions</h5>
+              <ul class="small mb-0">
+                <li>Stress and anxiety management</li>
+                <li>Emotional healing and relationship challenges</li>
+                <li>Confidence, clarity, and self‑belief</li>
+                <li>Success mindset and goal alignment</li>
+                <li>Leadership presence and decision‑making</li>
               </ul>
-              <a href="#" class="btn btn-success btn-lg w-100" data-package="professional">
-                Purchase Package
-              </a>
+            </div>
+            <div data-group-panel="children" class="d-none">
+              <h5 class="fw-bold mb-2">Children – Individual Sessions</h5>
+              <ul class="small mb-0">
+                <li>Focus and concentration improvement</li>
+                <li>Smart study methods and learning confidence</li>
+                <li>Peak performance for exams and competitions</li>
+                <li>Accelerated learning and memory techniques</li>
+                <li>Emotional regulation and motivation</li>
+              </ul>
+            </div>
+            <div data-group-panel="professionals" class="d-none">
+              <h5 class="fw-bold mb-2">Professionals – Individual Sessions</h5>
+              <ul class="small mb-0">
+                <li>Emotional intelligence at work</li>
+                <li>Leadership development</li>
+                <li>High‑performance and success mindset</li>
+                <li>Sales confidence and influence skills</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="small text-muted mt-2 text-center mb-0">
+          All sessions are one‑to‑one, 60 minutes each, and personalised to your goals.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRAINING & SEMINARS -->
+  <section id="training" class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-4">Training & Seminars</h2>
+      <p class="text-center text-muted mb-4">
+        High‑impact programs for teachers, students, and corporate teams.
+      </p>
+      <p class="text-center small text-muted mb-5">
+        All training programs are 4–6 hours per day. Travel & stay extra outside Mumbai.
+      </p>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="fw-bold mb-2">Teachers’ Training</h5>
+              <p class="small text-muted mb-3">Psychology‑driven programs for educators.</p>
+              <p class="mb-3"><strong>Fee:</strong> ₹25,000 per day</p>
+              <ul class="small mb-4">
+                <li>Student psychology & emotional intelligence</li>
+                <li>Stress management for teachers</li>
+                <li>Effective communication & classroom engagement</li>
+              </ul>
+              <button class="btn btn-outline-primary mt-auto w-100">Request Proposal</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <h5 class="fw-bold mb-2">Students’ Seminars</h5>
+              <p class="small text-muted mb-3">Motivational and skills‑based sessions.</p>
+              <p class="mb-3"><strong>Fee:</strong> ₹25,000 per day</p>
+              <ul class="small mb-4">
+                <li>Motivation, focus, and exam readiness</li>
+                <li>Memory skills and smart study methods</li>
+                <li>Emotional resilience and confidence building</li>
+              </ul>
+              <button class="btn btn-outline-primary mt-auto w-100">Request Proposal</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm popular">
+            <div class="card-body d-flex flex-column">
+              <span class="badge bg-success mb-2">For Organizations</span>
+              <h5 class="fw-bold mb-2">Corporate Training</h5>
+              <p class="small text-muted mb-3">Leadership and performance for teams.</p>
+              <p class="mb-3"><strong>Fee:</strong> ₹35,000 per day</p>
+              <ul class="small mb-4">
+                <li>Emotional intelligence and leadership mindset</li>
+                <li>Performance under pressure</li>
+                <li>Communication and team effectiveness</li>
+              </ul>
+              <button class="btn btn-primary mt-auto w-100">Request Proposal</button>
             </div>
           </div>
         </div>
@@ -90,8 +412,145 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </section>
 
+  <!-- EXISTING ASSESSMENT PRICING (ANCHOR ADDED) -->
+  <section id="assessments" class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container text-center">
+      <h2 class="display-6 fw-bold mb-3">Assessment Packages</h2>
+      <p class="lead mb-4">93 test sections • 500+ questions across 20 categories</p>
+      <a href="#custom-builder" class="btn btn-light btn-lg px-5 py-3">🎯 Build Custom Package</a>
+    </div>
+  </section>
+
+  <!-- Pre-built Packages - 4 Tiers -->
+  <section class="py-5 mb-5">
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+        
+        <!-- Middle School Package - NEW -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 shadow-lg border-0 hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="bg-primary rounded-circle mx-auto mb-3 p-3 d-inline-block" style="width: 90px; height: 90px; font-size: 0.75rem;">
+                <div class="text-white fw-bold">11-14<br>Years</div>
+              </div>
+              <h4 class="card-title fw-bold mb-3">Middle School</h4>
+              <p class="text-muted mb-3 small">6 foundational tests</p>
+              <div class="h3 fw-bold text-primary mb-3">₹5,000</div>
+              <ul class="list-unstyled mb-3 text-start small">
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Learning Style</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Multiple Intelligence</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Study Skills</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Personality (Basic)</li>
+              </ul>
+              <a href="#" class="btn btn-primary btn-lg w-100" data-package="middleschool">
+                Buy Now
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- High School Package -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 shadow-lg border-0 hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="bg-warning rounded-circle mx-auto mb-3 p-3 d-inline-block" style="width: 90px; height: 90px; font-size: 0.75rem;">
+                <div class="text-white fw-bold">14-17<br>Years</div>
+              </div>
+              <h4 class="card-title fw-bold mb-3">High School</h4>
+              <p class="text-muted mb-3 small">12 essential tests</p>
+              <div class="h3 fw-bold text-warning mb-3">₹7,500</div>
+              <ul class="list-unstyled mb-3 text-start small">
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Career Interest</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Personality (MBTI)</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Academic Aptitude</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Emotional Intelligence</li>
+              </ul>
+              <a href="#" class="btn btn-warning btn-lg w-100" data-package="highschool">
+                Buy Now
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- College Package -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 shadow-lg border-0 hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="bg-info rounded-circle mx-auto mb-3 p-3 d-inline-block" style="width: 90px; height: 90px; font-size: 0.75rem;">
+                <div class="text-white fw-bold">18-22<br>Years</div>
+              </div>
+              <h4 class="card-title fw-bold mb-3">College</h4>
+              <p class="text-muted mb-3 small">15 comprehensive tests</p>
+              <div class="h3 fw-bold text-info mb-3">₹8,500</div>
+              <ul class="list-unstyled mb-3 text-start small">
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Leadership Potential</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Big Five Personality</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> DISC Profile</li>
+              </ul>
+              <a href="#" class="btn btn-info btn-lg w-100" data-package="college">
+                Buy Now
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Professional Package - MOST POPULAR -->
+        <div class="col-lg-3 col-md-12">
+          <div class="card h-100 shadow-lg border-0 hover-lift popular position-relative">
+            <span class="badge bg-danger position-absolute top-0 start-50 translate-middle-x mt-2 z-3 px-3 py-2">⭐ MOST POPULAR</span>
+            <div class="card-body text-center p-4">
+              <div class="bg-success rounded-circle mx-auto mb-3 p-3 d-inline-block" style="width: 90px; height: 90px; font-size: 0.75rem;">
+                <div class="text-white fw-bold">23+<br>Years</div>
+              </div>
+              <h4 class="card-title fw-bold mb-3">Professionals</h4>
+              <p class="text-muted mb-3 small">17 advanced tests + reports</p>
+              <div class="h3 fw-bold text-success mb-3">₹9,500</div>
+              <ul class="list-unstyled mb-3 text-start small">
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Executive Aptitude</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Team Dynamics</li>
+                <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1 fs-6"></i> Stress Management</li>
+              </ul>
+              <a href="#" class="btn btn-success btn-lg w-100" data-package="professional">
+                Buy Now - Best Value
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Package Comparison Table -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-4">📊 Package Comparison</h2>
+      
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle text-center">
+          <thead class="table-dark">
+            <tr>
+              <th>Features</th>
+              <th>Middle School<br><small>₹5,000</small></th>
+              <th>High School<br><small>₹7,500</small></th>
+              <th>College<br><small>₹8,500</small></th>
+              <th>Professional<br><small>₹9,500 ⭐</small></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Tests Included</strong></td><td>6</td><td>12</td><td>15</td><td>17</td></tr>
+            <tr><td><strong>Sections</strong></td><td>18</td><td>36</td><td>45</td><td>51</td></tr>
+            <tr><td><strong>Questions</strong></td><td>150+</td><td>300+</td><td>375+</td><td>425+</td></tr>
+            <tr><td><strong>Age Group</strong></td><td>11-14</td><td>14-17</td><td>18-22</td><td>23+</td></tr>
+            <tr><td><strong>Personalized Report</strong></td><td>✔ Basic</td><td>✔ Detailed</td><td>✔ Detailed</td><td>✔ Premium</td></tr>
+            <tr><td><strong>Career Mapping</strong></td><td>✖</td><td>✔</td><td>✔</td><td>✔ Advanced</td></tr>
+            <tr><td><strong>Priority Support</strong></td><td>✖</td><td>✖</td><td>✔</td><td>✔</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- Custom Mix & Match Builder -->
-  <section id="custom-builder" class="py-5 bg-light">
+  <section id="custom-builder" class="py-5">
     <div class="container">
       <h2 class="text-center mb-5">🎨 Build Your Perfect Package</h2>
       
@@ -107,11 +566,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
             <div class="card-body p-4">
               <div class="row g-3" id="testCategories">
-                <!-- Sample categories - expand to 20 -->
+                <!-- 20 Categories with pricing -->
                 <div class="col-md-6 col-lg-4">
                   <div class="form-check">
-                    <input class="form-check-input test-checkbox" type="checkbox" id="career" value="750">
-                    <label class="form-check-label fw-medium" for="career">Career Interest</label>
+                    <input class="form-check-input test-checkbox" type="checkbox" id="learning" value="400">
+                    <label class="form-check-label fw-medium" for="learning">Learning Style</label>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-check">
+                    <input class="form-check-input test-checkbox" type="checkbox" id="multiple-intel" value="450">
+                    <label class="form-check-label fw-medium" for="multiple-intel">Multiple Intelligence</label>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-check">
+                    <input class="form-check-input test-checkbox" type="checkbox" id="study-skills" value="350">
+                    <label class="form-check-label fw-medium" for="study-skills">Study Skills</label>
                   </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
@@ -122,11 +593,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 </div>
                 <div class="col-md-6 col-lg-4">
                   <div class="form-check">
-                    <input class="form-check-input test-checkbox" type="checkbox" id="aptitude" value="800">
-                    <label class="form-check-label fw-medium" for="aptitude">Aptitude</label>
+                    <input class="form-check-input test-checkbox" type="checkbox" id="career" value="750">
+                    <label class="form-check-label fw-medium" for="career">Career Interest</label>
                   </div>
                 </div>
-                <!-- Add 17 more categories here -->
+                <!-- Continue with remaining 15 categories... -->
+                <div class="col-12 mt-3">
+                  <small class="text-muted">* Min 5 tests • Max 17 tests • Volume discounts for 10+</small>
+                </div>
               </div>
             </div>
           </div>
@@ -134,7 +608,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <!-- Live Pricing Sidebar -->
         <div class="col-lg-4">
-          <div class="card sticky-top" style="top: 100px;">
+          <div class="card sticky-top shadow-lg" style="top: 100px;">
             <div class="card-header bg-success text-white">
               <h5 class="mb-0">Your Custom Package</h5>
             </div>
@@ -160,6 +634,53 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </div>
   </section>
+
+  <!-- Test Coverage Matrix -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-4">📋 Test Coverage by Age Group</h2>
+      <p class="text-center text-muted mb-5">See which assessments are included in each package</p>
+
+      <!-- DESKTOP TABLE - Updated with Middle School -->
+      <div class="table-responsive d-none d-md-block">
+        <table class="table table-bordered align-middle text-center">
+          <thead class="table-light">
+            <tr>
+              <th class="text-start">Assessment</th>
+              <th>Middle<br>School</th>
+              <th>High<br>School</th>
+              <th>College</th>
+              <th>Professional</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="text-start">Learning Style</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
+            <tr><td class="text-start">Multiple Intelligence</td><td>✔</td><td>✔</td><td>✔</td><td>✖</td></tr>
+            <tr><td class="text-start">Study Skills</td><td>✔</td><td>✔</td><td>✔</td><td>✖</td></tr>
+            <tr><td class="text-start">Personality</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
+            <tr><td class="text-start">Career Interest</td><td>✖</td><td>✔</td><td>✔</td><td>✔</td></tr>
+            <tr><td class="text-start">Emotional Intelligence</td><td>✖</td><td>✔</td><td>✔</td><td>✔</td></tr>
+            <!-- Add more rows as needed -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE VIEW - Updated -->
+      <div class="d-md-none">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Age Group</label>
+          <select id="groupSelect" class="form-select">
+            <option value="middleschool">Middle School</option>
+            <option value="highschool">High School</option>
+            <option value="college">College</option>
+            <option value="professional">Professional</option>
+          </select>
+        </div>
+        <ul class="list-group" id="mobileTestList"></ul>
+      </div>
+    </div>
+  </section>
+
 </BaseLayout>
 
 <style>
@@ -176,7 +697,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </style>
 
 <script>
-  // Custom Package Builder Logic
+  // Custom Package Builder Logic (existing)
   document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.test-checkbox');
     const totalPriceEl = document.getElementById('totalPrice');
@@ -203,6 +724,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
     
     function updateUI() {
+      if (!totalPriceEl) return;
       selectedCountEl.textContent = count;
       totalPriceEl.textContent = `₹${total.toLocaleString()}`;
       
@@ -220,5 +742,70 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         // Integrate with your payment flow
       });
     });
+
+    // Coaching audience tabs
+    const tabContainer = document.getElementById('coachingTabs');
+    if (tabContainer) {
+      const tabs = tabContainer.querySelectorAll('.nav-link');
+      const panels = document.querySelectorAll('[data-group-panel]');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const group = tab.getAttribute('data-group');
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          panels.forEach(panel => {
+            panel.classList.toggle('d-none', panel.getAttribute('data-group-panel') !== group);
+          });
+        });
+      });
+    }
   });
+</script>
+
+<script>
+  // Existing testMatrix script unchanged
+  const testMatrix = [
+    { name: "Integrity Assessment", highschool: true, college: true, professional: true },
+    { name: "Leadership Skills", highschool: false, college: true, professional: true },
+    { name: "Leadership Style", highschool: false, college: true, professional: true },
+    { name: "Left-Right Brain Dominance", highschool: true, college: true, professional: false },
+    { name: "Aptitude", highschool: true, college: true, professional: true },
+    { name: "Cyber Dependency", highschool: true, college: true, professional: false },
+    { name: "Competitive State Anxiety Inventory", highschool: true, college: true, professional: false },
+    { name: "Emotional Intelligence", highschool: true, college: true, professional: true },
+    { name: "Entrepreneurship Suitability Assessment", highschool: false, college: true, professional: true },
+    { name: "Learning Style", highschool: true, college: true, professional: false },
+    { name: "Multiple Intelligence", highschool: true, college: true, professional: false },
+    { name: "Parenting Style", highschool: false, college: false, professional: true },
+    { name: "Personality", highschool: true, college: true, professional: true },
+    { name: "Professional Suitability Assessment", highschool: false, college: true, professional: true },
+    { name: "Professional Skills Set Assessment", highschool: false, college: true, professional: true },
+    { name: "Study Skills Profile Assessment", highschool: true, college: true, professional: false },
+    { name: "Students Wheel of Life", highschool: true, college: true, professional: false },
+    { name: "Work Life Balance", highschool: false, college: false, professional: true },
+    { name: "Wheel of Life", highschool: false, college: true, professional: true }
+  ];
+
+  const list = document.getElementById("mobileTestList");
+  const select = document.getElementById("groupSelect");
+
+  function renderMobile(group) {
+    if (!list) return;
+    list.innerHTML = "";
+    testMatrix.forEach(t => {
+      if (t[group]) {
+        list.innerHTML += `
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            ${t.name}
+            <span class="badge bg-success">✔</span>
+          </li>
+        `;
+      }
+    });
+  }
+
+  if (select) {
+    renderMobile(select.value);
+    select.addEventListener("change", e => renderMobile(e.target.value));
+  }
 </script>
