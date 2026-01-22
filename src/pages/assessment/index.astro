@@ -37,6 +37,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   <!-- PAGE SCRIPT -->
   <script is:inline>
     const session = sessionStorage.getItem("assessmentSession");
+    const token = sessionStorage.getItem("assessmentToken");
 
     if (!session) {
       window.location.replace("/register");
@@ -54,8 +55,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       await loadTests();
     });
 
+    async function apiFetch(url) {
+      return fetch(url, {
+        headers: {
+          "x-assessment-token": token
+        }
+      });
+    }
+
     async function loadTests() {
-      const res = await fetch("/api/psychotestlist");
+      const res = await apiFetch("/api/psychotestlist");
       const tests = await res.json();
 
       dropdown.innerHTML = `<option value="">-- Select a Test --</option>`;
@@ -77,7 +86,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       questionsContainer.innerHTML = "Loading test...";
       accordion.innerHTML = "";
 
-      const res = await fetch(`/api/psychotest-bundle?test_id=${testId}`);
+      const res = await apiFetch(`/api/psychotest-bundle?test_id=${testId}`);
       const data = await res.json();
 
       renderTest(data);
