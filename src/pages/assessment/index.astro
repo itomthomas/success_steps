@@ -7,9 +7,51 @@ export const prerender = false;
   Live Progress - Section counters, question status, progress bar
   Mobile-First - Stacked options on mobile, perfect alignment
   Multi-Test Tracking - Independent progress per test
-  Submit Prevention - Disabled until 100%, warning modal
+  LOCALSTORAGE - Auto-saves progress after every question
+  SUBMIT LOCK - Only enabled when ALL TESTS 100% complete
+  Submit Prevention - Warning modal with all-test stats
   Visual Polish - Hover effects, checked states, shadows
   Bootstrap Native - Works with your layout perfectly
+
+  Key Changes Implemented:
+🔹 LocalStorage Auto-Save
+Saves progress after every single answer
+
+Loads existing progress on page load
+
+Uses token-based unique key: psycho_progress_${token}
+
+Clears storage only after successful submission
+
+🔹 Global Submit Lock
+Submit button LOCKED until ALL TESTS are 100% complete
+
+Shows real-time stats: 2/4 tests complete | 156/240 questions
+
+Visual locked state with gray styling + lock emoji
+
+🔹 Enhanced Progress Tracking
+Individual test progress bars remain
+
+Global progress summary shows all tests status
+
+Modal shows comprehensive stats before final submit
+
+🔹 Multi-Test Submission
+Submits ALL tests in parallel when final submit clicked
+
+Only submits tests that are complete (no resubmission)
+
+Handles partial failures gracefully
+
+🔹 User Experience
+Progress survives page refresh/F5
+
+Clear visual feedback on completion status
+
+Warning modal shows all-tests stats
+
+Page unload protection auto-saves
 -->
 <BaseLayout>
   <Fragment slot="head">
@@ -52,8 +94,14 @@ export const prerender = false;
       color: #0d6efd;
       font-weight: 600;
     }
-        /* Minimal custom for Progress Overview */
-    /* Progress Overview - 2 Column Layout */
+    /* Submit button locked state */
+    .submit-locked {
+      background-color: #6c757d !important;
+      border-color: #6c757d !important;
+      cursor: not-allowed !important;
+      opacity: 0.65;
+    }
+    /* Minimal custom for Progress Overview */
     .progress-list .test-name {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -111,9 +159,10 @@ export const prerender = false;
 
     <button
       id="submitBtn"
-      class="btn btn-success mt-4 d-none"
+      class="btn btn-success mt-4 d-none submit-locked"
+      disabled
     >
-      Submit Assessment
+      🔒 Complete All Tests First
     </button>
   </section>
 
@@ -122,472 +171,564 @@ export const prerender = false;
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Confirm Submission</h5>
+          <h5 class="modal-title">Confirm Final Submission</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p><strong>Warning:</strong> Have you reviewed all questions?</p>
+          <p><strong>Warning:</strong> Have you reviewed all questions across ALL tests?</p>
           <div id="modalStats" class="mb-3">
-            <p><span id="attemptedCount">-</span> / <span id="totalCount">-</span> questions attempted</p>
-            <p class="text-muted small">Please scroll through all questions before submitting.</p>
+            <p><span id="testsComplete">-</span> / <span id="totalTests">-</span> tests complete</p>
+            <p><span id="overallAttempted">-</span> / <span id="overallTotal">-</span> total questions answered</p>
           </div>
           <div class="alert alert-warning">
-            <strong>This action cannot be undone!</strong> Make sure you've reviewed every question.
+            <strong>This action cannot be undone!</strong> Make sure you've reviewed every test and question.
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review Questions</button>
-          <button type="button" class="btn btn-danger" id="confirmSubmitBtn">Yes, Submit Now</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review Tests</button>
+          <button type="button" class="btn btn-danger" id="confirmSubmitBtn">Yes, Submit All Now</button>
         </div>
       </div>
     </div>
   </div>
 
   <script is:inline>
-    /* ---------------------------------------------------------
-       0. Session Guard
-    --------------------------------------------------------- */
-    const token = sessionStorage.getItem("assessmentToken");
-    if (!token) {
-      window.location.replace("/register");
+  /* ---------------------------------------------------------
+     0. Session Guard & LocalStorage Init
+  --------------------------------------------------------- */
+  const token = sessionStorage.getItem("assessmentToken");
+  if (!token) {
+    window.location.replace("/register");
+  }
+
+  const STORAGE_KEY = `psycho_progress_${token}`;
+
+  /* ---------------------------------------------------------
+     1. DOM References
+  --------------------------------------------------------- */
+  const startBtn = document.getElementById("startBtn");
+  const testSelector = document.getElementById("testSelector");
+  const testDropdown = document.getElementById("testDropdown");
+  const questionsContainer = document.getElementById("questionsContainer");
+  const submitBtn = document.getElementById("submitBtn");
+  const progressSummary = document.getElementById("progressSummary");
+  const progressList = document.getElementById("progressList");
+  const modal = document.getElementById("submitWarningModal");
+
+  /* ---------------------------------------------------------
+     2. Local State + GLOBAL TOTALS CACHE
+  --------------------------------------------------------- */
+  let bundle = null;
+  let activeTest = null;
+  let testProgress = {};
+  let globalTotals = { totalQuestions: 0, totalTests: 0 };
+
+  /* ---------------------------------------------------------
+     3. LocalStorage Helpers
+  --------------------------------------------------------- */
+  function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(testProgress));
+  }
+
+  function loadProgress() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.warn("Failed to load progress:", e);
+      return {};
     }
+  }
 
-    /* ---------------------------------------------------------
-       1. DOM References
-    --------------------------------------------------------- */
-    const startBtn = document.getElementById("startBtn");
-    const testSelector = document.getElementById("testSelector");
-    const testDropdown = document.getElementById("testDropdown");
-    const questionsContainer = document.getElementById("questionsContainer");
-    const submitBtn = document.getElementById("submitBtn");
-    const progressSummary = document.getElementById("progressSummary");
-    const progressList = document.getElementById("progressList");
-    const modal = document.getElementById("submitWarningModal");
+  function clearProgress() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
-    /* ---------------------------------------------------------
-       2. Local State
-    --------------------------------------------------------- */
-    let bundle = null;
-    let activeTest = null;
-    let testProgress = {};
-
-    /* ---------------------------------------------------------
-       3. API Helper
-    --------------------------------------------------------- */
-    async function apiFetch(url, options = {}) {
-      return fetch(url, {
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-          "x-assessment-token": token
-        }
-      });
-    }
-
-    /* ---------------------------------------------------------
-       4. Start Assessment
-    --------------------------------------------------------- */
-    startBtn.addEventListener("click", async () => {
-      startBtn.disabled = true;
-      startBtn.textContent = "Loading…";
-
-      const res = await apiFetch("/api/psychotest-bundle");
-      const testpackage = await res.json();
-
-      bundle = {
-        tests: testpackage.payload || []
-      };
-
-      if (!bundle.tests || bundle.tests.length === 0) {
-        questionsContainer.innerHTML =
-          "<p class='text-danger'>No tests assigned.</p>";
-        return;
+  /* ---------------------------------------------------------
+     4. API Helper
+  --------------------------------------------------------- */
+  async function apiFetch(url, options = {}) {
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        "x-assessment-token": token
       }
+    });
+  }
 
-      // Initialize progress tracking
-      bundle.tests.forEach(test => {
+  /* ---------------------------------------------------------
+     5. CALCULATE GLOBAL TOTALS
+  --------------------------------------------------------- */
+  function calculateGlobalTotals() {
+    globalTotals.totalTests = bundle.tests.length;
+    globalTotals.totalQuestions = bundle.tests.reduce((sum, test) => {
+      return sum + Object.keys(test.questions).length;
+    }, 0);
+  }
+
+  /* ---------------------------------------------------------
+     6. LIVE ACCORDION COUNTER UPDATES
+  --------------------------------------------------------- */
+  function updateAllSectionCounters(testId) {
+    const testContainer = questionsContainer.querySelector(`#testAccordion_${testId}`);
+    if (!testContainer) return;
+    
+    const progress = testProgress[testId];
+    
+    testContainer.querySelectorAll('.accordion-item').forEach((sectionItem, subIndex) => {
+      const subtestCode = Object.values(activeTest.subtests)[subIndex]?.subtest_code;
+      if (!subtestCode) return;
+      
+      const subQuestions = Object.values(activeTest.questions).filter(
+        q => q.subtest_code === subtestCode
+      );
+      
+      const answeredInSection = subQuestions.filter(q => 
+        progress.answers[q.question_id]
+      ).length;
+      
+      const sectionBadge = sectionItem.querySelector('.badge.bg-primary');
+      if (sectionBadge) {
+        sectionBadge.textContent = `${answeredInSection}/${subQuestions.length}`;
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     7. LIVE QUESTION STATUS UPDATES
+  --------------------------------------------------------- */
+  function updateAllQuestionStatuses(testId) {
+    const testContainer = questionsContainer.querySelector(`#testAccordion_${testId}`);
+    if (!testContainer) return;
+    
+    const progress = testProgress[testId];
+    
+    testContainer.querySelectorAll('.question-item').forEach(questionItem => {
+      const qid = questionItem.dataset.qid;
+      const hasAnswer = progress.answers[qid];
+      
+      const statusBadge = questionItem.querySelector('.question-status');
+      if (statusBadge) {
+        if (hasAnswer) {
+          statusBadge.textContent = '✅ Answered';
+          statusBadge.className = 'badge question-status bg-success';
+          questionItem.classList.add('answered');
+        } else {
+          statusBadge.textContent = '○ Not answered';
+          statusBadge.className = 'badge question-status bg-secondary';
+          questionItem.classList.remove('answered');
+        }
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     8. Start Assessment
+  --------------------------------------------------------- */
+  startBtn.addEventListener("click", async () => {
+    startBtn.disabled = true;
+    startBtn.textContent = "Loading…";
+
+    const res = await apiFetch("/api/psychotest-bundle");
+    const testpackage = await res.json();
+
+    bundle = {
+      tests: testpackage.payload || []
+    };
+
+    if (!bundle.tests || bundle.tests.length === 0) {
+      questionsContainer.innerHTML =
+        "<p class='text-danger'>No tests assigned.</p>";
+      return;
+    }
+
+    calculateGlobalTotals();
+    
+    testProgress = loadProgress();
+    bundle.tests.forEach(test => {
+      if (!testProgress[test.test_id]) {
         testProgress[test.test_id] = {
           attempted: 0,
-          total: 0,
+          total: Object.keys(test.questions).length,
           answers: {},
           completed: false
         };
-      });
-
-      initialiseUI();
-    });
-
-    /* ---------------------------------------------------------
-       5. Initialise UI
-    --------------------------------------------------------- */
-    function initialiseUI() {
-      startBtn.classList.add("d-none");
-
-      if (bundle.tests.length === 1) {
-        activeTest = bundle.tests[0];
-        renderTest(activeTest);
       } else {
-        testSelector.classList.remove("d-none");
-        testDropdown.innerHTML = `<option value="">-- Select Test --</option>`;
-
-        bundle.tests.forEach(t => {
-          const opt = document.createElement("option");
-          opt.value = t.test_id;
-          opt.textContent = t.test_name;
-          testDropdown.appendChild(opt);
-        });
-        updateProgressSummary();
+        testProgress[test.test_id].total = Object.keys(test.questions).length;
       }
-    }
-
-    /* ---------------------------------------------------------
-       6. Test Selection
-    --------------------------------------------------------- */
-    testDropdown?.addEventListener("change", e => {
-      const testId = e.target.value;
-      activeTest = bundle.tests.find(t => t.test_id === testId);
-      if (activeTest) {
-        renderTest(activeTest);
-      }
-      updateProgressSummary();
     });
 
-    /* ---------------------------------------------------------
-       7. Progress Summary
-                📊 Progress Overview [Collapse ↑]
-          ┌─────────────────────┬─────────────────────┐
-          │ Integrity Assessment│ Leadership Skills   │
-          │ 75%                 │ ✅ Complete         │
-          ├─────────────────────┼─────────────────────┤
-          │ Aptitude            │ Cyber Dependency    │
-          │ 60%                 │ 25%                 │
-          └─────────────────────┴─────────────────────┘
-            📊 Progress Overview [Collapse ↑]
-            [Single column - full width cards]
-            Integrity Assessment    75%
-            Leadership Skills      ✅ Complete
-            Aptitude                60%
-            ...
-            2-column grid (col-md-6 col-lg-6) - Desktop/Tablet
-            Single column (col-md-6 stacks) - Mobile
-            Collapse button - ALL devices (persists state)
-            Light turquoise theme (bg-info bg-opacity-10)
-            Alternating borders for visual separation
-            Smart truncation for long test names
-            Hover effects with lift animation
-            localStorage remembers collapse state
-    --------------------------------------------------------- */
-    function updateProgressSummary() {
-        if (!bundle?.tests) return;
+    initialiseUI();
+  });
+
+  /* ---------------------------------------------------------
+     9. Initialise UI
+  --------------------------------------------------------- */
+  function initialiseUI() {
+    startBtn.classList.add("d-none");
+
+    if (bundle.tests.length === 1) {
+      activeTest = bundle.tests[0];
+      renderTest(activeTest);
+    } else {
+      testSelector.classList.remove("d-none");
+      testDropdown.innerHTML = `<option value="">-- Select Test --</option>`;
+
+      bundle.tests.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t.test_id;
+        opt.textContent = t.test_name;
+        testDropdown.appendChild(opt);
+      });
+    }
+    
+    updateProgressSummary();
+    updateGlobalSubmitButton();
+  }
+
+  /* ---------------------------------------------------------
+     10. Test Selection
+  --------------------------------------------------------- */
+  testDropdown?.addEventListener("change", e => {
+    const testId = e.target.value;
+    activeTest = bundle.tests.find(t => t.test_id === testId);
+    if (activeTest) {
+      renderTest(activeTest);
+    }
+  });
+
+  /* ---------------------------------------------------------
+     11. Progress Summary
+  --------------------------------------------------------- */
+  function updateProgressSummary() {
+    if (!bundle?.tests) return;
+    
+    progressSummary.classList.remove("d-none");
+    
+    progressList.innerHTML = bundle.tests.map((test, index) => {
+      const progress = testProgress[test.test_id];
+      const attempted = Object.keys(progress.answers || {}).length;
+      const percent = progress.total > 0 ? Math.round((attempted / progress.total) * 100) : 0;
+      const statusClass = progress.completed ? 'bg-success' : 
+                        percent === 100 ? 'bg-warning text-dark' : 'bg-secondary';
+      const statusText = progress.completed ? '✅ Complete' : 
+                        percent === 100 ? '⚠️ Review' : `${percent}%`;
+      
+      const colClass = index % 2 === 0 ? 'col-md-6 col-lg-6' : 'col-md-6 col-lg-6 offset-lg-0';
+      
+      return `
+        <div class="progress-item ${colClass} mb-2 p-3 rounded-2 border ${index % 2 === 0 ? 'border-info border-opacity-25' : 'border-secondary border-opacity-10'} bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="test-name fw-semibold text-truncate pe-2" style="max-width: 70%;">
+              ${test.test_name}
+            </div>
+            <div class="text-end">
+              <span class="badge ${statusClass} fs-6 px-3 py-2 min-w-70px">
+                ${statusText}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+    
+    const toggleBtn = document.getElementById('toggleProgress');
+    if (toggleBtn && !toggleBtn._listenerAdded) {
+      toggleBtn._listenerAdded = true;
+      const isCollapsed = localStorage.getItem('progressCollapsed') === 'true';
+      
+      if (isCollapsed) {
+        progressList.classList.add('d-none');
+        toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
+      } else {
+        toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
+      }
+      
+      toggleBtn.addEventListener('click', () => {
+        const isHidden = progressList.classList.contains('d-none');
+        progressList.classList.toggle('d-none');
         
-        progressSummary.classList.remove("d-none");
-        
-        // 2-column layout using Bootstrap grid
-        progressList.innerHTML = bundle.tests.map((test, index) => {
-          const progress = testProgress[test.test_id];
-          const attempted = Object.keys(progress.answers || {}).length;
-          const percent = progress.total > 0 ? Math.round((attempted / progress.total) * 100) : 0;
-          const statusClass = progress.completed ? 'bg-success' : 
-                            percent === 100 ? 'bg-warning text-dark' : 'bg-secondary';
-          const statusText = progress.completed ? '✅ Complete' : 
-                            percent === 100 ? '⚠️ Review' : `${percent}%`;
-          
-          const colClass = index % 2 === 0 ? 'col-md-6 col-lg-6' : 'col-md-6 col-lg-6 offset-lg-0';
+        if (isHidden) {
+          toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
+          localStorage.setItem('progressCollapsed', 'false');
+        } else {
+          toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
+          localStorage.setItem('progressCollapsed', 'true');
+        }
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     12. Render Test - FIXED COUNTERS
+  --------------------------------------------------------- */
+  function renderTest(test) {
+    const progress = testProgress[test.test_id];
+    
+    questionsContainer.innerHTML = `
+      <div class="accordion accordion-flush" id="testAccordion_${test.test_id}">
+        ${Object.values(test.subtests).map((sub, subIndex) => {
+          const subQuestions = Object.values(test.questions).filter(
+            q => q.subtest_code === sub.subtest_code
+          );
           
           return `
-            <div class="progress-item ${colClass} mb-2 p-3 rounded-2 border ${index % 2 === 0 ? 'border-info border-opacity-25' : 'border-secondary border-opacity-10'} bg-white">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="test-name fw-semibold text-truncate pe-2" style="max-width: 70%;">
-                  ${test.test_name}
-                </div>
-                <div class="text-end">
-                  <span class="badge ${statusClass} fs-6 px-3 py-2 min-w-70px">
-                    ${statusText}
-                  </span>
+            <div class="accordion-item border rounded mb-3 shadow-sm">
+              <h3 class="accordion-header" id="heading${test.test_id}_${subIndex}">
+                <button class="accordion-button ${subIndex !== 0 ? 'collapsed' : ''}" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapse${test.test_id}_${subIndex}">
+                  <div class="d-flex justify-content-between w-100 align-items-center">
+                    <span class="fw-semibold">🚀 ${sub.subtest_name}</span>
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="badge bg-primary fs-6" data-subtest="${sub.subtest_code}">0/${subQuestions.length}</span>
+                      <small class="text-muted">${subQuestions.length} questions</small>
+                    </span>
+                  </div>
+                </button>
+              </h3>
+              <div id="collapse${test.test_id}_${subIndex}" 
+                  class="accordion-collapse collapse ${subIndex === 0 ? 'show' : ''}" 
+                  data-bs-parent="#testAccordion_${test.test_id}">
+                <div class="accordion-body p-0">
+                  ${subQuestions.map((q, qIndex) => `
+                    <div class="question-item p-4 mb-4 mx-3 border rounded shadow-sm ${progress.answers[q.question_id] ? 'answered' : ''}" 
+                        data-qid="${q.question_id}">
+                      <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h6 class="mb-0 fw-semibold text-dark">${qIndex + 1}. ${q.text}</h6>
+                        <span class="badge question-status ${progress.answers[q.question_id] ? 'bg-success' : 'bg-secondary'}">
+                          ${progress.answers[q.question_id] ? '✅ Answered' : '○ Not answered'}
+                        </span>
+                      </div>
+                      
+                      <div class="row g-2 g-md-3">
+                        ${q.options.map((o, optIndex) => `
+                          <div class="col-12 col-sm-6 col-lg-2">
+                            <div class="option-container d-flex flex-column align-items-center">
+                              <input class="form-check-input mb-2 mt-0"
+                                    type="radio"
+                                    name="q_${q.question_id}"
+                                    value="${o.score}"
+                                    id="opt-${q.question_id}-${optIndex}"
+                                    ${progress.answers[q.question_id] == o.score ? "checked" : ""}
+                                    data-qid="${q.question_id}" />
+                              <label class="option-label w-100 ${progress.answers[q.question_id] == o.score ? 'checked' : ''}" 
+                                    for="opt-${q.question_id}-${optIndex}">
+                                ${o.label}
+                              </label>
+                            </div>
+                          </div>
+                        `).join("")}
+                      </div>
+                    </div>
+                  `).join("")}
                 </div>
               </div>
             </div>
           `;
-        }).join("");
-        
-        // Collapse toggle for ALL devices
-        const toggleBtn = document.getElementById('toggleProgress');
-        if (toggleBtn && !toggleBtn._listenerAdded) {
-          toggleBtn._listenerAdded = true;
-          const isCollapsed = localStorage.getItem('progressCollapsed') === 'true';
-          
-          if (isCollapsed) {
-            progressList.classList.add('d-none');
-            toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
-          } else {
-            toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
-          }
-          
-          toggleBtn.addEventListener('click', () => {
-            const isHidden = progressList.classList.contains('d-none');
-            progressList.classList.toggle('d-none');
-            
-            if (isHidden) {
-              toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
-              localStorage.setItem('progressCollapsed', 'false');
-            } else {
-              toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
-              localStorage.setItem('progressCollapsed', 'true');
-            }
-          });
-        }
-      }
-
-    /* ---------------------------------------------------------
-       8. ACCORDION UI - Mobile Friendly
-                  col-12 col-sm-6 col-lg-2 = PERFECT Likert Scale!
-          Desktop (≥992px):  col-lg-2  → 5 options per row ✓
-          Tablet (576-991px): col-sm-6 → 2 options per row  
-          Mobile (<576px):   col-12   → 1 option per row ✓
-    --------------------------------------------------------- */
-    function renderTest(test) {
-        const progress = testProgress[test.test_id];
-        progress.total = Object.keys(test.questions).length;
-        
-        questionsContainer.innerHTML = `
-          <div class="accordion accordion-flush" id="testAccordion_${test.test_id}">
-            ${Object.values(test.subtests).map((sub, subIndex) => {
-              const subQuestions = Object.values(test.questions).filter(
-                q => q.subtest_code === sub.subtest_code
-              );
-              const answeredInSection = subQuestions.filter(q => 
-                progress.answers[q.question_id]
-              ).length;
-              
-              return `
-                <div class="accordion-item border rounded mb-3 shadow-sm">
-                  <h3 class="accordion-header" id="heading${test.test_id}_${subIndex}">
-                    <button class="accordion-button ${subIndex !== 0 ? 'collapsed' : ''}" 
-                            type="button" 
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#collapse${test.test_id}_${subIndex}">
-                      <div class="d-flex justify-content-between w-100 align-items-center">
-                        <span class="fw-semibold">🚀 ${sub.subtest_name}</span>
-                        <span class="d-flex align-items-center gap-2">
-                          <span class="badge bg-primary fs-6">${answeredInSection}/${subQuestions.length}</span>
-                          <small class="text-muted">${subQuestions.length} questions</small>
-                        </span>
-                      </div>
-                    </button>
-                  </h3>
-                  <div id="collapse${test.test_id}_${subIndex}" 
-                      class="accordion-collapse collapse ${subIndex === 0 ? 'show' : ''}" 
-                      data-bs-parent="#testAccordion_${test.test_id}">
-                    <div class="accordion-body p-0">
-                      ${subQuestions.map((q, qIndex) => `
-                        <div class="question-item p-4 mb-4 mx-3 border rounded shadow-sm" 
-                            data-qid="${q.question_id}">
-                          <div class="d-flex justify-content-between align-items-start mb-4">
-                            <h6 class="mb-0 fw-semibold text-dark">${qIndex + 1}. ${q.text}</h6>
-                            <span class="badge question-status ${progress.answers[q.question_id] ? 'bg-success' : 'bg-secondary'}">
-                              ${progress.answers[q.question_id] ? '✅ Answered' : '○ Not answered'}
-                            </span>
-                          </div>
-                          
-                          <!-- ✅ BOOTSTRAP 5-COL GRID -->
-                          <div class="row g-2 g-md-3">
-                            ${q.options.map((o, optIndex) => `
-                              <div class="col-12 col-sm-6 col-lg-2">
-                                <div class="option-container d-flex flex-column align-items-center">
-                                  <input class="form-check-input mb-2 mt-0"
-                                        type="radio"
-                                        name="q_${q.question_id}"
-                                        value="${o.score}"
-                                        id="opt-${q.question_id}-${optIndex}"
-                                        ${progress.answers[q.question_id] == o.score ? "checked" : ""}
-                                        data-qid="${q.question_id}" />
-                                  <label class="option-label w-100 ${progress.answers[q.question_id] == o.score ? 'checked' : ''}" 
-                                        for="opt-${q.question_id}-${optIndex}">
-                                    ${o.label}
-                                  </label>
-                                </div>
-                              </div>
-                            `).join("")}
-                          </div>
-                        </div>
-                      `).join("")}
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join("")}
-          </div>
-          
-          <!-- Progress Bar -->
-          <div class="row mt-4 g-3 align-items-center">
-            <div class="col-md-8">
-              <div class="progress" style="height: 28px;">
-                <div class="progress-bar bg-success" 
-                    role="progressbar" 
-                    style="width: ${progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0}%"
-                    aria-valuenow="${progress.attempted}" 
-                    aria-valuemax="${progress.total}">
-                  <strong>${progress.attempted}/${progress.total} answered</strong>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 text-md-end">
-              <small class="text-muted">${progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0}% complete</small>
-            </div>
-          </div>
-        `;
-        
-        submitBtn.classList.remove("d-none");
-        bindAnswerEvents();
-        updateSubmitButtonState(test.test_id);
-      }
-    /* ---------------------------------------------------------
-       9. Answer Tracking
-    --------------------------------------------------------- */
-    function bindAnswerEvents() {
-      questionsContainer.removeEventListener('change', radioHandler);
-      questionsContainer.addEventListener('change', radioHandler);
+        }).join("")}
+      </div>
       
-      function radioHandler(e) {
-        if (e.target.type !== 'radio') return;
-        
-        const qid = e.target.name.replace("q_", "");
-        const testId = qid.split('-')[0];
-        
-        // Update data
-        testProgress[testId].answers[qid] = Number(e.target.value);
-        testProgress[testId].attempted = Object.keys(testProgress[testId].answers).length;
-        
-        // Update visuals
-        const questionItem = e.target.closest('.question-item');
-        questionItem.classList.add('answered');
-        
-        const statusBadge = questionItem.querySelector('.question-status');
-        statusBadge.textContent = '✅ Answered';
-        statusBadge.className = 'badge question-status bg-success';
-        
-        questionItem.querySelectorAll('.option-label').forEach(label => {
-          label.classList.remove('checked');
-        });
-        e.target.nextElementSibling.classList.add('checked');
-        
-        updateSectionHeader(questionItem);
-        updateProgressBar(testId);
-        
-        if (activeTest && activeTest.test_id === testId) {
-          updateSubmitButtonState(testId);
-        }
-        if (bundle?.tests?.length > 1) {
-          updateProgressSummary();
-        }
+      <div class="row mt-4 g-3 align-items-center">
+        <div class="col-md-8">
+          <div class="progress" style="height: 28px;">
+            <div class="progress-bar bg-success" 
+                role="progressbar" 
+                style="width: ${progress.total > 0 ? Math.round((Object.keys(progress.answers).length / progress.total) * 100) : 0}%"
+                aria-valuenow="${Object.keys(progress.answers).length}" 
+                aria-valuemax="${progress.total}">
+              <strong>${Object.keys(progress.answers).length}/${progress.total} answered</strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <small class="text-muted">${progress.total > 0 ? Math.round((Object.keys(progress.answers).length / progress.total) * 100) : 0}% complete</small>
+        </div>
+      </div>
+    `;
+    
+    // 🔥 Initialize live counters after render
+    updateAllSectionCounters(test.test_id);
+    updateAllQuestionStatuses(test.test_id);
+    
+    submitBtn.classList.remove("d-none");
+    bindAnswerEvents();
+  }
+
+  /* ---------------------------------------------------------
+     13. FIXED Answer Tracking
+  --------------------------------------------------------- */
+  function bindAnswerEvents() {
+    questionsContainer.removeEventListener('change', radioHandler);
+    questionsContainer.addEventListener('change', radioHandler);
+    
+    function radioHandler(e) {
+      if (e.target.type !== 'radio') return;
+      
+      const qid = e.target.name.replace("q_", "");
+      const testId = activeTest.test_id;
+      
+      testProgress[testId].answers[qid] = Number(e.target.value);
+      testProgress[testId].attempted = Object.keys(testProgress[testId].answers).length;
+      
+      const questionItem = e.target.closest('.question-item');
+      questionItem.classList.add('answered');
+      
+      const statusBadge = questionItem.querySelector('.question-status');
+      statusBadge.textContent = '✅ Answered';
+      statusBadge.className = 'badge question-status bg-success';
+      
+      questionItem.querySelectorAll('.option-label').forEach(label => {
+        label.classList.remove('checked');
+      });
+      e.target.nextElementSibling.classList.add('checked');
+      
+      // 🔥 LIVE UPDATES
+      updateAllSectionCounters(testId);
+      updateAllQuestionStatuses(testId);
+      updateTestProgressBar(testId);
+      
+      saveProgress();
+      updateGlobalSubmitButton();
+      
+      if (bundle?.tests?.length > 1) {
+        updateProgressSummary();
       }
     }
+  }
 
-    /* ---------------------------------------------------------
-       10. Helper Functions
-    --------------------------------------------------------- */
-    function updateSectionHeader(questionItem) {
-      const sectionCollapse = questionItem.closest('.accordion-collapse');
-      const sectionBadge = sectionCollapse.previousElementSibling
-        .querySelector('.badge.bg-primary');
-      if (sectionBadge) {
-        const counts = sectionBadge.textContent.split('/');
-        const newAnswered = parseInt(counts[0]) + 1;
-        sectionBadge.textContent = `${newAnswered}/${counts[1]}`;
-      }
+  /* ---------------------------------------------------------
+     14. GLOBAL SUBMIT BUTTON - Stable Totals
+  --------------------------------------------------------- */
+  function updateGlobalSubmitButton() {
+    const totalTests = globalTotals.totalTests;
+    const totalQuestions = globalTotals.totalQuestions;
+    
+    const completedTests = bundle.tests.filter(test => {
+      const progress = testProgress[test.test_id];
+      return progress.completed || 
+             (progress.total > 0 && 
+              Object.keys(progress.answers).length === progress.total);
+    }).length;
+    
+    const answeredQuestions = bundle.tests.reduce((sum, test) => {
+      return sum + Object.keys(testProgress[test.test_id]?.answers || {}).length;
+    }, 0);
+    
+    const allTestsComplete = completedTests === totalTests;
+
+    submitBtn.disabled = !allTestsComplete;
+    submitBtn.classList.toggle('submit-locked', !allTestsComplete);
+    
+    if (allTestsComplete) {
+      submitBtn.innerHTML = `✅ All Tests Complete! Submit Assessment`;
+      submitBtn.className = "btn btn-success btn-lg mt-4 w-100";
+    } else {
+      submitBtn.innerHTML = `🔒 ${completedTests}/${totalTests} tests complete<br><small class="text-muted">${answeredQuestions}/${totalQuestions} questions</small>`;
     }
+  }
 
-    function updateProgressBar(testId) {
-      const progressBar = questionsContainer.querySelector('.progress-bar');
-      if (progressBar) {
-        const progress = testProgress[testId];
-        const percent = progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0;
-        progressBar.style.width = `${percent}%`;
-        progressBar.innerHTML = `<strong>${progress.attempted}/${progress.total} answered</strong>`;
-        progressBar.setAttribute('aria-valuenow', progress.attempted);
-      }
-    }
-
-    /* ---------------------------------------------------------
-       11. Submit Button State
-    --------------------------------------------------------- */
-    function updateSubmitButtonState(testId) {
+  /* ---------------------------------------------------------
+     15. Helper Functions
+  --------------------------------------------------------- */
+  function updateTestProgressBar(testId) {
+    const progressBar = questionsContainer.querySelector('.progress-bar');
+    if (progressBar) {
       const progress = testProgress[testId];
-      const isComplete = progress.attempted === progress.total;
-      
-      submitBtn.disabled = !isComplete;
-      submitBtn.className = isComplete ? "btn btn-success btn-lg mt-4 w-100" : "btn btn-warning btn-lg mt-4 w-100";
-      
-      if (isComplete) {
-        submitBtn.innerHTML = `✅ All Complete! Submit Test`;
-      } else {
-        const percent = Math.round((progress.attempted / progress.total) * 100);
-        submitBtn.innerHTML = `⚠️ ${percent}% Complete (${progress.attempted}/${progress.total})`;
-      }
+      const answeredCount = Object.keys(progress.answers).length;
+      const percent = progress.total > 0 ? Math.round((answeredCount / progress.total) * 100) : 0;
+      progressBar.style.width = `${percent}%`;
+      progressBar.innerHTML = `<strong>${answeredCount}/${progress.total} answered</strong>`;
+      progressBar.setAttribute('aria-valuenow', answeredCount);
     }
+  }
 
-    /* ---------------------------------------------------------
-       12. Submit Modal Handler
-    --------------------------------------------------------- */
-    submitBtn.addEventListener("click", () => {
-      if (submitBtn.disabled) return;
-      
-      const progress = testProgress[activeTest.test_id];
-      document.getElementById("attemptedCount").textContent = progress.attempted;
-      document.getElementById("totalCount").textContent = progress.total;
-      modal.show();
-    });
+  /* ---------------------------------------------------------
+     16. Submit Modal
+  --------------------------------------------------------- */
+  submitBtn.addEventListener("click", () => {
+    if (submitBtn.disabled) return;
+    
+    const totalTests = globalTotals.totalTests;
+    const totalQuestions = globalTotals.totalQuestions;
+    
+    const completedTests = bundle.tests.filter(test => {
+      const progress = testProgress[test.test_id];
+      return progress.completed || 
+             (progress.total > 0 && 
+              Object.keys(progress.answers).length === progress.total);
+    }).length;
+    
+    const answeredQuestions = bundle.tests.reduce((sum, test) => {
+      return sum + Object.keys(testProgress[test.test_id]?.answers || {}).length;
+    }, 0);
+    
+    document.getElementById("testsComplete").textContent = completedTests;
+    document.getElementById("totalTests").textContent = totalTests;
+    document.getElementById("overallAttempted").textContent = answeredQuestions;
+    document.getElementById("overallTotal").textContent = totalQuestions;
+    
+    modal.show();
+  });
 
-    document.getElementById("confirmSubmitBtn").addEventListener("click", async () => {
-      modal.hide();
-      await handleActualSubmit();
-    });
+  /* ---------------------------------------------------------
+     17. Final Submit ALL TESTS
+  --------------------------------------------------------- */
+  document.getElementById("confirmSubmitBtn").addEventListener("click", async () => {
+    modal.hide();
+    await handleFinalSubmit();
+  });
 
-    /* ---------------------------------------------------------
-       13. Final Submit
-    --------------------------------------------------------- */
-    async function handleActualSubmit() {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting…";
+  async function handleFinalSubmit() {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting All Tests…";
+    submitBtn.classList.add("submit-locked");
 
-      const progress = testProgress[activeTest.test_id];
-      progress.completed = true;
-
-      const payload = {
-        test_id: activeTest.test_id,
-        answers: progress.answers
-      };
-
-      const res = await apiFetch("/api/psychotest-submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+    try {
+      const submitPromises = bundle.tests.map(async (test) => {
+        const progress = testProgress[test.test_id];
+        if (!progress.completed && Object.keys(progress.answers).length === progress.total) {
+          const payload = {
+            test_id: test.test_id,
+            answers: progress.answers
+          };
+          
+          const res = await apiFetch("/api/psychotest-submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          
+          if (!res.ok) throw new Error(`Test ${test.test_id} failed`);
+          
+          progress.completed = true;
+          saveProgress();
+        }
       });
 
-      const result = await res.json();
+      await Promise.all(submitPromises);
       
-      if (result.success && res.ok) {
-        console.log("Test Submitted Successfully");
-        
-        const allComplete = bundle.tests.every(t => testProgress[t.test_id].completed);
-        if (allComplete) {
-          alert("All tests completed! Thank you.");
-        } else {
-          alert("Test submitted. Please complete remaining tests.");
-          updateProgressSummary();
-          if (bundle.tests.length === 1) {
-            submitBtn.classList.add("d-none");
-          } else {
-            testDropdown.value = "";
-            questionsContainer.innerHTML = "";
-            submitBtn.classList.add("d-none");
-          }
-        }
-      } else {
-        alert("Submission failed. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Test";
-      }
+      clearProgress();
+      
+      alert("🎉 All tests submitted successfully! Thank you for completing the assessment.");
+      window.location.href = "/dashboard";
+      
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("Submission failed. Your progress is saved locally. Please try again.");
+      submitBtn.disabled = false;
+      updateGlobalSubmitButton();
     }
-  </script>
+  }
+
+  /* ---------------------------------------------------------
+     18. Page unload protection
+  --------------------------------------------------------- */
+  window.addEventListener('beforeunload', () => {
+    saveProgress();
+  });
+</script>
+
 </BaseLayout>
