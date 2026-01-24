@@ -1,153 +1,227 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+export const prerender = false;
 ---
 
 <BaseLayout>
-  <!-- Page-specific HEAD -->
   <Fragment slot="head">
     <title>Psychometric Assessment | Success Steps</title>
     <meta
       name="description"
-      content="Begin your secure psychometric assessment with Success Steps."
+      content="Secure psychometric assessment"
     />
   </Fragment>
 
   <section class="container py-5 mt-5">
-    <h2 class="mb-3">Welcome to Your Psychometric Assessment</h2>
+    <h2 class="mb-3">Psychometric Assessment</h2>
     <p class="text-muted mb-4">
-      Please proceed carefully. You may complete this assessment in one sitting.
+      Please complete all questions carefully. Do not refresh the page.
     </p>
 
     <button id="startBtn" class="btn btn-primary mb-3">
-      Begin Psychometric Test
+      Start Assessment
     </button>
 
+    <!-- Test selector (shown only if multiple tests) -->
     <div id="testSelector" class="mb-4 d-none">
-      <label for="testDropdown" class="form-label">Select Test</label>
-      <select id="testDropdown" class="form-select">
-        <option value="">Loading tests...</option>
-      </select>
+      <label class="form-label">Select Test</label>
+      <select id="testDropdown" class="form-select"></select>
     </div>
 
     <div id="questionsContainer"></div>
-    <div class="accordion" id="subtestAccordion"></div>
 
+    <button
+      id="submitBtn"
+      class="btn btn-success mt-4 d-none"
+    >
+      Submit Assessment
+    </button>
   </section>
 
-  <!-- PAGE SCRIPT -->
   <script is:inline>
-    const session = sessionStorage.getItem("assessmentSession");
+    /* ---------------------------------------------------------
+       0. Session Guard
+    --------------------------------------------------------- */
     const token = sessionStorage.getItem("assessmentToken");
-
-    if (!session) {
+    if (!token) {
       window.location.replace("/register");
     }
 
+    /* ---------------------------------------------------------
+       1. DOM References
+    --------------------------------------------------------- */
     const startBtn = document.getElementById("startBtn");
-    const selector = document.getElementById("testSelector");
-    const dropdown = document.getElementById("testDropdown");
+    const testSelector = document.getElementById("testSelector");
+    const testDropdown = document.getElementById("testDropdown");
     const questionsContainer = document.getElementById("questionsContainer");
-    const accordion = document.getElementById("subtestAccordion");
+    const submitBtn = document.getElementById("submitBtn");
 
-    startBtn.addEventListener("click", async () => {
-      selector.classList.remove("d-none");
-      startBtn.disabled = true; // Prevents double clicking
-      await loadTests();
-    });
+    /* ---------------------------------------------------------
+       2. Local State (Model B)
+    --------------------------------------------------------- */
+    let bundle = null;           // Entire test package (fetched once)
+    let activeTest = null;       // Currently selected test
+    let answers = {};            // { question_id: selected_score }
 
-    async function apiFetch(url) {
+    /* ---------------------------------------------------------
+       3. API Helper
+    --------------------------------------------------------- */
+    async function apiFetch(url, options = {}) {
       return fetch(url, {
+        ...options,
         headers: {
+          ...(options.headers || {}),
           "x-assessment-token": token
         }
       });
     }
 
-    async function loadTests() {
-      const res = await apiFetch("/api/psychotestlist");
-      const tests = await res.json();
+    /* ---------------------------------------------------------
+       4. Start Assessment → Fetch EVERYTHING once
+    --------------------------------------------------------- */
+    startBtn.addEventListener("click", async () => {
+      startBtn.disabled = true;
+      startBtn.textContent = "Loading…";
 
-      dropdown.innerHTML = `<option value="">-- Select a Test --</option>`;
+      const res = await apiFetch("/api/psychotest-bundle");
+      testpackage = await res.json();
 
-      tests.forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t.test_id;
-        opt.textContent = t.test_name;
-        dropdown.appendChild(opt);
-      });
-    }
+      // 🔑 Normalize GAS response
+      bundle = {
+        tests: testpackage.payload || []
+      };
+      console.log(bundle);
+      if (!bundle.tests || bundle.tests.length === 0) {
+        questionsContainer.innerHTML =
+          "<p class='text-danger'>No tests assigned.</p>";
+        return;
+      }
 
-    dropdown.addEventListener("change", async (e) => {
-      if (!e.target.value) return;
-      await loadTestBundle(e.target.value);
+      initialiseUI();
     });
 
-    async function loadTestBundle(testId) {
-      questionsContainer.innerHTML = "Loading test...";
-      accordion.innerHTML = "";
+    /* ---------------------------------------------------------
+       5. Initialise UI from Cached Bundle
+    --------------------------------------------------------- */
+    function initialiseUI() {
+      startBtn.classList.add("d-none");
 
-      const res = await apiFetch(`/api/psychotest-bundle?test_id=${testId}`);
-      const data = await res.json();
+      if (bundle.tests.length === 1) {
+        // Only one test → render directly
+        activeTest = bundle.tests[0];
+        renderTest(activeTest);
+      } else {
+        // Multiple tests → dropdown
+        testSelector.classList.remove("d-none");
+        testDropdown.innerHTML =
+          `<option value="">-- Select Test --</option>`;
 
-      renderTest(data);
+        bundle.tests.forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t.test_id;
+          opt.textContent = t.test_name;
+          testDropdown.appendChild(opt);
+        });
+      }
     }
 
-    function renderTest(data) {
+    /* ---------------------------------------------------------
+       6. Handle Test Selection
+    --------------------------------------------------------- */
+    testDropdown?.addEventListener("change", e => {
+      const testId = e.target.value;
+      activeTest = bundle.tests.find(t => t.test_id === testId);
+      if (activeTest) renderTest(activeTest);
+    });
+
+    /* ---------------------------------------------------------
+       7. Render Test (Questions already shuffled by GAS)
+    --------------------------------------------------------- */
+    function renderTest(test) {
       questionsContainer.innerHTML = "";
-      accordion.innerHTML = "";
+      submitBtn.classList.remove("d-none");
 
       let qNo = 1;
 
-      data.subtests.forEach((subtest, index) => {
-        const isOpen = index === 0;
-
-        const subtestQuestions = data.questions.filter(
-          q => q.subtest_code === subtest.subtest_code
+      Object.values(test.subtests).forEach(sub => {
+        const subQuestions = test.questions.filter(
+          q => q.subtest_code === sub.subtest_code
         );
 
-        accordion.innerHTML += `
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button ${isOpen ? "" : "collapsed"}"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapse_${subtest.subtest_code}"
-              >
-                ${subtest.subtest_name}
-              </button>
-            </h2>
+        const block = document.createElement("div");
+        block.className = "mb-4";
 
-            <div
-              id="collapse_${subtest.subtest_code}"
-              class="accordion-collapse collapse ${isOpen ? "show" : ""}"
-              data-bs-parent="#subtestAccordion"
-            >
-              <div class="accordion-body">
-                ${subtestQuestions.map(q => `
-                  <div class="border rounded p-3 mb-3">
-                    <p><strong>${qNo++}. ${q.text}</strong></p>
-
-                    ${q.options.map(o => `
-                      <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          name="q_${q.question_id}"
-                          value="${o.score}"
-                        />
-                        <label class="form-check-label">
-                          ${o.label}
-                        </label>
-                      </div>
-                    `).join("")}
-                  </div>
-                `).join("")}
-              </div>
+        block.innerHTML = `
+          <h5 class="mb-3">${sub.subtest_name}</h5>
+          ${subQuestions.map(q => `
+            <div class="border rounded p-3 mb-3">
+              <p><strong>${qNo++}. ${q.text}</strong></p>
+              ${q.options.map(o => `
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="q_${q.question_id}"
+                    value="${o.score}"
+                    ${answers[q.question_id] == o.score ? "checked" : ""}
+                  />
+                  <label class="form-check-label">${o.label}</label>
+                </div>
+              `).join("")}
             </div>
-          </div>
+          `).join("")}
         `;
+
+        questionsContainer.appendChild(block);
       });
+
+      bindAnswerEvents();
     }
+
+    /* ---------------------------------------------------------
+       8. Capture Answers Locally
+    --------------------------------------------------------- */
+    function bindAnswerEvents() {
+      document
+        .querySelectorAll("input[type=radio]")
+        .forEach(input => {
+          input.addEventListener("change", e => {
+            const qid = e.target.name.replace("q_", "");
+            answers[qid] = Number(e.target.value);
+          });
+        });
+    }
+
+    /* ---------------------------------------------------------
+       9. Submit (ONE API CALL)
+    --------------------------------------------------------- */
+    submitBtn.addEventListener("click", async () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
+      const payload = {
+        test_id: activeTest.test_id, 
+        answers
+      };
+
+      const res = await apiFetch("/api/psychotest-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+    
+      if (result.success && res.ok) {
+        console.log("Answer Submitted.")
+        /* sessionStorage.removeItem("assessmentSession");
+        sessionStorage.removeItem("assessmentToken");
+        window.location.replace("/assessment/thankyou");  */
+      } else {
+        alert("Submission failed. Please contact support.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Assessment";
+      }
+    });
   </script>
 </BaseLayout>

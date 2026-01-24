@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>Psychometric Assessment | Success Steps</title>
+    <meta name="description" content="Thank you for psychometric assessment" />
+  </Fragment>
+
+  <main class="vh-100 d-flex align-items-center bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 text-center shadow p-5 bg-white rounded">
+          <div class="mb-4">
+            <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+          </div>
+          <h1 class="display-4 fw-bold">Thank You!</h1>
+          <p class="lead mb-4">
+            Your psychometric assessment has been successfully submitted. 
+            Our team will review your results and contact you shortly.
+          </p>
+          <hr class="my-4" />
+          <p class="text-muted mb-4">Having trouble? <a href="/contact" class="text-decoration-none">Contact Support</a></p>
+          <a href="/" class="btn btn-primary btn-lg px-5">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
