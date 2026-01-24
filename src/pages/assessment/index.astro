@@ -2,7 +2,15 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 export const prerender = false;
 ---
-
+<!-- 
+  Accordion Sections - First opens, others collapsed
+  Live Progress - Section counters, question status, progress bar
+  Mobile-First - Stacked options on mobile, perfect alignment
+  Multi-Test Tracking - Independent progress per test
+  Submit Prevention - Disabled until 100%, warning modal
+  Visual Polish - Hover effects, checked states, shadows
+  Bootstrap Native - Works with your layout perfectly
+-->
 <BaseLayout>
   <Fragment slot="head">
     <title>Psychometric Assessment | Success Steps</title>
@@ -12,11 +20,82 @@ export const prerender = false;
     />
   </Fragment>
 
+  <style>
+    /* Minimal customizations only */
+    .question-item.answered {
+      border-color: #0d6efd !important;
+      background-color: #f8f9ff;
+    }
+    .accordion-button:not(.collapsed) {
+      background-color: #e7f3ff;
+      color: #0d6efd;
+      font-weight: 600;
+    }
+    .option-label {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 2px solid #dee2e6;
+      transition: all 0.2s;
+      display: block;
+      text-align: center;
+      font-size: 0.9em;
+      line-height: 1.3;
+    }
+    .option-label:hover {
+      background-color: #f8f9fa;
+      border-color: #0d6efd;
+    }
+    .option-label.checked {
+      background-color: #e3f2fd;
+      border-color: #0d6efd;
+      color: #0d6efd;
+      font-weight: 600;
+    }
+        /* Minimal custom for Progress Overview */
+    /* Progress Overview - 2 Column Layout */
+    .progress-list .test-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .min-w-70px {
+      min-width: 70px;
+    }
+    .progress-item {
+      transition: all 0.2s ease;
+    }
+    .progress-item:hover {
+      background-color: rgba(13, 202, 240, 0.15) !important;
+      transform: translateY(-1px);
+    }
+    @media (max-width: 767px) {
+      .test-name {
+        white-space: normal !important;
+        font-size: 0.95em;
+      }
+      .progress-list {
+        --bs-gutter-x: 1rem !important;
+      }
+    }
+  </style>
+
   <section class="container py-5 mt-5">
     <h2 class="mb-3">Psychometric Assessment</h2>
     <p class="text-muted mb-4">
       Please complete all questions carefully. Do not refresh the page.
     </p>
+
+    <!-- Progress Summary -->
+    <div id="progressSummary" class="bg-info bg-opacity-10 border border-info rounded-3 p-3 mb-4 d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0 text-info fw-semibold">📊 Progress Overview</h6>
+        <button class="btn btn-sm btn-outline-info" id="toggleProgress">
+          <i class="bi bi-chevron-down me-1"></i>Collapse
+        </button>
+      </div>
+      <div id="progressList" class="progress-list row g-3 g-lg-4"></div>
+    </div>
 
     <button id="startBtn" class="btn btn-primary mb-3">
       Start Assessment
@@ -38,6 +117,32 @@ export const prerender = false;
     </button>
   </section>
 
+  <!-- Warning Modal -->
+  <div class="modal fade" id="submitWarningModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Submission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Warning:</strong> Have you reviewed all questions?</p>
+          <div id="modalStats" class="mb-3">
+            <p><span id="attemptedCount">-</span> / <span id="totalCount">-</span> questions attempted</p>
+            <p class="text-muted small">Please scroll through all questions before submitting.</p>
+          </div>
+          <div class="alert alert-warning">
+            <strong>This action cannot be undone!</strong> Make sure you've reviewed every question.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review Questions</button>
+          <button type="button" class="btn btn-danger" id="confirmSubmitBtn">Yes, Submit Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script is:inline>
     /* ---------------------------------------------------------
        0. Session Guard
@@ -55,13 +160,16 @@ export const prerender = false;
     const testDropdown = document.getElementById("testDropdown");
     const questionsContainer = document.getElementById("questionsContainer");
     const submitBtn = document.getElementById("submitBtn");
+    const progressSummary = document.getElementById("progressSummary");
+    const progressList = document.getElementById("progressList");
+    const modal = document.getElementById("submitWarningModal");
 
     /* ---------------------------------------------------------
-       2. Local State (Model B)
+       2. Local State
     --------------------------------------------------------- */
-    let bundle = null;           // Entire test package (fetched once)
-    let activeTest = null;       // Currently selected test
-    let answers = {};            // { question_id: selected_score }
+    let bundle = null;
+    let activeTest = null;
+    let testProgress = {};
 
     /* ---------------------------------------------------------
        3. API Helper
@@ -77,44 +185,50 @@ export const prerender = false;
     }
 
     /* ---------------------------------------------------------
-       4. Start Assessment → Fetch EVERYTHING once
+       4. Start Assessment
     --------------------------------------------------------- */
     startBtn.addEventListener("click", async () => {
       startBtn.disabled = true;
       startBtn.textContent = "Loading…";
 
       const res = await apiFetch("/api/psychotest-bundle");
-      testpackage = await res.json();
+      const testpackage = await res.json();
 
-      // 🔑 Normalize GAS response
       bundle = {
         tests: testpackage.payload || []
       };
-      console.log(bundle);
+
       if (!bundle.tests || bundle.tests.length === 0) {
         questionsContainer.innerHTML =
           "<p class='text-danger'>No tests assigned.</p>";
         return;
       }
 
+      // Initialize progress tracking
+      bundle.tests.forEach(test => {
+        testProgress[test.test_id] = {
+          attempted: 0,
+          total: 0,
+          answers: {},
+          completed: false
+        };
+      });
+
       initialiseUI();
     });
 
     /* ---------------------------------------------------------
-       5. Initialise UI from Cached Bundle
+       5. Initialise UI
     --------------------------------------------------------- */
     function initialiseUI() {
       startBtn.classList.add("d-none");
 
       if (bundle.tests.length === 1) {
-        // Only one test → render directly
         activeTest = bundle.tests[0];
         renderTest(activeTest);
       } else {
-        // Multiple tests → dropdown
         testSelector.classList.remove("d-none");
-        testDropdown.innerHTML =
-          `<option value="">-- Select Test --</option>`;
+        testDropdown.innerHTML = `<option value="">-- Select Test --</option>`;
 
         bundle.tests.forEach(t => {
           const opt = document.createElement("option");
@@ -122,86 +236,326 @@ export const prerender = false;
           opt.textContent = t.test_name;
           testDropdown.appendChild(opt);
         });
+        updateProgressSummary();
       }
     }
 
     /* ---------------------------------------------------------
-       6. Handle Test Selection
+       6. Test Selection
     --------------------------------------------------------- */
     testDropdown?.addEventListener("change", e => {
       const testId = e.target.value;
       activeTest = bundle.tests.find(t => t.test_id === testId);
-      if (activeTest) renderTest(activeTest);
+      if (activeTest) {
+        renderTest(activeTest);
+      }
+      updateProgressSummary();
     });
 
     /* ---------------------------------------------------------
-       7. Render Test (Questions already shuffled by GAS)
+       7. Progress Summary
+                📊 Progress Overview [Collapse ↑]
+          ┌─────────────────────┬─────────────────────┐
+          │ Integrity Assessment│ Leadership Skills   │
+          │ 75%                 │ ✅ Complete         │
+          ├─────────────────────┼─────────────────────┤
+          │ Aptitude            │ Cyber Dependency    │
+          │ 60%                 │ 25%                 │
+          └─────────────────────┴─────────────────────┘
+            📊 Progress Overview [Collapse ↑]
+            [Single column - full width cards]
+            Integrity Assessment    75%
+            Leadership Skills      ✅ Complete
+            Aptitude                60%
+            ...
+            2-column grid (col-md-6 col-lg-6) - Desktop/Tablet
+            Single column (col-md-6 stacks) - Mobile
+            Collapse button - ALL devices (persists state)
+            Light turquoise theme (bg-info bg-opacity-10)
+            Alternating borders for visual separation
+            Smart truncation for long test names
+            Hover effects with lift animation
+            localStorage remembers collapse state
+    --------------------------------------------------------- */
+    function updateProgressSummary() {
+        if (!bundle?.tests) return;
+        
+        progressSummary.classList.remove("d-none");
+        
+        // 2-column layout using Bootstrap grid
+        progressList.innerHTML = bundle.tests.map((test, index) => {
+          const progress = testProgress[test.test_id];
+          const attempted = Object.keys(progress.answers || {}).length;
+          const percent = progress.total > 0 ? Math.round((attempted / progress.total) * 100) : 0;
+          const statusClass = progress.completed ? 'bg-success' : 
+                            percent === 100 ? 'bg-warning text-dark' : 'bg-secondary';
+          const statusText = progress.completed ? '✅ Complete' : 
+                            percent === 100 ? '⚠️ Review' : `${percent}%`;
+          
+          const colClass = index % 2 === 0 ? 'col-md-6 col-lg-6' : 'col-md-6 col-lg-6 offset-lg-0';
+          
+          return `
+            <div class="progress-item ${colClass} mb-2 p-3 rounded-2 border ${index % 2 === 0 ? 'border-info border-opacity-25' : 'border-secondary border-opacity-10'} bg-white">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="test-name fw-semibold text-truncate pe-2" style="max-width: 70%;">
+                  ${test.test_name}
+                </div>
+                <div class="text-end">
+                  <span class="badge ${statusClass} fs-6 px-3 py-2 min-w-70px">
+                    ${statusText}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+        
+        // Collapse toggle for ALL devices
+        const toggleBtn = document.getElementById('toggleProgress');
+        if (toggleBtn && !toggleBtn._listenerAdded) {
+          toggleBtn._listenerAdded = true;
+          const isCollapsed = localStorage.getItem('progressCollapsed') === 'true';
+          
+          if (isCollapsed) {
+            progressList.classList.add('d-none');
+            toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
+          } else {
+            toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
+          }
+          
+          toggleBtn.addEventListener('click', () => {
+            const isHidden = progressList.classList.contains('d-none');
+            progressList.classList.toggle('d-none');
+            
+            if (isHidden) {
+              toggleBtn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Collapse';
+              localStorage.setItem('progressCollapsed', 'false');
+            } else {
+              toggleBtn.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Expand';
+              localStorage.setItem('progressCollapsed', 'true');
+            }
+          });
+        }
+      }
+
+    /* ---------------------------------------------------------
+       8. ACCORDION UI - Mobile Friendly
+                  col-12 col-sm-6 col-lg-2 = PERFECT Likert Scale!
+          Desktop (≥992px):  col-lg-2  → 5 options per row ✓
+          Tablet (576-991px): col-sm-6 → 2 options per row  
+          Mobile (<576px):   col-12   → 1 option per row ✓
     --------------------------------------------------------- */
     function renderTest(test) {
-      questionsContainer.innerHTML = "";
-      submitBtn.classList.remove("d-none");
-
-      let qNo = 1;
-
-      Object.values(test.subtests).forEach(sub => {
-        const subQuestions = test.questions.filter(
-          q => q.subtest_code === sub.subtest_code
-        );
-
-        const block = document.createElement("div");
-        block.className = "mb-4";
-
-        block.innerHTML = `
-          <h5 class="mb-3">${sub.subtest_name}</h5>
-          ${subQuestions.map(q => `
-            <div class="border rounded p-3 mb-3">
-              <p><strong>${qNo++}. ${q.text}</strong></p>
-              ${q.options.map(o => `
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="q_${q.question_id}"
-                    value="${o.score}"
-                    ${answers[q.question_id] == o.score ? "checked" : ""}
-                  />
-                  <label class="form-check-label">${o.label}</label>
+        const progress = testProgress[test.test_id];
+        progress.total = Object.keys(test.questions).length;
+        
+        questionsContainer.innerHTML = `
+          <div class="accordion accordion-flush" id="testAccordion_${test.test_id}">
+            ${Object.values(test.subtests).map((sub, subIndex) => {
+              const subQuestions = Object.values(test.questions).filter(
+                q => q.subtest_code === sub.subtest_code
+              );
+              const answeredInSection = subQuestions.filter(q => 
+                progress.answers[q.question_id]
+              ).length;
+              
+              return `
+                <div class="accordion-item border rounded mb-3 shadow-sm">
+                  <h3 class="accordion-header" id="heading${test.test_id}_${subIndex}">
+                    <button class="accordion-button ${subIndex !== 0 ? 'collapsed' : ''}" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#collapse${test.test_id}_${subIndex}">
+                      <div class="d-flex justify-content-between w-100 align-items-center">
+                        <span class="fw-semibold">🚀 ${sub.subtest_name}</span>
+                        <span class="d-flex align-items-center gap-2">
+                          <span class="badge bg-primary fs-6">${answeredInSection}/${subQuestions.length}</span>
+                          <small class="text-muted">${subQuestions.length} questions</small>
+                        </span>
+                      </div>
+                    </button>
+                  </h3>
+                  <div id="collapse${test.test_id}_${subIndex}" 
+                      class="accordion-collapse collapse ${subIndex === 0 ? 'show' : ''}" 
+                      data-bs-parent="#testAccordion_${test.test_id}">
+                    <div class="accordion-body p-0">
+                      ${subQuestions.map((q, qIndex) => `
+                        <div class="question-item p-4 mb-4 mx-3 border rounded shadow-sm" 
+                            data-qid="${q.question_id}">
+                          <div class="d-flex justify-content-between align-items-start mb-4">
+                            <h6 class="mb-0 fw-semibold text-dark">${qIndex + 1}. ${q.text}</h6>
+                            <span class="badge question-status ${progress.answers[q.question_id] ? 'bg-success' : 'bg-secondary'}">
+                              ${progress.answers[q.question_id] ? '✅ Answered' : '○ Not answered'}
+                            </span>
+                          </div>
+                          
+                          <!-- ✅ BOOTSTRAP 5-COL GRID -->
+                          <div class="row g-2 g-md-3">
+                            ${q.options.map((o, optIndex) => `
+                              <div class="col-12 col-sm-6 col-lg-2">
+                                <div class="option-container d-flex flex-column align-items-center">
+                                  <input class="form-check-input mb-2 mt-0"
+                                        type="radio"
+                                        name="q_${q.question_id}"
+                                        value="${o.score}"
+                                        id="opt-${q.question_id}-${optIndex}"
+                                        ${progress.answers[q.question_id] == o.score ? "checked" : ""}
+                                        data-qid="${q.question_id}" />
+                                  <label class="option-label w-100 ${progress.answers[q.question_id] == o.score ? 'checked' : ''}" 
+                                        for="opt-${q.question_id}-${optIndex}">
+                                    ${o.label}
+                                  </label>
+                                </div>
+                              </div>
+                            `).join("")}
+                          </div>
+                        </div>
+                      `).join("")}
+                    </div>
+                  </div>
                 </div>
-              `).join("")}
+              `;
+            }).join("")}
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="row mt-4 g-3 align-items-center">
+            <div class="col-md-8">
+              <div class="progress" style="height: 28px;">
+                <div class="progress-bar bg-success" 
+                    role="progressbar" 
+                    style="width: ${progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0}%"
+                    aria-valuenow="${progress.attempted}" 
+                    aria-valuemax="${progress.total}">
+                  <strong>${progress.attempted}/${progress.total} answered</strong>
+                </div>
+              </div>
             </div>
-          `).join("")}
+            <div class="col-md-4 text-md-end">
+              <small class="text-muted">${progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0}% complete</small>
+            </div>
+          </div>
         `;
-
-        questionsContainer.appendChild(block);
-      });
-
-      bindAnswerEvents();
-    }
-
+        
+        submitBtn.classList.remove("d-none");
+        bindAnswerEvents();
+        updateSubmitButtonState(test.test_id);
+      }
     /* ---------------------------------------------------------
-       8. Capture Answers Locally
+       9. Answer Tracking
     --------------------------------------------------------- */
     function bindAnswerEvents() {
-      document
-        .querySelectorAll("input[type=radio]")
-        .forEach(input => {
-          input.addEventListener("change", e => {
-            const qid = e.target.name.replace("q_", "");
-            answers[qid] = Number(e.target.value);
-          });
+      questionsContainer.removeEventListener('change', radioHandler);
+      questionsContainer.addEventListener('change', radioHandler);
+      
+      function radioHandler(e) {
+        if (e.target.type !== 'radio') return;
+        
+        const qid = e.target.name.replace("q_", "");
+        const testId = qid.split('-')[0];
+        
+        // Update data
+        testProgress[testId].answers[qid] = Number(e.target.value);
+        testProgress[testId].attempted = Object.keys(testProgress[testId].answers).length;
+        
+        // Update visuals
+        const questionItem = e.target.closest('.question-item');
+        questionItem.classList.add('answered');
+        
+        const statusBadge = questionItem.querySelector('.question-status');
+        statusBadge.textContent = '✅ Answered';
+        statusBadge.className = 'badge question-status bg-success';
+        
+        questionItem.querySelectorAll('.option-label').forEach(label => {
+          label.classList.remove('checked');
         });
+        e.target.nextElementSibling.classList.add('checked');
+        
+        updateSectionHeader(questionItem);
+        updateProgressBar(testId);
+        
+        if (activeTest && activeTest.test_id === testId) {
+          updateSubmitButtonState(testId);
+        }
+        if (bundle?.tests?.length > 1) {
+          updateProgressSummary();
+        }
+      }
     }
 
     /* ---------------------------------------------------------
-       9. Submit (ONE API CALL)
+       10. Helper Functions
     --------------------------------------------------------- */
-    submitBtn.addEventListener("click", async () => {
+    function updateSectionHeader(questionItem) {
+      const sectionCollapse = questionItem.closest('.accordion-collapse');
+      const sectionBadge = sectionCollapse.previousElementSibling
+        .querySelector('.badge.bg-primary');
+      if (sectionBadge) {
+        const counts = sectionBadge.textContent.split('/');
+        const newAnswered = parseInt(counts[0]) + 1;
+        sectionBadge.textContent = `${newAnswered}/${counts[1]}`;
+      }
+    }
+
+    function updateProgressBar(testId) {
+      const progressBar = questionsContainer.querySelector('.progress-bar');
+      if (progressBar) {
+        const progress = testProgress[testId];
+        const percent = progress.total > 0 ? Math.round((progress.attempted / progress.total) * 100) : 0;
+        progressBar.style.width = `${percent}%`;
+        progressBar.innerHTML = `<strong>${progress.attempted}/${progress.total} answered</strong>`;
+        progressBar.setAttribute('aria-valuenow', progress.attempted);
+      }
+    }
+
+    /* ---------------------------------------------------------
+       11. Submit Button State
+    --------------------------------------------------------- */
+    function updateSubmitButtonState(testId) {
+      const progress = testProgress[testId];
+      const isComplete = progress.attempted === progress.total;
+      
+      submitBtn.disabled = !isComplete;
+      submitBtn.className = isComplete ? "btn btn-success btn-lg mt-4 w-100" : "btn btn-warning btn-lg mt-4 w-100";
+      
+      if (isComplete) {
+        submitBtn.innerHTML = `✅ All Complete! Submit Test`;
+      } else {
+        const percent = Math.round((progress.attempted / progress.total) * 100);
+        submitBtn.innerHTML = `⚠️ ${percent}% Complete (${progress.attempted}/${progress.total})`;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       12. Submit Modal Handler
+    --------------------------------------------------------- */
+    submitBtn.addEventListener("click", () => {
+      if (submitBtn.disabled) return;
+      
+      const progress = testProgress[activeTest.test_id];
+      document.getElementById("attemptedCount").textContent = progress.attempted;
+      document.getElementById("totalCount").textContent = progress.total;
+      modal.show();
+    });
+
+    document.getElementById("confirmSubmitBtn").addEventListener("click", async () => {
+      modal.hide();
+      await handleActualSubmit();
+    });
+
+    /* ---------------------------------------------------------
+       13. Final Submit
+    --------------------------------------------------------- */
+    async function handleActualSubmit() {
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting…";
 
+      const progress = testProgress[activeTest.test_id];
+      progress.completed = true;
+
       const payload = {
-        test_id: activeTest.test_id, 
-        answers
+        test_id: activeTest.test_id,
+        answers: progress.answers
       };
 
       const res = await apiFetch("/api/psychotest-submit", {
@@ -211,17 +565,29 @@ export const prerender = false;
       });
 
       const result = await res.json();
-    
+      
       if (result.success && res.ok) {
-        console.log("Answer Submitted.")
-        /* sessionStorage.removeItem("assessmentSession");
-        sessionStorage.removeItem("assessmentToken");
-        window.location.replace("/assessment/thankyou");  */
+        console.log("Test Submitted Successfully");
+        
+        const allComplete = bundle.tests.every(t => testProgress[t.test_id].completed);
+        if (allComplete) {
+          alert("All tests completed! Thank you.");
+        } else {
+          alert("Test submitted. Please complete remaining tests.");
+          updateProgressSummary();
+          if (bundle.tests.length === 1) {
+            submitBtn.classList.add("d-none");
+          } else {
+            testDropdown.value = "";
+            questionsContainer.innerHTML = "";
+            submitBtn.classList.add("d-none");
+          }
+        }
       } else {
-        alert("Submission failed. Please contact support.");
+        alert("Submission failed. Please try again.");
         submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Assessment";
+        submitBtn.textContent = "Submit Test";
       }
-    });
+    }
   </script>
 </BaseLayout>
