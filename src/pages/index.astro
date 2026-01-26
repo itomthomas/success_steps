@@ -1,86 +1,495 @@
 ---
+// src/pages/index.astro
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image } from 'astro:assets';
+import bgHero from '../images/newbg.webp';
+import brainLobes from '../images/brain.png';
+import testifyplaceholder from '../images/testimonial-1.jpg';
 ---
 
-<BaseLayout>
-  <Fragment slot="head">
-    <title>SuccessSteps | Premium Psychometric Counselling</title>
-    <meta
-      name="description"
-      content="Premium psychometric assessment and private counselling for students and professionals seeking clarity, alignment, and growth."
-    />
-  </Fragment>
-
-  <!-- HERO -->
+<BaseLayout title="SuccessSteps - Transform Your Potential">
+  <!-- Hero Section -->
   <section class="hero pt-5">
-    <div class="container py-5 mt-5">
-      <div class="row">
+    <div class="container py-2 mt-5">
+      <div class="row align-items-center">
         <div class="col-lg-7">
-          <h1 class="display-5 mb-3">
-            Unlock Your True Potential Through Scientific Self-Discovery
-          </h1>
-          <p class="lead mb-4">
-            A premium psychometric assessment and private counselling experience
-            for students and professionals seeking clarity, alignment, and growth.
-          </p>
-          <a href="/assessment" class="btn btn-premium btn-lg me-3">
-            Begin Psychometric Assessment
-          </a>
-          <a href="/register" class="btn btn-outline-light btn-lg">
-            Register
-          </a>
+          <h1 class="display-5 mb-4">Unlock Your True Potential Through Scientific Self-Discovery</h1>
+          <p class="lead mb-4">Mind Wellness • Training • Certification • Psychometric Testing</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="#contact" class="btn btn-premium btn-lg">Book Free Consultation</a>
+            <a href="/pricing" class="btn btn-outline-light btn-lg">View Pricing</a>
+          </div>
+        </div>
+        <div class="col-lg-5 text-center">
+          <Image 
+              src={brainLobes}
+              alt="Success Steps" 
+              class="img-fluid" 
+            />
         </div>
       </div>
     </div>
   </section>
 
-  <!-- PROBLEM -->
-  <section class="py-5">
+  <!-- Services Section -->
+  <section class="services-section py-5 bg-light">
     <div class="container">
-      <div class="text-center mb-5">
-        <h2 class="section-title">
-          Why Intelligent, Hardworking People Still Feel Stuck
-        </h2>
+      <div class="row text-center mb-5">
+        <div class="col-lg-8 mx-auto">
+          <h2 class="display-5 fw-bold mb-3">Our Transformative Services</h2>
+          <p class="lead text-muted">Choose your path to personal and professional growth</p>
+        </div>
       </div>
+      
       <div class="row g-4">
-        <div class="col-md-3"><div class="card card-premium p-4 h-100">Unclear career direction</div></div>
-        <div class="col-md-3"><div class="card card-premium p-4 h-100">Pressure-driven decisions</div></div>
-        <div class="col-md-3"><div class="card card-premium p-4 h-100">Burnout without fulfilment</div></div>
-        <div class="col-md-3"><div class="card card-premium p-4 h-100">Untapped strengths</div></div>
+        <!-- Mind Wellness -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 border-0 shadow-sm hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="service-icon mb-3">
+                <i class="bi bi-person-heart fs-1 text-primary"></i>
+              </div>
+              <h5 class="card-title fw-bold">Mind Wellness</h5>
+              <ul class="list-unstyled text-start">
+                <li>✓ Therapy & Counseling</li>
+                <li>✓ Stress Management</li>
+                <li>✓ Emotional Intelligence</li>
+              </ul>
+              <div class="mt-4">
+                <a href="/mindwellness" class="btn btn-outline-primary me-2">Learn More</a>
+                <a href="/pricing" class="btn btn-primary">Pricing</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Training -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 border-0 shadow-sm hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="service-icon mb-3">
+                <i class="bi bi-briefcase fs-1 text-success"></i>
+              </div>
+              <h5 class="card-title fw-bold">Professional Training</h5>
+              <ul class="list-unstyled text-start">
+                <li>✓ Leadership Development</li>
+                <li>✓ Team Building</li>
+                <li>✓ Skill Enhancement</li>
+              </ul>
+              <div class="mt-4">
+                <a href="/training" class="btn btn-outline-success me-2">Learn More</a>
+                <a href="/pricing" class="btn btn-success">Pricing</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Certification -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 border-0 shadow-sm hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="service-icon mb-3">
+                <i class="bi bi-award fs-1 text-warning"></i>
+              </div>
+              <h5 class="card-title fw-bold">Certifications</h5>
+              <ul class="list-unstyled text-start">
+                <li>✓ Accredited Programs</li>
+                <li>✓ Career Advancement</li>
+                <li>✓ Lifetime Access</li>
+              </ul>
+              <div class="mt-4">
+                <a href="/certificate" class="btn btn-outline-warning me-2">Learn More</a>
+                <a href="/pricing" class="btn btn-warning">Pricing</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Psychometric Test -->
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 border-0 shadow-sm hover-lift">
+            <div class="card-body text-center p-4">
+              <div class="service-icon mb-3">
+                <i class="bi bi-bar-chart fs-1 text-info"></i>
+              </div>
+              <h5 class="card-title fw-bold">Psychometric Tests</h5>
+              <ul class="list-unstyled text-start">
+                <li>✓ Career Assessment</li>
+                <li>✓ Personality Profiling</li>
+                <li>✓ Instant Results</li>
+              </ul>
+              <div class="mt-4">
+                <a href="/psychometrictest/getstarted" class="btn btn-outline-info me-2">Get Started</a>
+                <a href="/pricing" class="btn btn-info">Pricing</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ASSESSMENT -->
-  <section id="assessment" class="py-5">
-    <div class="container text-center">
-      <h2 class="section-title mb-4">
-        The SuccessSteps Psychometric Assessment
-      </h2>
-      <div class="card card-premium p-5">
-        <p class="mb-4">
-          A structured, in-depth assessment followed by private counselling
-          and a personalised roadmap.
-        </p>
-        <a href="/register" class="btn btn-premium btn-lg">
-          Request Access
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section id="contact" class="py-5 text-center">
+  <!-- Modern Testimonial Section -->
+  <section class="testimonials-section py-5 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
     <div class="container">
-      <h2 class="section-title mb-3">
-        Clarity Is a Decision. Growth Is the Result.
-      </h2>
-      <a href="/register" class="btn btn-premium btn-lg me-3">
-        Register
-      </a>
-      <a href="/contact" class="btn btn-outline-dark btn-lg">
-        Contact Us
-      </a>
+      <div class="row justify-content-center text-center text-white mb-5">
+        <div class="col-lg-8">
+          <h2 class="display-5 fw-bold mb-3">Trusted by Thousands</h2>
+          <p class="lead">Real stories from real transformations</p>
+        </div>
+      </div>
+      
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <div class="testimonial-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 h-100">
+            <div class="stars mb-3">
+              <i class="bi bi-star-fill text-warning"></i>
+              <i class="bi bi-star-fill text-warning"></i>
+              <i class="bi bi-star-fill text-warning"></i>
+              <i class="bi bi-star-fill text-warning"></i>
+              <i class="bi bi-star-fill text-warning"></i>
+            </div>
+            <p class="lead">"Dr. Antony's life coaching sessions at Success Steps NLP Academy is a true catalyst for personal growth. His guidance has helped me redefine my goals and develop a clear roadmap to achieve them."</p>
+            <div class="d-flex align-items-center mt-4">
+              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <div>
+                <h6 class="fw-bold mb-0">Vicky Rajesh</h6>
+                <small>Melbourne | Australia</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6">
+          <div class="testimonial-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 h-100">
+            <div class="stars mb-3">
+              <i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i>
+            </div>
+            <p class="lead">"As a startup founder struggling to scale, the personalized coaching at Success Steps NLP Academy provided essential strategies and insights. I've doubled revenue and credit much of that success to their confident guidance."</p>
+            <div class="d-flex align-items-center mt-4">
+              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <div>
+                <h6 class="fw-bold mb-0">Joseph Davis</h6>
+                <small>Mumbai | India</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6">
+          <div class="testimonial-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 h-100">
+            <div class="stars mb-3">
+              <i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i><i class="bi bi-star-fill text-warning"></i>
+            </div>
+            <p class="lead">"I was skeptical at first, but after a few sessions at Success Steps NLP Academy, my thought patterns and behavior shifted remarkably. The compassionate, skilled therapist taught me practical techniques for managing stress, improving communication, and fostering optimism—truly transformative."</p>
+            <div class="d-flex align-items-center mt-4">
+              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <div>
+                <h6 class="fw-bold mb-0">Farheen Shaikh</h6>
+                <small>Dubai | UAE</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-5">
+        <a href="/testimonials" class="btn btn-light btn-lg">Read More Stories</a>
+      </div>
     </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section py-5 bg-dark text-white">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-3 mb-4">
+          <div class="h1 fw-bold text-primary mb-2">5000+</div>
+          <div class="h5">Happy Clients</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="h1 fw-bold text-success mb-2">98%</div>
+          <div class="h5">Success Rate</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="h1 fw-bold text-warning mb-2">50+</div>
+          <div class="h5">Expert Trainers</div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="h1 fw-bold text-info mb-2">24/7</div>
+          <div class="h5">Support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section py-5">
+      <div class="container">
+        <div class="row align-items-start h-100">
+          <!-- Contact Info (unchanged) -->
+          <div class="col-lg-6">
+            <h2 class="display-5 fw-bold mb-4">Ready to Transform?</h2>
+            <p class="lead mb-4">Get your free consultation today and start your journey to success.</p>
+            <ul class="list-unstyled">
+              <li class="mb-3"><i class="bi bi-telephone text-primary me-3"></i>+91 98330 86018</li>
+              <li class="mb-3"><i class="bi bi-envelope text-primary me-3"></i>hello@successteps.in</li>
+              <li class="mb-3"><i class="bi bi-geo-alt text-primary me-3"></i><strong>SUCCESS STEPS NLP ACADEMY</strong></li>
+              <li class="mb-4">
+                <i class="bi text-primary me-3 d-block d-md-inline-block"></i>
+                <div class="d-md-inline-block">
+                  Varun Arcade-1B, Office No.109<br>
+                  Varun Garden, Opp. R Mall,<br>
+                  Ghodbunder Road,<br>
+                  Manpada, Thane 400610.<br>
+                  <a href="https://maps.app.goo.gl/aCKS7kyRHVwpNfHs5" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                    <i class="bi bi-geo-alt me-1"></i>Open in Google Maps
+                  </a>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- FORM WIRED TO GOOGLE SHEETS -->
+          <div class="col-lg-6">
+            <div class="card border-0 shadow">
+              <div class="card-body p-5">
+                <h5 class="fw-bold mb-4">Quick Contact</h5>
+                <form name="contactForm" class="contact-form">
+                  <!-- HONEYPOT (Hidden spam trap) -->
+                  <div style="position:absolute; left:-5000px;">
+                    <input type="text" name="honeypot" tabindex="-1" autocomplete="off">
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <input 
+                        type="text" 
+                        name="name" 
+                        class="form-control" 
+                        placeholder="Your Name *" 
+                        required
+                      >
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <input 
+                        type="tel" 
+                        name="phone" 
+                        class="form-control" 
+                        placeholder="Phone *" 
+                        pattern="[0-9\s\-\+\(\)]{10,15}"
+                        required
+                      >
+                    </div>
+                  </div>
+
+                  <!-- FULL COUNTRY DROPDOWN + TEXT INPUT -->
+                  <div class="mb-3">
+                    <select name="country" class="form-select country-select" required>
+                      <option value="">Select your country *</option>
+                      <option value="India">India</option>
+                      <option value="United States">United States</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Australia">Australia</option>
+                      <option value="Germany">Germany</option>
+                      <option value="France">France</option>
+                      <option value="United Arab Emirates">United Arab Emirates</option>
+                      <option value="Singapore">Singapore</option>
+                      <option value="Malaysia">Malaysia</option>
+                      <option value="Indonesia">Indonesia</option>
+                      <option value="Philippines">Philippines</option>
+                      <option value="Japan">Japan</option>
+                      <option value="South Korea">South Korea</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    
+                    <!-- Hidden text input - shows when "Other" selected -->
+                    <input 
+                      type="text" 
+                      name="country_other" 
+                      class="form-control mt-2 other-country-input d-none" 
+                      placeholder="Please specify your country"
+                    >
+                  </div>
+
+                  <div class="mb-3">
+                    <input 
+                      type="email" 
+                      name="email" 
+                      class="form-control" 
+                      placeholder="Your Email *" 
+                      required
+                    >
+                  </div>
+
+                  <div class="mb-3">
+                    <select name="service" class="form-select" required>
+                      <option value="">Select Service *</option>
+                      <option>Mind Wellness</option>
+                      <option>Training</option>
+                      <option>Certification</option>
+                      <option>Psychometric Test</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-4">
+                    <textarea 
+                      name="message" 
+                      class="form-control" 
+                      rows="4"
+                      placeholder="Tell us about your goals..."
+                    ></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" id="submitBtn">
+                    <span class="btn-text">Send Message</span>
+                    <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
+                    <span class="loading-text d-none">Sending...</span>
+                  </button>
+
+                  <!-- Success/Error Messages -->
+                  <div id="form-message" class="mt-3 d-none"></div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Custom hover effect for service cards */
+  .hover-lift {
+    transition: all 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Testimonial glassmorphism */
+ .testimonials-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    position: relative;
+    overflow: hidden;
+  }
+  
+ .testimonial-card {
+    background: rgba(255, 255, 255, 0.11) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 24px !important;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .testimonial-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    padding: 2px;
+    mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
+    -webkit-mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+  }
+  
+  .testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.2) !important;
+  }
+  
+  /* Text contrast fix */
+  .testimonial-card h6,
+  .testimonial-card small {
+    color: white !important;
+  }
+  
+  .testimonial-card small {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+
+<script>
+  const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Replace after setup
+
+  // Country "Other" toggle functionality
+  const countrySelect = document.querySelector('.country-select');
+  const countryOtherInput = document.querySelector('.other-country-input');
+  
+  countrySelect.addEventListener('change', function() {
+    if (this.value === 'Other') {
+      countryOtherInput.classList.remove('d-none');
+      countryOtherInput.required = true;
+    } else {
+      countryOtherInput.classList.add('d-none');
+      countryOtherInput.required = false;
+      countryOtherInput.value = '';
+    }
+  });
+  
+  const form = document.forms['contactForm'];
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = submitBtn.querySelector('.btn-text');
+  const loadingText = submitBtn.querySelector('.loading-text');
+  const spinner = submitBtn.querySelector('.spinner-border');
+  const messageDiv = document.getElementById('form-message');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    
+    // HONEYPOT CHECK - Block spam bots
+    const honeypot = form.honeypot.value;
+    if (honeypot) {
+      //console.log('Spam bot detected!');
+      return false;
+    }
+
+    // Show loading state
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    loadingText.classList.remove('d-none');
+    btnText.classList.add('d-none');
+    messageDiv.classList.add('d-none');
+
+    // Submit to Google Sheets
+    fetch(scriptURL, { 
+      method: 'POST', 
+      body: new FormData(form)
+    })
+    .then(response => response.text())
+    .then(result => {
+      console.log('SUCCESS!', result);
+      showMessage('Thank you! We\'ll contact you within 24 hours.', 'success');
+      form.reset();
+    })
+    .catch(error => {
+      console.error('ERROR!', error.message);
+      showMessage('Oops! Something went wrong. Please try again.', 'error');
+    })
+    .finally(() => {
+      // Reset button
+      submitBtn.disabled = false;
+      spinner.classList.add('d-none');
+      loadingText.classList.add('d-none');
+      btnText.classList.remove('d-none');
+    });
+  });
+
+  function showMessage(text, type) {
+    messageDiv.textContent = text;
+    messageDiv.className = `mt-3 alert alert-${type === 'success' ? 'success' : 'danger'}`;
+    messageDiv.classList.remove('d-none');
+  }
+</script>

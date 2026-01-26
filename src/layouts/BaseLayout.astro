@@ -1,6 +1,8 @@
 ---
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/theme.css";
+import { Image } from 'astro:assets';
+import LOGO from '../images/fitLogo.png';
 ---
 
 <!DOCTYPE html>
@@ -19,17 +21,35 @@ import "../styles/theme.css";
       src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
       defer
     ></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   </head>
 
   <body>
-    <!-- NAVBAR -->
+    <!-- NAVBAR WITH LOGO -->
     <nav class="navbar navbar-expand-lg bg-white border-bottom fixed-top">
       <div class="container">
-        <a class="navbar-brand fw-semibold" href="/">SuccessSteps</a>
 
-        <div class="collapse navbar-collapse">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="/#approach">Our Approach</a></li>
+        <!-- LOGO -->
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <Image
+            src={LOGO}
+            alt="Success Steps NLP Academy"
+            class="navbar-logo"
+          />
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link" href="/">Our Approach</a></li>
             <li class="nav-item"><a class="nav-link" href="/assessment">Assessment</a></li>
             <li class="nav-item"><a class="nav-link" href="/facilitator">Counsellor</a></li>
             <li class="nav-item"><a class="nav-link" href="/pricing">Pricing</a></li>
@@ -40,9 +60,11 @@ import "../styles/theme.css";
             </li>
           </ul>
         </div>
+
       </div>
     </nav>
 
+    
     <!-- PAGE CONTENT -->
     <main style="padding-top: 12px;">
       <slot />
@@ -74,7 +96,7 @@ import "../styles/theme.css";
 
 
     <footer class="border-top py-4 text-center small">
-      © SuccessSteps. Created by Tom Thomas.
+      © SuccessSteps. <br>Developed by <strong><a href="https://getitautomated.com" target="_blank" rel="noopener noreferrer">Tom Thomas</a></strong>
     </footer>
 
     <script>
