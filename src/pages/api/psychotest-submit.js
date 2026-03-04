@@ -7,15 +7,15 @@ export async function POST({ request }) {
   }
 
   const body = await request.json();
-  const { test_id, answers } = body;
+  const { test_ids, answers } = body;
 
-  if (!test_id || !answers) {
+  if (!test_ids || !test_ids.length || !answers) {
     return new Response(JSON.stringify({ error: "Astro:Invalid answer payload" }), { status: 400 });
   }
 
   const PSYCHO_GAS_URL = import.meta.env.PUBLIC_GS_API;
 // Not passing test_id to GAS
-  const res = await fetch(`${PSYCHO_GAS_URL}/exec`, {
+  const submitRes = await fetch(`${PSYCHO_GAS_URL}/exec`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -24,10 +24,19 @@ export async function POST({ request }) {
       answers
     })
   });
+  console.log("Submit response status:", submitRes.status);
+  const submitData = await submitRes.json();
 
-  const data = await res.text();
+   // ✅ Explicitly check GAS-level success, not just HTTP status
+  if (!submitData.success) {
+    return new Response(
+      JSON.stringify({ error: submitData.error || "Submit failed" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
-  return new Response(data, {
-    headers: { "Content-Type": "application/json" }
-  });
+  return new Response(
+    JSON.stringify({ success: true }),
+    { status: 200, headers: { "Content-Type": "application/json" } }
+  );
 }

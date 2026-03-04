@@ -332,6 +332,7 @@ Page unload protection auto-saves
 
     const res = await apiFetch("/api/psychotest-bundle");
     const testpackage = await res.json();
+     console.log("testpackage:", testpackage);
 
     bundle = {
       tests: testpackage.payload || []
@@ -670,14 +671,19 @@ Page unload protection auto-saves
     document.getElementById("overallAttempted").textContent = answeredQuestions;
     document.getElementById("overallTotal").textContent = totalQuestions;
     
-    modal.show();
+    // ✅ Bootstrap 5: Use data attributes or manual show
+    const modalElement = document.getElementById("submitWarningModal");
+    const bootstrapModal = new bootstrap.Modal(modalElement);
+    bootstrapModal.show();
   });
 
   /* ---------------------------------------------------------
      17. Final Submit ALL TESTS
   --------------------------------------------------------- */
   document.getElementById("confirmSubmitBtn").addEventListener("click", async () => {
-    modal.hide();
+    const modalElement = document.getElementById("submitWarningModal");
+    const bootstrapModal = new bootstrap.Modal(modalElement);
+    bootstrapModal.hide();
     await handleFinalSubmit();
   });
 
@@ -687,34 +693,51 @@ Page unload protection auto-saves
     submitBtn.classList.add("submit-locked");
 
     try {
-      const submitPromises = bundle.tests.map(async (test) => {
-        const progress = testProgress[test.test_id];
-        if (!progress.completed && Object.keys(progress.answers).length === progress.total) {
-          const payload = {
-            test_id: test.test_id,
-            answers: progress.answers
-          };
-          
-          const res = await apiFetch("/api/psychotest-submit", {
+        // Step 1: Collect ALL answers across ALL tests into one payload
+        const allAnswers = {};
+        const testIds = [];
+
+        bundle.tests.forEach(test => {
+          const progress = testProgress[test.test_id];
+          if (progress.completed) return;
+
+          testIds.push(test.test_id);
+
+          // Merge answers — key is question_id, value is score
+          Object.assign(allAnswers, progress.answers);
+        });
+
+        // Step 2: Single submit call for all tests
+        const res = await apiFetch("/api/psychotest-submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            test_ids: testIds,    // ✅ array of all test IDs
+            answers: allAnswers   // ✅ all answers merged
+          })
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(`Astro: Submit failed: ${data.error}`);
+
+        // Mark all tests complete
+        bundle.tests.forEach(test => {
+           testProgress[test.test_id].completed = true;
+        });
+        saveProgress();
+
+        // Step 3: Trigger scoring per test — fire and forget
+        apiFetch("/api/psychotest-score", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          
-          if (!res.ok) throw new Error(`Test ${test.test_id} failed`);
-          
-          progress.completed = true;
-          saveProgress();
-        }
-      });
+            body: JSON.stringify({ test_ids: testIds })  // ✅ array, single call
+          }).catch(err => console.error("Score trigger failed:", err));
 
-      await Promise.all(submitPromises);
-      
-      clearProgress();
-      
-      alert("🎉 All tests submitted successfully! Thank you for completing the assessment.");
-      window.location.href = "/dashboard";
-      
+        clearProgress();
+        alert("🎉 All tests submitted successfully! Thank you for completing the assessment.");
+        window.location.href = "/assessment/thankyou";
+        //window.location.href = "/assessment/results";    
+    
     } catch (error) {
       console.error("Submission failed:", error);
       alert("Submission failed. Your progress is saved locally. Please try again.");

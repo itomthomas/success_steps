@@ -1,0 +1,402 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+export const prerender = false;
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>Your Results | Success Steps</title>
+    <meta name="description" content="Your psychometric assessment results" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  </Fragment>
+
+  <style>
+    /* ── pdf-exclude: visible on screen, hidden only during PDF capture via JS */
+    /* DO NOT set display:none here — JS handles hiding during capture */
+
+    /* ── pdf-only: hidden on screen, shown only during PDF capture via JS */
+    .pdf-only {
+      display: none;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: always;
+    }
+
+    .feedback-card { border-left: 4px solid #0d6efd; }
+    .level-badge { font-size: 0.85rem; }
+
+    .score-pill {
+      background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+      color: white;
+      border-radius: 50px;
+      padding: 4px 16px;
+      font-weight: 600;
+    }
+
+    .test-section {
+      border-top: 3px solid #0d6efd;
+      margin-top: 5rem;
+      padding-top: 2.5rem;
+      padding-bottom: 2rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow: visible !important;
+    }
+
+    .bar-container {
+      position: relative;
+      min-height: 200px;
+      overflow: visible !important;
+    }
+  </style>
+
+  <section class="container py-5">
+
+    <!-- Header — visible on screen, hidden during PDF capture via JS -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pdf-exclude">
+      <h2 class="mb-0">📊 Assessment Results</h2>
+      <button class="btn btn-outline-primary" id="downloadPdf">
+        ⬇️ Download PDF
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="text-center py-5">
+      <div class="spinner-border text-primary mb-3"></div>
+      <p class="text-muted">Loading your results…</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorState" class="alert alert-danger d-none"></div>
+
+    <!-- Report (hidden until data loads) -->
+    <div id="reportContent" class="d-none">
+
+      <!-- PDF-only header — hidden on screen, shown during PDF capture via JS -->
+      <div class="pdf-only text-center mb-4 pb-3" style="border-bottom: 2px solid #0d6efd;">
+        <h2 class="text-primary fw-bold">Success Steps</h2>
+        <p class="text-muted mb-0">Psychometric Assessment Report</p>
+      </div>
+
+      <!-- User Profile Header -->
+      <div class="card shadow-sm mb-5 border-0 bg-primary text-white">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center"
+                   style="width:64px;height:64px;font-size:1.8rem;">
+                👤
+              </div>
+            </div>
+            <div class="col">
+              <h3 class="mb-1" id="profileName">—</h3>
+              <p class="mb-0 opacity-75" id="profileEmail">—</p>
+            </div>
+            <div class="col-auto text-end">
+              <small class="opacity-75">Assessment Date</small>
+              <div class="fw-semibold" id="profileDate">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tests injected here -->
+      <div id="testsContainer"></div>
+
+    </div>
+  </section>
+
+  <script is:inline>
+    const token = sessionStorage.getItem("assessmentToken");
+    if (!token) window.location.replace("/register");
+
+    const loadingState   = document.getElementById("loadingState");
+    const errorState     = document.getElementById("errorState");
+    const reportContent  = document.getElementById("reportContent");
+    const testsContainer = document.getElementById("testsContainer");
+
+    // ── Colour palette
+    const COLOURS = [
+      "#0d6efd","#0dcaf0","#20c997","#ffc107",
+      "#fd7e14","#6f42c1","#d63384","#198754",
+      "#dc3545","#6c757d"
+    ];
+
+    // ── Load results
+    async function loadResults() {
+      try {
+        const res  = await fetch("/api/psychotest-results", {
+          headers: { "x-assessment-token": token }
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        renderProfile(data.profile);
+        renderTests(data.results);
+
+        loadingState.classList.add("d-none");
+        reportContent.classList.remove("d-none");
+
+      } catch (err) {
+        loadingState.classList.add("d-none");
+        errorState.classList.remove("d-none");
+        errorState.textContent = "Failed to load results: " + err.message;
+      }
+    }
+
+    // ── Render profile
+    function renderProfile(profile) {
+      document.getElementById("profileName").textContent  = profile.name  || "—";
+      document.getElementById("profileEmail").textContent = profile.email || "—";
+      document.getElementById("profileDate").textContent  =
+        profile.createdAt
+          ? new Date(profile.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric", month: "long", year: "numeric"
+            })
+          : "—";
+    }
+
+    // ── Render all tests
+    function renderTests(tests) {
+      if (!tests || !tests.length) {
+        testsContainer.innerHTML = "<p class='text-muted'>No results available yet.</p>";
+        return;
+      }
+      tests.forEach((test, testIndex) => {
+        const section = document.createElement("div");
+        section.className = "test-section page-break";
+        section.innerHTML = buildTestHTML(test, testIndex);
+        testsContainer.appendChild(section);
+        drawRadarChart(test, testIndex);
+        drawBarChart(test, testIndex);
+      });
+    }
+
+    // ── Build test HTML
+    function buildTestHTML(test, idx) {
+      const subtests    = test.subtests || [];
+      const maxPossible = subtests.reduce((s, st) => s + (Number(st.max_score) || 0), 0);
+      const totalScore  = subtests.reduce((s, st) => s + (Number(st.raw_score) || 0), 0);
+
+      return `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold text-primary mb-0">${test.test_name}</h4>
+          <span class="score-pill">Total: ${totalScore} / ${maxPossible}</span>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-body">
+                <h6 class="text-muted mb-3">📡 Profile Overview</h6>
+                <div class="chart-container">
+                  <canvas id="radar_${idx}"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-body">
+                <h6 class="text-muted mb-3">📊 Subtest Scores</h6>
+                <div class="bar-container" id="barContainer_${idx}">
+                  <canvas id="bar_${idx}"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-5">
+          ${subtests.map((st, si) => `
+            <div class="col-md-6">
+              <div class="card feedback-card shadow-sm border-0 h-100"
+                   style="border-left-color: ${COLOURS[si % COLOURS.length]} !important;">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="fw-semibold mb-0">${st.subtest_name}</h6>
+                    <span class="badge level-badge"
+                          style="background:${COLOURS[si % COLOURS.length]}">
+                      ${st.level_label || "—"}
+                    </span>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted">Score: </small>
+                    <strong>${st.raw_score}</strong>
+                    <small class="text-muted"> / ${st.max_score} &nbsp;(${st.score_range})</small>
+                  </div>
+                  <p class="text-muted small mb-0">${st.feedback || "—"}</p>
+                </div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    // ── Radar chart
+    function drawRadarChart(test, idx) {
+      const ctx = document.getElementById(`radar_${idx}`);
+      if (!ctx) return;
+      const subtests = test.subtests || [];
+      new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: subtests.map(s => s.subtest_name),
+          datasets: [{
+            label: test.test_name,
+            data:  subtests.map(s => Number(s.raw_score) || 0),
+            backgroundColor:      "rgba(13,110,253,0.15)",
+            borderColor:          "#0d6efd",
+            pointBackgroundColor: "#0d6efd",
+            pointRadius: 4,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              beginAtZero: true,
+              ticks:       { stepSize: 5, font: { size: 10 } },
+              pointLabels: { font: { size: 11 } }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // ── Bar chart (horizontal, dynamic height)
+    function drawBarChart(test, idx) {
+      const ctx = document.getElementById(`bar_${idx}`);
+      if (!ctx) return;
+      const subtests = test.subtests || [];
+
+      // Dynamic height: 52px per bar, minimum 200px
+      const barHeight       = Math.max(52, Math.floor(320 / subtests.length));
+      const containerHeight = subtests.length * barHeight;
+      const container       = document.getElementById(`barContainer_${idx}`);
+      if (container) container.style.height = `${containerHeight}px`;
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: subtests.map(s => s.subtest_name),
+          datasets: [{
+            label:           "Score",
+            data:            subtests.map(s => Number(s.raw_score) || 0),
+            backgroundColor: subtests.map((_, i) => COLOURS[i % COLOURS.length]),
+            borderRadius:    4,
+            borderSkipped:   false
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { stepSize: 5, font: { size: 10 } },
+              grid:  { display: true }
+            },
+            y: {
+              ticks: {
+                font: { size: subtests.length > 6 ? 10 : 11 },
+                // Wrap long labels into 2 lines at word boundaries
+                callback: function(val, index) {
+                  const label = subtests[index]?.subtest_name || "";
+                  const words = label.split(" ");
+                  const lines = [];
+                  let current = "";
+                  words.forEach(word => {
+                    if ((current + " " + word).trim().length <= 16) {
+                      current = (current + " " + word).trim();
+                    } else {
+                      if (current) lines.push(current);
+                      current = word;
+                    }
+                  });
+                  if (current) lines.push(current);
+                  return lines; // Chart.js renders array as multiline
+                }
+              },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => subtests[items[0].dataIndex]?.subtest_name || "",
+                label: (item)  => ` Score: ${item.raw}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ── PDF Download
+    document.getElementById("downloadPdf").addEventListener("click", async () => {
+      const btn = document.getElementById("downloadPdf");
+      btn.disabled    = true;
+      btn.textContent = "⏳ Generating PDF…";
+
+      // Wait for any final renders
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Hide screen-only elements during capture
+      document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "none");
+
+      // Show PDF-only elements during capture
+      document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "block");
+
+      const element     = document.getElementById("reportContent");
+      const profileName = document.getElementById("profileName").textContent || "Assessment";
+      const filename    = `${profileName.replace(/\s+/g, "_")}_Results.pdf`;
+
+      const opt = {
+        margin:      [10, 10, 10, 10],
+        filename:    filename,
+        image:       { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+        jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak:   { mode: ["avoid-all", "css"], before: ".page-break" }
+      };
+
+      html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .then(() => {
+          // Restore screen-only elements
+          document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "");
+          // Hide PDF-only elements again
+          document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "none");
+          btn.disabled  = false;
+          btn.innerHTML = "⬇️ Download PDF";
+        })
+        .catch(err => {
+          console.error("PDF generation failed:", err);
+          document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "");
+          document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "none");
+          btn.disabled  = false;
+          btn.innerHTML = "⬇️ Download PDF";
+        });
+    });
+
+    // ── Boot
+    loadResults();
+  </script>
+</BaseLayout>

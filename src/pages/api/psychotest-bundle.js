@@ -5,11 +5,22 @@ export async function GET({ request }) {
   if (!token) return new Response("Astro: Missing token", { status: 401 });
 
   const GAS = import.meta.env.PUBLIC_GS_API;
-  const res = await fetch(`${GAS}/exec?action=bundle&token=${token}`);
-  return new Response(await res.text(), {
-    headers: { "Content-Type": "application/json" }
-  });
+  try {
+    const res = await fetch(`${GAS}/exec?action=bundle&token=${token}`);
+    if (!res.ok) {
+      return new Response(`Upstream error: ${res.status} ${res.statusText}`, {
+        status: res.status,
+      });
+    }
+    const data = await res.json();
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    return new Response("Astro: Internal error", { status: 500 });
+  }
 }
+
 
 
 /*
