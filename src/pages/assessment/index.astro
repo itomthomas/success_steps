@@ -202,6 +202,7 @@ Page unload protection auto-saves
   }
 
   const STORAGE_KEY = `psycho_progress_${token}`;
+  let submissionComplete = false;
 
   /* ---------------------------------------------------------
      1. DOM References
@@ -724,7 +725,7 @@ Page unload protection auto-saves
         bundle.tests.forEach(test => {
            testProgress[test.test_id].completed = true;
         });
-        saveProgress();
+        //saveProgress();
 
         // Step 3: Trigger scoring per test — fire and forget
         apiFetch("/api/psychotest-score", {
@@ -734,6 +735,7 @@ Page unload protection auto-saves
           }).catch(err => console.error("Score trigger failed:", err));
 
         clearProgress();
+        submissionComplete = true; 
         alert("🎉 All tests submitted successfully! Thank you for completing the assessment.");
         window.location.href = "/assessment/thankyou";
         //window.location.href = "/assessment/results";    
@@ -750,7 +752,9 @@ Page unload protection auto-saves
      18. Page unload protection
   --------------------------------------------------------- */
   window.addEventListener('beforeunload', () => {
-    saveProgress();
+    if (!submissionComplete) {
+      saveProgress();
+    }
   });
 </script>
 
