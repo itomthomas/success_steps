@@ -11,7 +11,7 @@ export async function POST({ request }) {
   if (!test_ids || !test_ids.length)
     return new Response(JSON.stringify({ error: "Astro: Missing test_ids" }), { status: 400 });
 
-  const gasUrl = `${import.meta.env.PUBLIC_GS_API}/exec`;
+  const gasUrl = `${import.meta.env.PSYCHO_GAS_URL}/exec`;
 
   // Fire-and-forget to GAS — don't block the response
   fetch(gasUrl, {

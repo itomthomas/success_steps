@@ -5,7 +5,7 @@ export async function GET({ request }) {
   if (!token)
     return new Response(JSON.stringify({ error: "Missing token" }), { status: 401 });
 
-  const gasUrl = `${import.meta.env.PUBLIC_GS_API}/exec?action=get_results&token=${encodeURIComponent(token)}`;
+  const gasUrl = `${import.meta.env.PSYCHO_GAS_URL}/exec?action=get_results&token=${encodeURIComponent(token)}`;
   const res  = await fetch(gasUrl);
   const text = await res.text();
 

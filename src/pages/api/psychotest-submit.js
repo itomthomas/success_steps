@@ -13,7 +13,7 @@ export async function POST({ request }) {
     return new Response(JSON.stringify({ error: "Astro:Invalid answer payload" }), { status: 400 });
   }
 
-  const PSYCHO_GAS_URL = import.meta.env.PUBLIC_GS_API;
+  const PSYCHO_GAS_URL = import.meta.env.PSYCHO_GAS_URL;
 // Not passing test_id to GAS
   const submitRes = await fetch(`${PSYCHO_GAS_URL}/exec`, {
     method: "POST",

@@ -12,7 +12,7 @@ export async function GET({ request }) {
     );
   }
 
-  const PSYCHO_GAS_URL = import.meta.env.PUBLIC_GS_API;
+  const PSYCHO_GAS_URL = import.meta.env.PSYCHO_GAS_URL;
   // Pass the token to the GAS backend in the query parameters, as custom header is inconsistent (GAS issue)
   const gasurl = new URL(`${PSYCHO_GAS_URL}/exec`);
   gasurl.searchParams.set("action", "tests");
