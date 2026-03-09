@@ -6,7 +6,7 @@ export async function GET({ request }) {
 
   const GAS = import.meta.env.PSYCHO_GAS_URL;
   try {
-    const res = await fetch(`${GAS}/exec?action=bundle&token=${token}`);
+    const res = await fetch(`${GAS}?action=bundle&token=${token}`);
     if (!res.ok) {
       return new Response(`Upstream error: ${res.status} ${res.statusText}`, {
         status: res.status,
