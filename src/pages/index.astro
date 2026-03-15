@@ -5,6 +5,7 @@ import { Image } from 'astro:assets';
 import bgHero from '../images/newbg.webp';
 import brainLobes from '../images/brain.png';
 import testifyplaceholder from '../images/testimonial-1.jpg';
+export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
 ---
 
 <BaseLayout title="SuccessSteps - Transform Your Potential">
@@ -258,7 +259,7 @@ import testifyplaceholder from '../images/testimonial-1.jpg';
                  class="social-link linkedin" title="LinkedIn" aria-label="LinkedIn">
                 <i class="bi bi-linkedin"></i>
               </a>
-              <a href="https://www.instagram.com/antony.k.a" target="_blank" rel="noopener" 
+              <a href="https://www.instagram.com/dr.antony_augusthy" target="_blank" rel="noopener" 
                  class="social-link instagram" title="Instagram" aria-label="Instagram">
                 <i class="bi bi-instagram"></i>
               </a>
