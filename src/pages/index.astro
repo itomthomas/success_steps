@@ -225,167 +225,175 @@ export const prerender = true;  // keeping this page static for blazing fast loa
 
   <!-- Contact Section -->
   <section id="contact" class="contact-section py-5">
-       <div class="container">
-    <div class="row align-items-start h-100">
-      <!-- Contact Info + Social -->
-      <div class="col-lg-6">
-        <div class="d-flex flex-column h-100">
-          <div class="flex-grow-1">
-            <h2 class="display-5 fw-bold mb-4 mt-0">Ready to Transform?</h2>
-            <p class="lead mb-4">Get your free consultation today and start your journey to success.</p>
-            <ul class="list-unstyled">
-              <li class="mb-3"><i class="bi bi-telephone text-primary me-3"></i>+91 98330 86018</li>
-              <li class="mb-3"><i class="bi bi-envelope text-primary me-3"></i>successtepsnlpa@gmail.com</li>
-              <li class="mb-3"><i class="bi bi-geo-alt text-primary me-3"></i><strong>SUCCESS STEPS NLP ACADEMY</strong></li>
-              <li class="mb-4">
-                <div class="d-md-inline-block">
-                  Varun Arcade-1B, Office No.109<br>
-                  Varun Garden, Opp. R Mall,<br>
-                  Ghodbunder Road,<br>
-                  Manpada, Thane 400610.<br>
-                  <a href="https://maps.app.goo.gl/aCKS7kyRHVwpNfHs5" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm mt-2">
-                    <i class="bi bi-geo-alt me-1"></i>Open in Google Maps
-                  </a>
-                </div>
-              </li>
-            </ul>
-          </div>
+    <div class="container">
+      <div class="row align-items-start h-100">
 
-          <!-- SOCIAL MEDIA - LARGER ICONS, PERFECTLY FITTED -->
-          <div class="social-section mt-4 pt-4 border-top">
-            <h6 class="fw-bold text-muted mb-4">Connect With Us</h6>
-            <div class="social-links d-flex gap-3 flex-wrap">
-              <a href="https://www.linkedin.com/in/dr-antony-augusthy-01057522/" target="_blank" rel="noopener" 
-                 class="social-link linkedin" title="LinkedIn" aria-label="LinkedIn">
-                <i class="bi bi-linkedin"></i>
-              </a>
-              <a href="https://www.instagram.com/dr.antony_augusthy" target="_blank" rel="noopener" 
-                 class="social-link instagram" title="Instagram" aria-label="Instagram">
-                <i class="bi bi-instagram"></i>
-              </a>
-              <a href="https://www.facebook.com/Successteps7" target="_blank" rel="noopener" 
-                 class="social-link facebook" title="Facebook" aria-label="Facebook">
-                <i class="bi bi-facebook"></i>
-              </a>
-              <a href="https://www.youtube.com/@antonyaugusthy" target="_blank" rel="noopener" 
-                 class="social-link youtube" title="YouTube" aria-label="YouTube">
-                <i class="bi bi-youtube"></i>
-              </a>
-              <a href="https://wa.me/919833086018" target="_blank" rel="noopener" 
-                 class="social-link whatsapp" title="WhatsApp" aria-label="WhatsApp">
-                <i class="bi bi-whatsapp"></i>
-              </a>
+        <!-- Contact Info + Social -->
+        <div class="col-lg-6">
+          <div class="d-flex flex-column h-100">
+            <div class="flex-grow-1">
+              <h2 class="display-5 fw-bold mb-4 mt-0">Ready to Transform?</h2>
+              <p class="lead mb-4">Get your free consultation today and start your journey to success.</p>
+              <ul class="list-unstyled">
+                <li class="mb-3"><i class="bi bi-telephone text-primary me-3"></i>+91 98330 86018</li>
+                <li class="mb-3"><i class="bi bi-envelope text-primary me-3"></i>successtepsnlpa@gmail.com</li>
+                <li class="mb-3"><i class="bi bi-geo-alt text-primary me-3"></i><strong>SUCCESS STEPS NLP ACADEMY</strong></li>
+                <li class="mb-4">
+                  <div class="d-md-inline-block">
+                    Varun Arcade-1B, Office No.109<br>
+                    Varun Garden, Opp. R Mall,<br>
+                    Ghodbunder Road,<br>
+                    Manpada, Thane 400610.<br>
+                    <a href="https://maps.app.goo.gl/aCKS7kyRHVwpNfHs5" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm mt-2">
+                      <i class="bi bi-geo-alt me-1"></i>Open in Google Maps
+                    </a>
+                  </div>
+                </li>
+              </ul>
             </div>
-          </div>
-        </div>
-      </div>
 
-          <!-- FORM WIRED TO GOOGLE SHEETS -->
-          <div class="col-lg-6">
-            <div class="card border-0 shadow">
-              <div class="card-body p-5">
-                <h5 class="fw-bold mb-4">Quick Contact</h5>
-                <form name="contactForm" class="contact-form">
-                  <!-- HONEYPOT (Hidden spam trap) -->
-                  <div style="position:absolute; left:-5000px;">
-                    <input type="text" name="honeypot" tabindex="-1" autocomplete="off">
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <input 
-                        type="text" 
-                        name="name" 
-                        class="form-control" 
-                        placeholder="Your Name *" 
-                        required
-                      >
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <input 
-                        type="tel" 
-                        name="phone" 
-                        class="form-control" 
-                        placeholder="Phone *" 
-                        pattern="[0-9\s\-\+\(\)]{10,15}"
-                        required
-                      >
-                    </div>
-                  </div>
-
-                  <!-- FULL COUNTRY DROPDOWN + TEXT INPUT -->
-                  <div class="mb-3">
-                    <select name="country" class="form-select country-select" required>
-                      <option value="">Select your country *</option>
-                      <option value="India">India</option>
-                      <option value="United States">United States</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Germany">Germany</option>
-                      <option value="France">France</option>
-                      <option value="United Arab Emirates">United Arab Emirates</option>
-                      <option value="Singapore">Singapore</option>
-                      <option value="Malaysia">Malaysia</option>
-                      <option value="Indonesia">Indonesia</option>
-                      <option value="Philippines">Philippines</option>
-                      <option value="Japan">Japan</option>
-                      <option value="South Korea">South Korea</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    
-                    <!-- Hidden text input - shows when "Other" selected -->
-                    <input 
-                      type="text" 
-                      name="country_other" 
-                      class="form-control mt-2 other-country-input d-none" 
-                      placeholder="Please specify your country"
-                    >
-                  </div>
-
-                  <div class="mb-3">
-                    <input 
-                      type="email" 
-                      name="email" 
-                      class="form-control" 
-                      placeholder="Your Email *" 
-                      required
-                    >
-                  </div>
-
-                  <div class="mb-3">
-                    <select name="service" class="form-select" required>
-                      <option value="">Select Service *</option>
-                      <option>Mind Wellness</option>
-                      <option>Training</option>
-                      <option>Certification</option>
-                      <option>Psychometric Test</option>
-                    </select>
-                  </div>
-
-                  <div class="mb-4">
-                    <textarea 
-                      name="message" 
-                      class="form-control" 
-                      rows="4"
-                      placeholder="Tell us about your goals..."
-                    ></textarea>
-                  </div>
-
-                  <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" id="submitBtn">
-                    <span class="btn-text">Send Message</span>
-                    <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
-                    <span class="loading-text d-none">Sending...</span>
-                  </button>
-
-                  <!-- Success/Error Messages -->
-                  <div id="form-message" class="mt-3 d-none"></div>
-                </form>
+            <!-- SOCIAL MEDIA -->
+            <div class="social-section mt-4 pt-4 border-top">
+              <h6 class="fw-bold text-muted mb-4">Connect With Us</h6>
+              <div class="social-links d-flex gap-3 flex-wrap">
+                <a href="https://www.linkedin.com/in/dr-antony-augusthy-01057522/" target="_blank" rel="noopener" 
+                   class="social-link linkedin" title="LinkedIn" aria-label="LinkedIn">
+                  <i class="bi bi-linkedin"></i>
+                </a>
+                <a href="https://www.instagram.com/dr.antony_augusthy" target="_blank" rel="noopener" 
+                   class="social-link instagram" title="Instagram" aria-label="Instagram">
+                  <i class="bi bi-instagram"></i>
+                </a>
+                <a href="https://www.facebook.com/Successteps7" target="_blank" rel="noopener" 
+                   class="social-link facebook" title="Facebook" aria-label="Facebook">
+                  <i class="bi bi-facebook"></i>
+                </a>
+                <a href="https://www.youtube.com/@antonyaugusthy" target="_blank" rel="noopener" 
+                   class="social-link youtube" title="YouTube" aria-label="YouTube">
+                  <i class="bi bi-youtube"></i>
+                </a>
+                <a href="https://wa.me/919833086018" target="_blank" rel="noopener" 
+                   class="social-link whatsapp" title="WhatsApp" aria-label="WhatsApp">
+                  <i class="bi bi-whatsapp"></i>
+                </a>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- CONTACT FORM -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow">
+            <div class="card-body p-5">
+              <h5 class="fw-bold mb-4">Quick Contact</h5>
+              <form name="contactForm" id="contactForm" class="contact-form" novalidate>
+
+                <!-- HONEYPOT (Hidden spam trap) -->
+                <div style="position:absolute;left:-5000px;" aria-hidden="true">
+                  <input type="text" name="honeypot" tabindex="-1" autocomplete="off">
+                </div>
+
+                <!-- TIMING TRAP -->
+                <input type="hidden" id="formLoadedAt">
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <input 
+                      type="text" 
+                      name="name" 
+                      class="form-control" 
+                      placeholder="Your Name *"
+                      minlength="2"
+                      maxlength="80"
+                      required
+                    >
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <input 
+                      type="tel" 
+                      name="phone" 
+                      class="form-control" 
+                      placeholder="Phone *" 
+                      pattern="[0-9\s\-\+\(\)]{10,15}"
+                      required
+                    >
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <select name="country" class="form-select country-select" required>
+                    <option value="">Select your country *</option>
+                    <option value="India">India</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="United Arab Emirates">United Arab Emirates</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="Malaysia">Malaysia</option>
+                    <option value="Indonesia">Indonesia</option>
+                    <option value="Philippines">Philippines</option>
+                    <option value="Japan">Japan</option>
+                    <option value="South Korea">South Korea</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <!-- Shows only when "Other" is selected -->
+                  <input 
+                    type="text" 
+                    name="country_other" 
+                    class="form-control mt-2 other-country-input d-none" 
+                    placeholder="Please specify your country"
+                    maxlength="60"
+                  >
+                </div>
+
+                <div class="mb-3">
+                  <input 
+                    type="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="Your Email *" 
+                    required
+                  >
+                </div>
+
+                <div class="mb-3">
+                  <select name="service" class="form-select" required>
+                    <option value="">Select Service *</option>
+                    <option>Mind Wellness</option>
+                    <option>Training</option>
+                    <option>Certification</option>
+                    <option>Psychometric Test</option>
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <textarea 
+                    name="message" 
+                    class="form-control" 
+                    rows="4"
+                    placeholder="Tell us about your goals..."
+                    maxlength="1000"
+                  ></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" id="submitBtn">
+                  <span class="btn-text">Send Message</span>
+                  <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                  <span class="loading-text d-none">Sending...</span>
+                </button>
+
+                <!-- Success/Error Messages -->
+                <div id="form-message" class="mt-3 d-none" role="alert"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+
       </div>
+    </div>
   </section>
 </BaseLayout>
 
@@ -400,13 +408,13 @@ export const prerender = true;  // keeping this page static for blazing fast loa
   }
   
   /* Testimonial glassmorphism */
- .testimonials-section {
+  .testimonials-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     position: relative;
     overflow: hidden;
   }
   
- .testimonial-card {
+  .testimonial-card {
     background: rgba(255, 255, 255, 0.11) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
@@ -450,74 +458,66 @@ export const prerender = true;  // keeping this page static for blazing fast loa
     scroll-behavior: smooth;
   }
 
-  /* LARGER SOCIAL ICONS - PERFECTLY FITTED */
-    .social-section {
-      border-top: 1px solid #e9ecef;
-    }
+  /* SOCIAL ICONS */
+  .social-section {
+    border-top: 1px solid #e9ecef;
+  }
 
-    .social-links {
-      gap: 1.25rem;
-    }
+  .social-links {
+    gap: 1.25rem;
+  }
 
-    .social-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px;      /* LARGER: 56px vs 44px */
-      height: 56px;     /* LARGER: 56px vs 44px */
-      border-radius: 16px;  /* Slightly squared for modern look */
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.25rem;   /* LARGER icons */
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      flex-shrink: 0;
-    }
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
 
-    .social-link:hover {
-      transform: translateY(-4px) scale(1.05);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
-      color: #fff !important;
-    }
+  .social-link:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    color: #fff !important;
+  }
 
-    /* Brand colors */
-    .social-link.linkedin { background: linear-gradient(135deg, #0077b5, #005582); }
-    .social-link.instagram { 
-      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    }
-    .social-link.facebook { background: linear-gradient(135deg, #1877f2, #0e5a8a); }
-    .social-link.youtube { background: linear-gradient(135deg, #ff0000, #cc0000); }
-    .social-link.whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); }
+  /* Brand colors */
+  .social-link.linkedin  { background: linear-gradient(135deg, #0077b5, #005582); }
+  .social-link.instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+  .social-link.facebook  { background: linear-gradient(135deg, #1877f2, #0e5a8a); }
+  .social-link.youtube   { background: linear-gradient(135deg, #ff0000, #cc0000); }
+  .social-link.whatsapp  { background: linear-gradient(135deg, #25d366, #128c7e); }
 
-    /* Responsive sizing */
-    @media (max-width: 991px) {
-      .social-link {
-        width: 52px;
-        height: 52px;
-        font-size: 1.125rem;
-      }
-    }
+  @media (max-width: 991px) {
+    .social-link { width: 52px; height: 52px; font-size: 1.125rem; }
+  }
 
-    @media (max-width: 575px) {
-      .social-links {
-        gap: 1rem;
-      }
-      .social-link {
-        width: 48px;
-        height: 48px;
-        font-size: 1rem;
-      }
-    }
+  @media (max-width: 575px) {
+    .social-links { gap: 1rem; }
+    .social-link  { width: 48px; height: 48px; font-size: 1rem; }
+  }
 </style>
 
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Replace after setup
+  // ── CONFIG: paste your Apps Script deployment URL here ────
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbySi_kLWhxXNSjtfOzUnjdFsurLcGP40XFXrZiPX5JhRCs6DH2qsR06rbMGdQqL5Lln/exec';
+  // ─────────────────────────────────────────────────────────
 
-  // Country "Other" toggle functionality
-  const countrySelect = document.querySelector('.country-select');
+  // Record page load time for timing trap
+  document.getElementById('formLoadedAt').value = Date.now();
+
+  // ── Country "Other" toggle ────────────────────────────────
+  const countrySelect     = document.querySelector('.country-select');
   const countryOtherInput = document.querySelector('.other-country-input');
-  
-  countrySelect.addEventListener('change', function() {
+
+  countrySelect.addEventListener('change', function () {
     if (this.value === 'Other') {
       countryOtherInput.classList.remove('d-none');
       countryOtherInput.required = true;
@@ -527,21 +527,55 @@ export const prerender = true;  // keeping this page static for blazing fast loa
       countryOtherInput.value = '';
     }
   });
-  
-  const form = document.forms['contactForm'];
-  const submitBtn = document.getElementById('submitBtn');
-  const btnText = submitBtn.querySelector('.btn-text');
-  const loadingText = submitBtn.querySelector('.loading-text');
-  const spinner = submitBtn.querySelector('.spinner-border');
-  const messageDiv = document.getElementById('form-message');
 
-  form.addEventListener('submit', e => {
+  // ── Element refs ──────────────────────────────────────────
+  const form        = document.getElementById('contactForm');
+  const submitBtn   = document.getElementById('submitBtn');
+  const btnText     = submitBtn.querySelector('.btn-text');
+  const loadingText = submitBtn.querySelector('.loading-text');
+  const spinner     = submitBtn.querySelector('.spinner-border');
+  const messageDiv  = document.getElementById('form-message');
+
+  // ── Client-side rate limit (localStorage) ────────────────
+  // Max 3 submissions per browser per hour
+  function clientRateLimit() {
+    const key      = 'cf_submit';
+    const MAX      = 3;
+    const ONE_HOUR = 60 * 60 * 1000;
+    const now      = Date.now();
+    let record;
+    try { record = JSON.parse(localStorage.getItem(key)); }
+    catch (_) { record = null; }
+
+    if (!record || (now - record.start) > ONE_HOUR) {
+      localStorage.setItem(key, JSON.stringify({ start: now, count: 1 }));
+      return true;
+    }
+    if (record.count >= MAX) return false;
+    record.count++;
+    localStorage.setItem(key, JSON.stringify(record));
+    return true;
+  }
+
+  // ── Submit handler ────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    // HONEYPOT CHECK - Block spam bots
-    const honeypot = form.honeypot.value;
-    if (honeypot) {
-      //console.log('Spam bot detected!');
+
+    // 1. Honeypot check
+    if (form.honeypot.value) {
+      return false;
+    }
+
+    // 2. Timing trap — genuine users take at least 3s to fill a form
+    const elapsed = Date.now() - parseInt(document.getElementById('formLoadedAt').value || '0');
+    if (elapsed < 3000) {
+      showMessage('Something went wrong. Please try again.', 'error');
+      return false;
+    }
+
+    // 3. Client-side rate limit
+    if (!clientRateLimit()) {
+      showMessage("You've submitted too many times. Please wait an hour and try again.", 'error');
       return false;
     }
 
@@ -552,33 +586,48 @@ export const prerender = true;  // keeping this page static for blazing fast loa
     btnText.classList.add('d-none');
     messageDiv.classList.add('d-none');
 
-    // Submit to Google Sheets
-    fetch(scriptURL, { 
-      method: 'POST', 
-      body: new FormData(form)
-    })
-    .then(response => response.text())
-    .then(result => {
-      console.log('SUCCESS!', result);
-      showMessage('Thank you! We\'ll contact you within 24 hours.', 'success');
-      form.reset();
-    })
-    .catch(error => {
+    // Build JSON payload — matches what Code.gs expects via e.parameter
+    const payload = {
+      name:          form.querySelector('[name="name"]').value.trim(),
+      phone:         form.querySelector('[name="phone"]').value.trim(),
+      country:       form.querySelector('[name="country"]').value,
+      country_other: countryOtherInput.value.trim(),
+      email:         form.querySelector('[name="email"]').value.trim(),
+      service:       form.querySelector('[name="service"]').value,
+      message:       form.querySelector('[name="message"]').value.trim(),
+      honeypot:      form.honeypot.value,  // server-side honeypot check too
+    };
+
+    try {
+      const response = await fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showMessage("Thank you! We'll contact you within 24 hours.", 'success');
+        form.reset();
+        countryOtherInput.classList.add('d-none'); // reset "Other" visibility
+      } else {
+        showMessage(result.message || 'Oops! Something went wrong. Please try again.', 'error');
+      }
+    } catch (error) {
       console.error('ERROR!', error.message);
       showMessage('Oops! Something went wrong. Please try again.', 'error');
-    })
-    .finally(() => {
-      // Reset button
+    } finally {
       submitBtn.disabled = false;
       spinner.classList.add('d-none');
       loadingText.classList.add('d-none');
       btnText.classList.remove('d-none');
-    });
+    }
   });
 
   function showMessage(text, type) {
     messageDiv.textContent = text;
-    messageDiv.className = `mt-3 alert alert-${type === 'success' ? 'success' : 'danger'}`;
+    messageDiv.className   = `mt-3 alert alert-${type === 'success' ? 'success' : 'danger'}`;
     messageDiv.classList.remove('d-none');
   }
 </script>
