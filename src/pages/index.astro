@@ -4,7 +4,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { Image } from 'astro:assets';
 import bgHero from '../images/newbg.webp';
 import brainLobes from '../images/brain.png';
-import testifyplaceholder from '../images/testimonial-1.jpg';
+import ImageGallery from '../components/ImageGallery.astro';
+// import testifyplaceholder from '../images/testimonial-1.jpg';
 export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
 ---
 
@@ -130,6 +131,13 @@ export const prerender = true;  // keeping this page static for blazing fast loa
   </section>
 
   <!-- Modern Testimonial Section -->
+   <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+      <symbol id="avatar-icon" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="30" fill="#1e1b2e"/>
+        <circle cx="30" cy="23" r="10" fill="#4a4560"/>
+        <ellipse cx="30" cy="50" rx="16" ry="12" fill="#4a4560"/>
+      </symbol>
+  </svg>
   <section class="testimonials-section py-5 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
     <div class="container">
       <div class="row justify-content-center text-center text-white mb-5">
@@ -151,7 +159,7 @@ export const prerender = true;  // keeping this page static for blazing fast loa
             </div>
             <p class="lead">"Dr. Antony's life coaching sessions at Success Steps NLP Academy is a true catalyst for personal growth. His guidance has helped me redefine my goals and develop a clear roadmap to achieve them."</p>
             <div class="d-flex align-items-center mt-4">
-              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <svg width="60" height="60" class="rounded-circle me-3" style="flex-shrink:0;"> <use href="#avatar-icon"/> </svg>
               <div>
                 <h6 class="fw-bold mb-0">Vicky Rajesh</h6>
                 <small>Melbourne | Australia</small>
@@ -167,7 +175,7 @@ export const prerender = true;  // keeping this page static for blazing fast loa
             </div>
             <p class="lead">"As a startup founder struggling to scale, the personalized coaching at Success Steps NLP Academy provided essential strategies and insights. I've doubled revenue and credit much of that success to their confident guidance."</p>
             <div class="d-flex align-items-center mt-4">
-              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <svg width="60" height="60" class="rounded-circle me-3" style="flex-shrink:0;"> <use href="#avatar-icon"/> </svg>
               <div>
                 <h6 class="fw-bold mb-0">Joseph Davis</h6>
                 <small>Mumbai | India</small>
@@ -183,7 +191,7 @@ export const prerender = true;  // keeping this page static for blazing fast loa
             </div>
             <p class="lead">"I was skeptical at first, but after a few sessions at Success Steps NLP Academy, my thought patterns and behavior shifted remarkably. The compassionate, skilled therapist taught me practical techniques for managing stress, improving communication, and fostering optimism—truly transformative."</p>
             <div class="d-flex align-items-center mt-4">
-              <Image src={testifyplaceholder} alt="Priya S." class="rounded-circle me-3" style="width:60px;height:60px;"/>
+              <svg width="60" height="60" class="rounded-circle me-3" style="flex-shrink:0;"> <use href="#avatar-icon"/> </svg>
               <div>
                 <h6 class="fw-bold mb-0">Farheen Shaikh</h6>
                 <small>Dubai | UAE</small>
@@ -193,9 +201,9 @@ export const prerender = true;  // keeping this page static for blazing fast loa
         </div>
       </div>
       
-      <div class="text-center mt-5">
+      <!--<div class="text-center mt-5">
         <a href="/testimonials" class="btn btn-light btn-lg">Read More Stories</a>
-      </div>
+      </div> -->
     </div>
   </section>
 
@@ -204,25 +212,25 @@ export const prerender = true;  // keeping this page static for blazing fast loa
     <div class="container">
       <div class="row text-center">
         <div class="col-md-3 mb-4">
-          <div class="h1 fw-bold text-primary mb-2">5000+</div>
-          <div class="h5">Happy Clients</div>
+          <div class="h1 fw-bold text-primary mb-2">2000+</div>
+          <div class="h5">Lives Transformed</div>
         </div>
         <div class="col-md-3 mb-4">
-          <div class="h1 fw-bold text-success mb-2">98%</div>
-          <div class="h5">Success Rate</div>
+          <div class="h1 fw-bold text-success mb-2">1:1</div>
+          <div class="h5">Personalized Coaching</div>
         </div>
         <div class="col-md-3 mb-4">
-          <div class="h1 fw-bold text-warning mb-2">50+</div>
-          <div class="h5">Expert Trainers</div>
+          <div class="h1 fw-bold text-warning mb-2">100+</div>
+          <div class="h5">School Sessions</div>
         </div>
         <div class="col-md-3 mb-4">
-          <div class="h1 fw-bold text-info mb-2">24/7</div>
-          <div class="h5">Support</div>
+          <div class="h1 fw-bold text-info mb-2">50+</div>
+          <div class="h5">Seminars</div>
         </div>
       </div>
     </div>
   </section>
-
+  <ImageGallery />
   <!-- Contact Section -->
   <section id="contact" class="contact-section py-5">
     <div class="container">
