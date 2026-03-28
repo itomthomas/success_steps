@@ -28,6 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
       userType,
       age,
       gender,
+      groups,
       company,       // honeypot
       securityToken
     } = body;
@@ -95,6 +96,7 @@ export const POST: APIRoute = async ({ request }) => {
         userType,
         age,
         gender,
+        groups,
         createdAt: new Date().toISOString()
       })
     });

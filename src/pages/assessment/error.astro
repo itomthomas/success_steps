@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
 
 const reason = Astro.url.searchParams.get("reason");
 

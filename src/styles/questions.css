@@ -1,0 +1,106 @@
+    /* Slider control */
+    .slider-wrapper { padding: 0 4px; }
+
+    .slider-track {
+      width: 100%;
+      cursor: pointer;
+      accent-color: #0d6efd;
+    }
+
+    .slider-tick-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding: 0 1px;
+    }
+    .slider-tick-labels span {
+      font-size: 11px;
+      color: #6c757d;
+      width: 10%;
+      text-align: center;
+    }
+
+    .slider-score-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+    .slider-score-number {
+      font-size: 22px;
+      font-weight: 600;
+      color: #0d6efd;
+      min-width: 28px;
+      text-align: center;
+    }
+    .slider-score-sep { color: #dee2e6; font-size: 18px; }
+    .slider-score-label { font-size: 14px; color: #212529; }
+    .slider-score-label.empty { color: #adb5bd; font-style: italic; }
+
+    /* Minimal customizations only */
+    .question-item.answered {
+      border-color: #0d6efd !important;
+      background-color: #f8f9ff;
+    }
+    .accordion-button:not(.collapsed) {
+      background-color: #e7f3ff;
+      color: #0d6efd;
+      font-weight: 600;
+    }
+    .option-label {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 2px solid #dee2e6;
+      transition: all 0.2s;
+      display: block;
+      text-align: center;
+      font-size: 0.9em;
+      line-height: 1.3;
+    }
+    .option-label:hover {
+      background-color: #f8f9fa;
+      border-color: #0d6efd;
+    }
+    .option-label.checked {
+      background-color: #e3f2fd;
+      border-color: #0d6efd;
+      color: #0d6efd;
+      font-weight: 600;
+    }
+    /* Submit button locked state */
+    .submit-locked {
+      background-color: #6c757d !important;
+      border-color: #6c757d !important;
+      cursor: not-allowed !important;
+      opacity: 0.65;
+    }
+    /* Minimal custom for Progress Overview */
+    .progress-list .test-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .min-w-70px {
+      min-width: 70px;
+    }
+    .progress-item {
+      transition: all 0.2s ease;
+    }
+    .progress-item:hover {
+      background-color: rgba(13, 202, 240, 0.15) !important;
+      transform: translateY(-1px);
+    }
+    @media (max-width: 767px) {
+      .test-name {
+        white-space: normal !important;
+        font-size: 0.95em;
+      }
+      .progress-list {
+        --bs-gutter-x: 1rem !important;
+      }
+    }
