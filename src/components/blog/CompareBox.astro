@@ -1,0 +1,33 @@
+---
+// src/components/blog/CompareBox.astro
+// Usage:
+//   <CompareBox
+//     bossLabel="The Boss"   bossQuote="Why did you mess this up?"
+//     leaderLabel="The Leader" leaderQuote="What can we learn from this?"
+//   />
+
+interface Props {
+  bossLabel?:   string;
+  bossQuote:    string;
+  leaderLabel?: string;
+  leaderQuote:  string;
+}
+
+const {
+  bossLabel   = 'The Boss Way',
+  bossQuote,
+  leaderLabel = 'The Leader Way',
+  leaderQuote,
+} = Astro.props;
+---
+
+<div class="compare-box">
+  <div class="compare-col boss">
+    <div class="compare-label">{bossLabel}</div>
+    <p>"{bossQuote}"</p>
+  </div>
+  <div class="compare-col leader">
+    <div class="compare-label">{leaderLabel}</div>
+    <p>"{leaderQuote}"</p>
+  </div>
+</div>

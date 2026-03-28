@@ -1,0 +1,68 @@
+---
+// src/pages/blog/index.astro
+// Mirrors successteps.in/successteps-blog
+// prerender = true → built as static HTML at deploy time (zero Netlify function calls)
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+
+export const prerender = true;
+
+const POSTS_PER_PAGE = 6;
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+const posts      = allPosts.slice(0, POSTS_PER_PAGE);
+---
+
+<BaseLayout
+  title="Blog — Success Steps NLP Academy"
+  description="Explore articles on leadership, NLP, psychometrics and personal growth by Dr. Antony Augusthy."
+>
+  <div class="page-wrapper">
+
+    <header class="blog-hero">
+      <h1>Our <span>Blog</span></h1>
+      <p>Insights on leadership, NLP, psychometrics & personal growth — by Dr. Antony Augusthy.</p>
+    </header>
+
+    <section aria-label="Blog posts">
+      <div class="blog-grid">
+        {posts.map((post, i) => (
+          <BlogCard
+            title={post.data.title}
+            description={post.data.description}
+            author={post.data.author}
+            pubDate={post.data.pubDate}
+            heroImage={post.data.heroImage}
+            heroImageAlt={post.data.heroImageAlt}
+            category={post.data.category}
+            slug={post.slug}
+            index={i}
+          />
+        ))}
+      </div>
+    </section>
+
+    {totalPages > 1 && (
+      <nav class="pagination" aria-label="Blog pagination">
+ 
+        {/* Page 1 — current */}
+        <span class="current" aria-current="page">1</span>
+ 
+        {/* Pages 2+ */}
+        {Array.from({ length: totalPages - 1 }, (_, i) => i + 2).map(page => (
+          <a href={`/blog/page/${page}`}>{page}</a>
+        ))}
+ 
+        {/* Next */}
+        <a href="/blog/page/2" aria-label="Next page">›</a>
+ 
+      </nav>
+    )}
+
+  </div>
+</BaseLayout>

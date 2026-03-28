@@ -1,0 +1,17 @@
+---
+// src/components/blog/Takeaway.astro
+// Usage: <Takeaway>Bosses manage tasks. *Leaders inspire transformation.*</Takeaway>
+// Wrap the italic part in <em> tags inside the slot.
+
+interface Props {
+  label?: string;
+}
+const { label = 'Takeaway' } = Astro.props;
+---
+
+<div class="takeaway-block">
+  <p class="takeaway-label">{label}</p>
+  <div class="takeaway-text">
+    <slot />
+  </div>
+</div>

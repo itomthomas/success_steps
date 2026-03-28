@@ -1,0 +1,15 @@
+---
+// src/components/blog/ImpactItem.astro
+// Usage: <ImpactItem emoji="🚀" label="Greater productivity" />
+
+interface Props {
+  emoji: string;
+  label: string;
+}
+const { emoji, label } = Astro.props;
+---
+
+<div class="impact-item">
+  <div class="impact-emoji">{emoji}</div>
+  <div class="impact-label">{label}</div>
+</div>

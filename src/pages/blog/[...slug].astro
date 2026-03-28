@@ -1,0 +1,35 @@
+---
+// src/pages/blog/[...slug].astro
+// One static HTML file is generated per blog post at build time.
+// prerender = true → zero Netlify function calls per post view.
+
+import { getCollection } from 'astro:content';
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props:  { post },
+  }));
+}
+
+const { post }    = Astro.props;
+const { Content } = await post.render();
+---
+
+<BlogPostLayout
+  title={post.data.title}
+  description={post.data.description}
+  author={post.data.author}
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  heroImage={post.data.heroImage}
+  heroImageAlt={post.data.heroImageAlt}
+  category={post.data.category}
+  tags={post.data.tags}
+>
+  <Content />
+</BlogPostLayout>

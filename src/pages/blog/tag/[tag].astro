@@ -1,0 +1,62 @@
+---
+// src/pages/blog/tag/[tag].astro
+// Generates one static page per tag, e.g. /blog/tag/leadership
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+  // Collect every unique tag across all posts
+  const allTags = [...new Set(posts.flatMap(post => post.data.tags ?? []))];
+
+  return allTags.map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+    props:  { tag, posts: posts.filter(p => p.data.tags?.includes(tag))
+                               .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()) },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout
+  title={`${tag} — Blog — Success Steps NLP Academy`}
+  description={`All articles tagged "${tag}" by Dr. Antony Augusthy.`}
+>
+  <div class="page-wrapper">
+
+    <header class="blog-hero">
+      <p class="tag-index-label">Tag</p>
+      <h1><span>{tag}</span></h1>
+      <p>{posts.length} article{posts.length !== 1 ? 's' : ''}</p>
+    </header>
+
+    <section aria-label={`Posts tagged ${tag}`}>
+      <div class="blog-grid">
+        {posts.map((post, i) => (
+          <BlogCard
+            title={post.data.title}
+            description={post.data.description}
+            author={post.data.author}
+            pubDate={post.data.pubDate}
+            heroImage={post.data.heroImage}
+            heroImageAlt={post.data.heroImageAlt}
+            category={post.data.category}
+            slug={post.slug}
+            index={i}
+          />
+        ))}
+      </div>
+    </section>
+
+    <div style="margin-top: 48px; text-align: center;">
+      <a href="/blog" class="card-read-more">← All articles</a>
+    </div>
+
+  </div>
+</BaseLayout>

@@ -1,0 +1,22 @@
+---
+// src/components/blog/ImpactGrid.astro
+// Usage:
+//   <ImpactGrid title="When you choose leadership, you create:">
+//     <ImpactItem emoji="🚀" label="Greater productivity" />
+//     <ImpactItem emoji="💛" label="Higher morale" />
+//   </ImpactGrid>
+//
+// Note: ImpactItem is defined at the bottom of this file — import from here.
+
+interface Props {
+  title?: string;
+}
+const { title = 'The impact:' } = Astro.props;
+---
+
+<div class="impact-section">
+  <p class="impact-title">{title}</p>
+  <div class="impact-grid">
+    <slot />
+  </div>
+</div>

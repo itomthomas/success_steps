@@ -1,0 +1,60 @@
+---
+// src/components/BlogCard.astro
+
+interface Props {
+  title:         string;
+  description:   string;
+  author:        string;
+  pubDate:       Date;
+  heroImage?:    string;
+  heroImageAlt?: string;
+  category?:     string;
+  slug:          string;
+  index?:        number;
+}
+
+const { title, description, author, pubDate, heroImage, heroImageAlt, category, slug, index = 0 } = Astro.props;
+
+const formattedDate = pubDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+const categoryEmoji: Record<string, string> = {
+  Leadership:   '🧭',
+  NLP:          '🧠',
+  Psychometrics:'📊',
+  Anxiety:      '🌿',
+  Career:       '🎯',
+};
+const emoji = category ? (categoryEmoji[category] ?? '✨') : '✨';
+---
+
+<article class="blog-card" style={`animation-delay:${index * 0.07}s`}>
+
+  <a href={`/blog/${slug}`} tabindex="-1" aria-hidden="true">
+    <div class="card-img-wrap">
+      {heroImage
+        ? <img src={heroImage} alt={heroImageAlt ?? title} loading="lazy" />
+        : <div class="card-img-placeholder">{emoji}</div>
+      }
+      {category && <span class="card-category">{category}</span>}
+    </div>
+  </a>
+
+  <div class="card-body">
+    <p class="card-meta">
+      <span>By {author}</span>
+      <span class="dot"></span>
+      <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+    </p>
+
+    <h2 class="card-title">
+      <a href={`/blog/${slug}`}>{title}</a>
+    </h2>
+
+    {description && <p class="card-desc">{description}</p>}
+
+    <a href={`/blog/${slug}`} class="card-read-more">
+      Read article <span aria-hidden="true">→</span>
+    </a>
+  </div>
+
+</article>

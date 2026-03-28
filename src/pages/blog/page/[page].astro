@@ -1,0 +1,92 @@
+---
+// src/pages/blog/page/[page].astro
+// Handles /blog/page/2, /blog/page/3, etc.
+// Page 1 is always served by /blog/index.astro — this file handles page 2+
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const POSTS_PER_PAGE = 6;
+  const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+
+  // Generate paths for page 2 onwards — page 1 is index.astro
+  return Array.from({ length: totalPages - 1 }, (_, i) => {
+    const page = i + 2;
+    const start = (page - 1) * POSTS_PER_PAGE;
+    return {
+      params: { page: String(page) },
+      props:  {
+        posts:      allPosts.slice(start, start + POSTS_PER_PAGE),
+        currentPage: page,
+        totalPages,
+      },
+    };
+  });
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout
+  title={`Blog — Page ${currentPage} — Success Steps NLP Academy`}
+  description="Explore articles on leadership, NLP, psychometrics and personal growth by Dr. Antony Augusthy."
+>
+  <div class="page-wrapper">
+
+    <header class="blog-hero">
+      <h1>Our <span>Blog</span></h1>
+      <p>Insights on leadership, NLP, psychometrics & personal growth — by Dr. Antony Augusthy.</p>
+    </header>
+
+    <section aria-label="Blog posts">
+      <div class="blog-grid">
+        {posts.map((post, i) => (
+          <BlogCard
+            title={post.data.title}
+            description={post.data.description}
+            author={post.data.author}
+            pubDate={post.data.pubDate}
+            heroImage={post.data.heroImage}
+            heroImageAlt={post.data.heroImageAlt}
+            category={post.data.category}
+            slug={post.slug}
+            index={i}
+          />
+        ))}
+      </div>
+    </section>
+
+    <nav class="pagination" aria-label="Blog pagination">
+
+      {/* Previous */}
+      {currentPage > 2
+        ? <a href={`/blog/page/${currentPage - 1}`} aria-label="Previous page">‹</a>
+        : <a href="/blog" aria-label="Previous page">‹</a>
+      }
+
+      {/* Page 1 always links back to /blog */}
+      <a href="/blog">1</a>
+
+      {/* Middle pages */}
+      {Array.from({ length: totalPages - 1 }, (_, i) => i + 2).map(page => (
+        page === currentPage
+          ? <span class="current" aria-current="page">{page}</span>
+          : <a href={`/blog/page/${page}`}>{page}</a>
+      ))}
+
+      {/* Next */}
+      {currentPage < totalPages &&
+        <a href={`/blog/page/${currentPage + 1}`} aria-label="Next page">›</a>
+      }
+
+    </nav>
+
+  </div>
+</BaseLayout>

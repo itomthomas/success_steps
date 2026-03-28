@@ -1,0 +1,23 @@
+---
+// src/components/blog/ReflectionBox.astro
+// Usage:
+//   <ReflectionBox title="Ask yourself:">
+//     - Do I guide or dictate?
+//     - Do I empower or control?
+//   </ReflectionBox>
+//
+// Pass questions as a prop array for typed rendering.
+
+interface Props {
+  title?:     string;
+  questions:  string[];
+}
+const { title = 'Ask yourself:', questions } = Astro.props;
+---
+
+<div class="reflection-box">
+  <p class="reflection-title">{title}</p>
+  <ul class="reflection-list">
+    {questions.map(q => <li>{q}</li>)}
+  </ul>
+</div>

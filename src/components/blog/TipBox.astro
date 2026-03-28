@@ -1,0 +1,17 @@
+---
+// src/components/blog/TipBox.astro
+// Usage:
+//   <TipBox>Ask your team how they're really doing today.</TipBox>
+//   <TipBox icon="🎯">Custom icon tip goes here.</TipBox>
+
+interface Props {
+  icon?: string;
+}
+
+const { icon = '💡' } = Astro.props;
+---
+
+<div class="tip-box">
+  <span class="tip-icon">{icon}</span>
+  <p class="tip-text"><strong>Tip:</strong> <slot /></p>
+</div>
