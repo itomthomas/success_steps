@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
 ---
 
 <BaseLayout title="Pricing | SuccessSteps">
@@ -353,7 +354,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <li>Stress management for teachers</li>
                 <li>Effective communication & classroom engagement</li>
               </ul>
-              <button class="btn btn-outline-primary mt-auto w-100">Request Proposal</button>
+              <a href="/teachers-training" class="btn btn-outline-primary mt-auto w-100">Learn More</a>
             </div>
           </div>
         </div>

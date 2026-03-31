@@ -1,0 +1,377 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/teachers-training.css';
+export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
+---
+
+<BaseLayout>
+  <slot name="head" slot="head">
+    <title>Teachers' Training | SuccessSteps NLP Academy</title>
+    <meta name="description" content="Empower educators with Neuro-Cognitive Emotional Behaviour mastery. Transform your classroom with NLP-based communication, engagement, and self-care tools." />
+  </slot>
+
+  <div class="tt-page">
+
+    <!-- ════════════════════════════════════════════════
+         HERO
+    ═══════════════════════════════════════════════════ -->
+    <section class="tt-hero">
+      <div class="container position-relative" style="z-index:1;">
+        <div class="row align-items-center">
+
+          <!-- Left: copy -->
+          <div class="col-lg-6">
+            <p class="tt-hero-breadcrumb">
+              <a href="/pricing">Pricing</a>
+              <span class="sep">›</span>
+              <a href="/pricing#training">Training &amp; Seminars</a>
+              <span class="sep">›</span>
+              Teachers' Training
+            </p>
+
+            <div class="tt-hero-badge">
+              <i class="bi bi-mortarboard-fill"></i>
+              Professional Development Programme
+            </div>
+
+            <h1>
+              Empowering Educators with<br/>
+              <em>Neuro-Cognitive</em> Mastery
+            </h1>
+
+            <p class="tt-hero-sub">
+              A transformative one‑day workshop that equips teachers with NLP, Emotional Intelligence,
+              and neuroscience‑backed tools to ignite learning, manage classrooms with confidence, and
+              sustain their own wellbeing.
+            </p>
+
+            <div class="tt-hero-stats">
+              <div class="tt-stat">
+                <span class="tt-stat-value">4–6</span>
+                <span class="tt-stat-label">Hours per day</span>
+              </div>
+              <div class="tt-stat">
+                <span class="tt-stat-value">5</span>
+                <span class="tt-stat-label">Core pillars</span>
+              </div>
+              <div class="tt-stat">
+                <span class="tt-stat-value">15+</span>
+                <span class="tt-stat-label">Skills covered</span>
+              </div>
+            </div>
+
+            <div class="tt-hero-actions">
+              <a href="/#contact" class="tt-btn-primary">
+                <i class="bi bi-calendar-check"></i> Reserve Your Spot
+              </a>
+              <a href="/pricing#training" class="tt-btn-outline">
+                <i class="bi bi-arrow-left"></i> Back to Pricing
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: glass module card -->
+          <div class="col-lg-6 tt-hero-visual">
+            <div class="tt-hero-card">
+              <div class="tt-hero-card-title">
+                <span class="icon-dot">📋</span>
+                What You'll Cover
+              </div>
+              <ul class="tt-module-list">
+                <li class="tt-module-item">
+                  <span class="tt-module-icon">💬</span>
+                  <div>
+                    <strong>Communication Skills</strong>
+                    <small>NLP rapport, active listening, presentation</small>
+                  </div>
+                </li>
+                <li class="tt-module-item">
+                  <span class="tt-module-icon">🏫</span>
+                  <div>
+                    <strong>Classroom Management</strong>
+                    <small>Boundaries, behaviour strategies, stress relief</small>
+                  </div>
+                </li>
+                <li class="tt-module-item">
+                  <span class="tt-module-icon">🔥</span>
+                  <div>
+                    <strong>Student Engagement</strong>
+                    <small>Dynamic lessons, learning styles, motivation</small>
+                  </div>
+                </li>
+                <li class="tt-module-item">
+                  <span class="tt-module-icon">🧩</span>
+                  <div>
+                    <strong>Teaching &amp; Learning Styles</strong>
+                    <small>NLP-informed, inclusive, personalised</small>
+                  </div>
+                </li>
+                <li class="tt-module-item">
+                  <span class="tt-module-icon">🌿</span>
+                  <div>
+                    <strong>Self-Care &amp; Stress Management</strong>
+                    <small>Resilience, wellbeing, sustained motivation</small>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════
+         QUOTE STRIP
+    ═══════════════════════════════════════════════════ -->
+    <div class="tt-quote-strip">
+      <div class="container">
+        <blockquote>
+          A teacher of average quality imparts information. A proficient teacher provides explanations.
+          An exceptional teacher exemplifies through action. A truly outstanding teacher
+          <strong>ignites inspiration.</strong>
+          <cite>— The NLP Educator's Credo</cite>
+        </blockquote>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         PROGRAMME PILLARS
+    ═══════════════════════════════════════════════════ -->
+    <section class="tt-section">
+      <div class="container">
+        <p class="tt-section-label">Programme Structure</p>
+        <h2 class="tt-section-heading">Five Pillars of Educator Empowerment</h2>
+        <p class="tt-section-sub">
+          Each pillar is a standalone learning block grounded in NLP, neuroscience, and emotional
+          intelligence — practical tools you can use in the classroom the very next day.
+        </p>
+
+        <div class="tt-pillars-grid">
+
+          <!-- 1 -->
+          <div class="tt-pillar-card">
+            <span class="tt-pillar-num">01</span>
+            <div class="tt-pillar-icon-wrap">💬</div>
+            <h3 class="tt-pillar-title">Communication Skills</h3>
+            <p class="tt-pillar-body">
+              Effective communication is the foundation of every great classroom. Through NLP,
+              teachers refine active listening, build authentic rapport, and craft presentations
+              that engage and inspire — with students, parents, and the wider school community.
+            </p>
+          </div>
+
+          <!-- 2 -->
+          <div class="tt-pillar-card">
+            <span class="tt-pillar-num">02</span>
+            <div class="tt-pillar-icon-wrap">🏫</div>
+            <h3 class="tt-pillar-title">Classroom Management</h3>
+            <p class="tt-pillar-body">
+              Large or diverse classrooms need clear boundaries and proactive strategies. NLP
+              techniques help educators set expectations with confidence, handle disruptive
+              behaviour constructively, and manage their own stress without burning out.
+            </p>
+          </div>
+
+          <!-- 3 -->
+          <div class="tt-pillar-card">
+            <span class="tt-pillar-num">03</span>
+            <div class="tt-pillar-icon-wrap">🔥</div>
+            <h3 class="tt-pillar-title">Student Engagement</h3>
+            <p class="tt-pillar-body">
+              Engaged students learn deeper and retain more. This pillar equips teachers with NLP
+              tools to design dynamic, interactive lessons that tap into individual curiosity,
+              transform passive attendance into active participation.
+            </p>
+          </div>
+
+          <!-- 4 -->
+          <div class="tt-pillar-card">
+            <span class="tt-pillar-num">04</span>
+            <div class="tt-pillar-icon-wrap">🧩</div>
+            <h3 class="tt-pillar-title">Teaching &amp; Learning Styles</h3>
+            <p class="tt-pillar-body">
+              Every student learns differently. NLP provides educators with deep insight into
+              diverse learning preferences, enabling them to tailor instruction that is inclusive,
+              relatable, and genuinely effective for every learner in the room.
+            </p>
+          </div>
+
+          <!-- 5 -->
+          <div class="tt-pillar-card">
+            <span class="tt-pillar-num">05</span>
+            <div class="tt-pillar-icon-wrap">🌿</div>
+            <h3 class="tt-pillar-title">Self-Care &amp; Stress Management</h3>
+            <p class="tt-pillar-body">
+              Teaching is demanding. This pillar gives educators personalised relaxation methods,
+              resilience strategies, and self-care routines — so they can sustain motivation,
+              focus, and joy in their work for the long term.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════
+         HIGHLIGHTS — dark band
+    ═══════════════════════════════════════════════════ -->
+    <section class="tt-highlights-section">
+      <div class="container">
+        <p class="tt-section-label" style="color:rgba(245,166,35,.8);">What You'll Walk Away With</p>
+        <h2 class="tt-section-heading" style="color:#fff;">15 Transformative Skills</h2>
+        <p class="tt-section-sub" style="color:rgba(255,255,255,.65);">
+          Practical, psychology-backed capabilities you can immediately apply — in the classroom,
+          the staffroom, and beyond.
+        </p>
+
+        <div class="tt-highlights-grid">
+          {[
+            "Unleash Your Inner Potential",
+            "Develop Rapport & Effective Communication",
+            "Master Relationships via Transactional Analysis",
+            "Set & Achieve Goals Strategically",
+            "Understand Children's Cognitive Development",
+            "Respond Adequately to Student Stress",
+            "Foster Self-Confidence & Positive Thinking",
+            "Reprogram Your Mind for Success",
+            "Cultivate Emotional Intelligence for Leadership",
+            "Cultivate the Right Growth Mindset",
+            "Achieve Peak Performance",
+            "Balance Work and Life Demands",
+            "Master the Art of Influence",
+            "Ignite Motivation and Inspiration",
+            "Excel in Team Dynamics",
+          ].map((skill) => (
+            <div class="tt-highlight-item">
+              <span class="tt-highlight-check">✓</span>
+              <span class="tt-highlight-text">{skill}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════
+         WHO IS IT FOR
+    ═══════════════════════════════════════════════════ -->
+    <section class="tt-section tt-section-alt">
+      <div class="container">
+        <p class="tt-section-label">Ideal Participants</p>
+        <h2 class="tt-section-heading">Who Should Attend?</h2>
+        <p class="tt-section-sub">
+          This programme is designed for every educator who wants to transform their impact —
+          whether you're just starting out or have decades of experience.
+        </p>
+
+        <div class="tt-audience-grid">
+          <div class="tt-audience-card">
+            <div class="tt-audience-emoji">🏫</div>
+            <h4 class="tt-audience-title">School Teachers</h4>
+            <p class="tt-audience-desc">
+              Primary, secondary, or senior school educators looking to strengthen classroom
+              presence, manage behaviour positively, and re-ignite their passion for teaching.
+            </p>
+          </div>
+          <div class="tt-audience-card">
+            <div class="tt-audience-emoji">🎓</div>
+            <h4 class="tt-audience-title">College Educators & Lecturers</h4>
+            <p class="tt-audience-desc">
+              Higher-education faculty who want to connect better with young adults, make lectures
+              compelling, and build an emotionally intelligent teaching style.
+            </p>
+          </div>
+          <div class="tt-audience-card">
+            <div class="tt-audience-emoji">🏢</div>
+            <h4 class="tt-audience-title">Academic Leaders & HODs</h4>
+            <p class="tt-audience-desc">
+              Department heads, coordinators, and principals who want to lead high-performing teams,
+              model healthy communication, and foster a culture of continuous growth.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════
+         LOGISTICS
+    ═══════════════════════════════════════════════════ -->
+    <section class="tt-section">
+      <div class="container">
+        <p class="tt-section-label">Programme Details</p>
+        <h2 class="tt-section-heading">Practical Information</h2>
+
+        <div class="row g-4 mt-2">
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius:14px;">
+              <div class="card-body p-4">
+                <div style="font-size:1.8rem;margin-bottom:12px;">⏱️</div>
+                <h5 class="fw-bold mb-2" style="font-family:var(--font-display);">Duration</h5>
+                <p class="text-muted small mb-0">
+                  4–6 hours per day, delivered as a focused one‑day or multi-day intensive.
+                  Schedule is flexible to fit your school's calendar.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius:14px;">
+              <div class="card-body p-4">
+                <div style="font-size:1.8rem;margin-bottom:12px;">📍</div>
+                <h5 class="fw-bold mb-2" style="font-family:var(--font-display);">Location</h5>
+                <p class="text-muted small mb-0">
+                  Conducted at your school or institution. Travel and stay charges apply
+                  for venues outside Mumbai.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius:14px;">
+              <div class="card-body p-4">
+                <div style="font-size:1.8rem;margin-bottom:12px;">👥</div>
+                <h5 class="fw-bold mb-2" style="font-family:var(--font-display);">Group Size</h5>
+                <p class="text-muted small mb-0">
+                  Suitable for any staff size. Custom facilitation ensures every participant
+                  experiences meaningful, personalised learning moments.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════
+         PRICING CTA BAND
+    ═══════════════════════════════════════════════════ -->
+    <div class="container">
+      <div class="tt-cta-band">
+        <div class="tt-cta-band-left">
+          <p class="tt-cta-label">Ready to Transform Your School?</p>
+          <h2 class="tt-cta-title">Book a Teachers' Training Day for Your Institution</h2>
+          <p class="tt-cta-sub">
+            One day. Measurable impact. A team of educators who communicate better,
+            manage with confidence, and inspire every student they teach.
+          </p>
+        </div>
+        <div class="tt-cta-band-right">
+          <div class="tt-price-tag">
+            <p class="price-label">Starting from</p>
+            <p class="price-value">₹25,000</p>
+            <p class="price-sub">per day · travel extra outside Mumbai</p>
+          </div>
+          <div class="tt-cta-actions">
+            <a href="/#contact" class="tt-btn-purple">
+              <i class="bi bi-calendar-check"></i> Request a Proposal
+            </a>
+            <a href="/pricing#training" class="tt-btn-ghost">
+              <i class="bi bi-grid"></i> All Programmes
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tt-page -->
+</BaseLayout>
