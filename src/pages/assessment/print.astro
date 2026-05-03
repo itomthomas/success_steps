@@ -1,0 +1,347 @@
+---
+export const prerender = false; 
+import { Image } from 'astro:assets';
+import pdfMain from '../../images/pdf_Front1.jpg';
+import LOGO from '../../images/fitLogo.png';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assessment Report | Success Steps</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/print-report.css" /> <!--  This is in Public styles folder -->
+  
+    
+</head>
+
+<body>
+  <!-- 
+    .page {
+          page-break-after: always;
+     }
+    👉 This tells the browser: 
+    “After every .page section, start a new physical page during Print.” 
+  -->
+
+  <!-- ── Screen toolbar (hidden on print) ── -->
+  <div class="screen-toolbar">
+    <a href="/assessment/results" class="btn-back">← Back to results</a>
+    <h1>Success Steps — Assessment Report</h1>
+    <button class="btn-print" onclick="window.print()">
+      🖨️ Save as PDF / Print
+    </button>
+  </div>
+
+  <div class="print-shell">
+    <div class="report-paper">
+
+      <!-- Loading -->
+      <div id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading your results…</p>
+      </div>
+
+      <!-- Error -->
+      <div id="errorState"></div>
+
+      <!-- Report — populated by JS -->
+      <div id="reportContent" style="display:none;">
+
+            <!-- COVER PAGE -->
+            <section class="page cover">
+              <div class="cover-container">
+                <h1>Psychometric Assessment Report</h1>
+              </div>
+              <div class="student-info">
+                  <p><strong>Name:</strong> <span id="coverName">—</span>
+                  <p><strong>Gender:</strong> <span id="coverGender">—</span> || <strong>Age:</strong> <span id="coverAge">—</span>
+                  <p><strong>Email:</strong> <span id="coverEmail">—</span></p>
+                  <p><strong>Tested On:</strong> <span id="coverDate">—</span></p>
+              </div>
+              <Image src={pdfMain} alt="PDF Cover" height={380}/>              
+              <div class="cover-container-2">
+                <h2>Neuro-Cognitive <br>Emotional Intelligence <br>Behaviour Competency Mapping</h2>
+                <h4>Test Analysis & Brain Mapping by:</h4>
+                <h3>Dr. Antony Augusthy</h3>
+                <h4>Neurocognitive Psychologist</h4>
+              </div>
+              
+              <br/>
+              <!-- EXISTING HEADER -->
+              <div class="doc-header">
+                <div class="brand">
+                 <Image
+                    src={LOGO}
+                    alt="Success Steps NLP Academy" height={80} width={300}
+                  />www.successsteps.in
+                </div>
+                <div class="meta"><br/>
+                  <span id="docDate"></span><br/>
+                  Confidential
+                </div>
+              </div>
+            </section>
+            
+            <!-- TESTS -->
+            <section class="page">
+              <h2 class="section-title">Assessment Results</h2>
+              <div id="testsContainer"></div>
+            </section>
+
+            <!-- CAREER PRIORITY -->
+            <section class="page">
+              <h2>Career Recommendations</h2>
+              <ol id="careerList"></ol>
+            </section>
+
+            <!-- FOOTER -->
+            <div class="doc-footer">
+              <span>Success Steps — Confidential Assessment Report</span>
+              <span id="footerDate"></span>
+            </div>
+
+          </div>
+    </div>
+  </div>
+
+  <script>
+    const COLOURS = [
+      "#0d6efd","#0dcaf0","#20c997","#ffc107",
+      "#fd7e14","#6f42c1","#d63384","#198754",
+      "#dc3545","#6c757d"
+    ];
+
+    // Read token from URL param (passed from results page to survive new-tab sessionStorage isolation)
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get("token") || sessionStorage.getItem("assessmentToken");
+    if (!token) window.location.replace("/register");
+
+
+    // Set dates
+    const now = new Date().toLocaleDateString("en-GB", {
+      day: "numeric", month: "long", year: "numeric"
+    });
+    document.getElementById("docDate").textContent    = "Generated " + now;
+    document.getElementById("footerDate").textContent = "Generated " + now;
+
+    async function load() {
+      try {
+        const res  = await fetch("/api/psychotest-results", {
+          headers: { "x-assessment-token": token }
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        // Profile
+        const p = data.profile || {};
+         document.getElementById("coverName").textContent  = p.name  || "—";
+        document.getElementById("coverEmail").textContent = p.email || "—";
+        document.getElementById("coverDate").textContent  = p.createdAt
+         ? new Date(p.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric", month: "long", year: "numeric"
+            })
+          : "—";
+
+        // Tests
+        const container = document.getElementById("testsContainer");
+        const tests = data.results || [];
+
+        if (!tests.length) {
+          container.innerHTML = "<p style='color:#6c757d;'>No results available yet.</p>";
+        } else {
+          tests.forEach((test, ti) => {
+            const section = document.createElement("section");
+            section.className = "page";
+
+            section.appendChild(buildTestBlock(test, ti));
+            container.appendChild(section);
+          });
+
+          // Charts must be drawn after elements are in the DOM
+          await new Promise(r => setTimeout(r, 50));
+          tests.forEach((test, ti) => {
+            drawRadar(test, ti);
+            drawBar(test, ti);
+          });
+        }
+
+        document.getElementById("loadingState").style.display  = "none";
+        document.getElementById("reportContent").style.display = "block";
+
+      } catch (err) {
+        document.getElementById("loadingState").style.display = "none";
+        const el = document.getElementById("errorState");
+        el.style.display  = "block";
+        el.textContent    = "Failed to load results: " + err.message;
+      }
+    }
+
+    function buildTestBlock(test, ti) {
+      const subtests    = test.subtests || [];
+      const maxPossible = subtests.reduce((s, st) => s + (Number(st.max_score) || 0), 0);
+      const totalScore  = subtests.reduce((s, st) => s + (Number(st.raw_score) || 0), 0);
+
+      const block = document.createElement("div");
+      block.className = "test-block";
+
+      // Heading
+      const heading = document.createElement("div");
+      heading.className = "test-heading";
+      heading.innerHTML = `
+        <h3>${test.test_name}</h3>
+        <span class="total-badge">Total: ${totalScore} / ${maxPossible}</span>
+      `;
+      block.appendChild(heading);
+
+      // Charts row
+      const chartsRow = document.createElement("div");
+      chartsRow.className = "charts-row";
+      chartsRow.innerHTML = `
+        <div class="chart-card">
+          <h6>Subtests Overview</h6>
+          <div class="chart-wrap"><canvas id="radar_${ti}"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h6>Subtest Scores</h6>
+          <div class="chart-wrap" id="barWrap_${ti}"><canvas id="bar_${ti}"></canvas></div>
+        </div>
+      `;
+      block.appendChild(chartsRow);
+
+      // Subtest cards
+      const grid = document.createElement("div");
+      grid.className = "subtests-grid";
+      subtests.forEach((st, si) => {
+        const colour = COLOURS[si % COLOURS.length];
+        const card   = document.createElement("div");
+        card.className = "subtest-card";
+        card.style.borderLeftColor = colour;
+        card.innerHTML = `
+          <div class="subtest-card-header">
+            <h4>${st.subtest_name}</h4>
+            <span class="level-pill" style="background:${colour}">${st.level_label || "—"}</span>
+          </div>
+          <div class="subtest-score">
+            Score: <strong>${st.raw_score}</strong>
+            <span style="color:#adb5bd"> / ${st.max_score}</span>
+            &nbsp;<span style="color:#adb5bd">(${st.score_range})</span>
+          </div>
+          <div class="subtest-feedback">${st.feedback || "—"}</div>
+        `;
+        grid.appendChild(card);
+      });
+      block.appendChild(grid);
+
+      return block;
+    }
+
+    function drawRadar(test, ti) {
+      const ctx      = document.getElementById(`radar_${ti}`);
+      if (!ctx) return;
+      const subtests = test.subtests || [];
+      new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: subtests.map(s => s.subtest_name),
+          datasets: [{
+            label: test.test_name,
+            data:  subtests.map(s => Number(s.raw_score) || 0),
+            backgroundColor:      "rgba(13,110,253,0.12)",
+            borderColor:          "#0d6efd",
+            pointBackgroundColor: "#0d6efd",
+            pointRadius: 3,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              beginAtZero: true,
+              ticks:       { stepSize: 5, font: { size: 9 } },
+              pointLabels: { font: { size: 9 } }
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function drawBar(test, ti) {
+      const ctx      = document.getElementById(`bar_${ti}`);
+      if (!ctx) return;
+      const subtests = test.subtests || [];
+
+      // Scale bar wrap height to number of subtests
+      const wrap = document.getElementById(`barWrap_${ti}`);
+      if (wrap) {
+        const h = Math.max(200, subtests.length * 36);
+        wrap.style.height = h + "px";
+      }
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: subtests.map(s => s.subtest_name),
+          datasets: [{
+            data:            subtests.map(s => Number(s.raw_score) || 0),
+            backgroundColor: subtests.map((_, i) => COLOURS[i % COLOURS.length]),
+            borderRadius:    3,
+            borderSkipped:   false
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 5, font: { size: 9 } } },
+            y: {
+              ticks: {
+                font: { size: 9 },
+                callback(val, i) {
+                  // Wrap long labels
+                  const label = subtests[i]?.subtest_name || "";
+                  const words = label.split(" ");
+                  const lines = [];
+                  let cur = "";
+                  words.forEach(w => {
+                    if ((cur + " " + w).trim().length <= 18) {
+                      cur = (cur + " " + w).trim();
+                    } else {
+                      if (cur) lines.push(cur);
+                      cur = w;
+                    }
+                  });
+                  if (cur) lines.push(cur);
+                  return lines;
+                }
+              },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: items => subtests[items[0].dataIndex]?.subtest_name || "",
+                label: item  => ` Score: ${item.raw}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
