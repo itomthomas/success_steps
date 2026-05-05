@@ -197,6 +197,99 @@ import LOGO from '../../images/fitLogo.png';
   }
 
   // ─────────────────────────────────────────────────────────────────
+  //  Build SUMMARY page  (page 2 — test index + guidance note)
+  // ─────────────────────────────────────────────────────────────────
+  function buildSummaryPage(tests, name) {
+    const sec = document.createElement("section");
+    sec.className = "page";
+    sec.innerHTML = pageHeaderHTML(name, genLabel);
+
+    const body = document.createElement("div");
+    body.className = "page-body";
+
+    // ── Table of tests ──
+    const tableRows = tests.map((test, i) => {
+      const subtests    = test.subtests || [];
+      const maxPossible = subtests.reduce((s, st) => s + (Number(st.max_score) || 0), 0);
+      const totalScore  = subtests.reduce((s, st) => s + (Number(st.raw_score) || 0), 0);
+      const pct         = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
+      const subtestCount = subtests.length;
+      return `
+        <tr>
+          <td><span class="summary-sn">${i + 1}</span></td>
+          <td style="font-weight:600;">${test.test_name}</td>
+          <td>${subtestCount} subtest${subtestCount !== 1 ? 's' : ''}</td>
+          <td>
+            <span class="summary-score-badge">${totalScore} / ${maxPossible} &nbsp;·&nbsp; ${pct}%</span>
+          </td>
+        </tr>`;
+    }).join("");
+
+    body.innerHTML = `
+      <h2 class="section-title">Assessment Overview</h2>
+      <p class="summary-intro">
+        The following assessments were conducted as part of your personalised
+        psychometric evaluation. Each test is detailed in the pages that follow,
+        with subtest breakdowns, scores, and individual feedback.
+      </p>
+
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Assessment</th>
+            <th>Subtests</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+
+      <!-- Guidance note -->
+      <div class="guidance-card">
+        <div class="guidance-header">
+          <div class="guidance-icon">💙</div>
+          <div class="guidance-title">
+            <span>A note for</span>
+            Students · Parents · Teachers
+          </div>
+        </div>
+
+        <div class="guidance-body">
+          <p>
+            We warmly encourage parents and teachers to carefully read and reflect on this
+            report before initiating any conversation with their child or student.
+            This assessment is not a measure of worth — it is a map of <strong>inner strengths,
+            hidden talents, and areas of growth</strong> waiting to be nurtured.
+          </p>
+          <p>
+            Please use the insights shared here to build a <strong>supportive, stress-free
+            environment</strong> — one where your child feels safe to explore, question, and
+            discover who they truly are. Avoid comparing scores or outcomes with others;
+            every profile is unique and equally valuable.
+          </p>
+          <p>
+            If questions arise, our team is available to walk you through the findings in a
+            one-to-one counselling session, so the report translates into meaningful,
+            positive action.
+          </p>
+        </div>
+
+        <div class="guidance-sign">
+          <div>
+            <div class="guidance-sign-name">Dr. Antony Augusthy</div>
+            <div class="guidance-sign-title">Neurocognitive Psychologist · Success Steps NLP Academy</div>
+          </div>
+          <div class="guidance-wishes">🌟 Wishing you and your child every success!</div>
+        </div>
+      </div>`;
+
+    sec.appendChild(body);
+    sec.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
+    return sec;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   //  Build ONE test page section  (header + body + footer)
   // ─────────────────────────────────────────────────────────────────
   function buildTestPage(test, ti, name) {
@@ -394,7 +487,12 @@ import LOGO from '../../images/fitLogo.png';
       // 1. Cover page
       root.appendChild(buildCoverPage(profile));
 
-      // 2. One page per test
+      // 2. Summary page — test index + guidance note
+      if (tests.length) {
+        root.appendChild(buildSummaryPage(tests, profile.name));
+      }
+
+      // 3. One page per test
       if (!tests.length) {
         const empty = document.createElement("section");
         empty.className = "page";
@@ -408,7 +506,7 @@ import LOGO from '../../images/fitLogo.png';
         });
       }
 
-      // 3. Career page (only if data exists)
+      // 4. Career page (only if data exists)
       if (data.career && data.career.length) {
         const careerSec = buildCareerPage(data.career, profile.name);
         root.appendChild(careerSec);
@@ -420,11 +518,11 @@ import LOGO from '../../images/fitLogo.png';
         });
       }
 
-      // 4. Show report, hide loader
+      // 5. Show report, hide loader
       document.getElementById("loadingState").style.display = "none";
       root.style.display = "block";
 
-      // 5. Draw charts AFTER elements are in DOM
+      // 6. Draw charts AFTER elements are in DOM
       await new Promise(r => setTimeout(r, 60));
       tests.forEach((test, ti) => {
         drawRadar(test, ti);
