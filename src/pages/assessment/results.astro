@@ -8,25 +8,16 @@ export const prerender = false;
     <title>Your Results | Success Steps</title>
     <meta name="description" content="Your psychometric assessment results" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </Fragment>
 
   <style>
-    /* ── pdf-exclude: visible on screen, hidden only during PDF capture via JS */
-    /* DO NOT set display:none here — JS handles hiding during capture */
-
-    /* ── pdf-only: hidden on screen, shown only during PDF capture via JS */
-    .pdf-only {
-      display: none;
-    }
-
     .page-break {
       page-break-before: always;
       break-before: always;
     }
 
     .feedback-card { border-left: 4px solid #0d6efd; }
-    .level-badge { font-size: 0.85rem; }
+    .level-badge   { font-size: 0.85rem; }
 
     .score-pill {
       background: linear-gradient(135deg, #0d6efd, #0dcaf0);
@@ -60,12 +51,12 @@ export const prerender = false;
 
   <section class="container py-5">
 
-    <!-- Header — visible on screen, hidden during PDF capture via JS -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pdf-exclude">
+    <!-- Header — stays on screen, excluded from the PDF clone via JS (.pdf-exclude) -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0">📊 Assessment Results</h2>
-      <button class="btn btn-outline-primary" id="downloadPdf">
-        ⬇️ Download PDF
-      </button>
+      <a id="printLink" href="/assessment/print" target="_blank" class="btn btn-outline-primary">
+        🖨️ Save as PDF
+      </a>
     </div>
 
     <!-- Loading -->
@@ -79,12 +70,6 @@ export const prerender = false;
 
     <!-- Report (hidden until data loads) -->
     <div id="reportContent" class="d-none">
-
-      <!-- PDF-only header — hidden on screen, shown during PDF capture via JS -->
-      <div class="pdf-only text-center mb-4 pb-3" style="border-bottom: 2px solid #0d6efd;">
-        <h2 class="text-primary fw-bold">Success Steps</h2>
-        <p class="text-muted mb-0">Psychometric Assessment Report</p>
-      </div>
 
       <!-- User Profile Header -->
       <div class="card shadow-sm mb-5 border-0 bg-primary text-white">
@@ -196,7 +181,7 @@ export const prerender = false;
           <div class="col-md-6">
             <div class="card shadow-sm border-0 h-100">
               <div class="card-body">
-                <h6 class="text-muted mb-3">📡 Profile Overview</h6>
+                <h6 class="text-muted mb-3">📡 Subtests Overview</h6>
                 <div class="chart-container">
                   <canvas id="radar_${idx}"></canvas>
                 </div>
@@ -282,7 +267,6 @@ export const prerender = false;
       if (!ctx) return;
       const subtests = test.subtests || [];
 
-      // Dynamic height: 52px per bar, minimum 200px
       const barHeight       = Math.max(52, Math.floor(320 / subtests.length));
       const containerHeight = subtests.length * barHeight;
       const container       = document.getElementById(`barContainer_${idx}`);
@@ -313,7 +297,6 @@ export const prerender = false;
             y: {
               ticks: {
                 font: { size: subtests.length > 6 ? 10 : 11 },
-                // Wrap long labels into 2 lines at word boundaries
                 callback: function(val, index) {
                   const label = subtests[index]?.subtest_name || "";
                   const words = label.split(" ");
@@ -328,7 +311,7 @@ export const prerender = false;
                     }
                   });
                   if (current) lines.push(current);
-                  return lines; // Chart.js renders array as multiline
+                  return lines;
                 }
               },
               grid: { display: false }
@@ -347,56 +330,12 @@ export const prerender = false;
       });
     }
 
-    // ── PDF Download
-    document.getElementById("downloadPdf").addEventListener("click", async () => {
-      const btn = document.getElementById("downloadPdf");
-      btn.disabled    = true;
-      btn.textContent = "⏳ Generating PDF…";
-
-      // Wait for any final renders
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Hide screen-only elements during capture
-      document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "none");
-
-      // Show PDF-only elements during capture
-      document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "block");
-
-      const element     = document.getElementById("reportContent");
-      const profileName = document.getElementById("profileName").textContent || "Assessment";
-      const filename    = `${profileName.replace(/\s+/g, "_")}_Results.pdf`;
-
-      const opt = {
-        margin:      [10, 10, 10, 10],
-        filename:    filename,
-        image:       { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
-        jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak:   { mode: ["avoid-all", "css"], before: ".page-break" }
-      };
-
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .then(() => {
-          // Restore screen-only elements
-          document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "");
-          // Hide PDF-only elements again
-          document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "none");
-          btn.disabled  = false;
-          btn.innerHTML = "⬇️ Download PDF";
-        })
-        .catch(err => {
-          console.error("PDF generation failed:", err);
-          document.querySelectorAll(".pdf-exclude").forEach(el => el.style.display = "");
-          document.querySelectorAll(".pdf-only").forEach(el => el.style.display = "none");
-          btn.disabled  = false;
-          btn.innerHTML = "⬇️ Download PDF";
-        });
-    });
-
     // ── Boot
+    // Append token to print link so sessionStorage survives the new tab
+    const printLink = document.getElementById("printLink");
+    if (printLink && token) {
+      printLink.href = "/assessment/print?token=" + encodeURIComponent(token);
+    }
     loadResults();
   </script>
 </BaseLayout>

@@ -504,6 +504,16 @@ Page unload protection auto-saves
                           ${progress.answers[q.question_id] ? '✅ Answered' : '○ Not answered'}
                         </span>
                       </div>
+                      ${q.image_url ? `
+                              <div class="question-image-wrap mb-3">
+                                <img
+                                  src="${q.image_url}"
+                                  alt="Question ${qIndex + 1} illustration"
+                                  class="question-img"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ` : ""}
                       
                       ${renderOptions(q, sub, testProgress[test.test_id])}
                     </div>
