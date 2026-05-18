@@ -1,14 +1,19 @@
 ---
-export const prerender = false; 
+// src/pages/print.astro
+// Permanent, shareable report page.
+// Access: /print?rt=rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//
+// - No sessionStorage required
+// - No assessment token in URL
+// - Works for users AND admin on any device, any browser
+// - The reportToken is the only credential needed
+// - Data is fetched from GAS via /api/print-results proxy
+
+export const prerender = false;
+
 import { Image } from 'astro:assets';
 import pdfMain from '../../images/pdf_Front1.jpg';
 import LOGO from '../../images/fitLogo.png';
-
-/*
-  We need the logo and cover image src at runtime (in <script>).
-  Astro's Image component handles optimisation at build time, so we
-  grab the resolved src via a data attribute trick below.
-*/
 ---
 
 <!DOCTYPE html>
@@ -28,7 +33,7 @@ import LOGO from '../../images/fitLogo.png';
 
   <!-- ── Screen toolbar (hidden on print) ── -->
   <div class="screen-toolbar">
-    <a href="/assessment/results" class="btn-back">← Back to results</a>
+    <a href="/" class="btn-back">← Home</a>
     <h1>Success Steps — Assessment Report</h1>
     <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
   </div>
@@ -36,24 +41,29 @@ import LOGO from '../../images/fitLogo.png';
   <div class="print-shell">
     <div class="report-paper">
 
-      <!-- Loading / Error states -->
+      <!-- Loading state -->
       <div id="loadingState">
         <div class="spinner"></div>
-        <p>Loading your results…</p>
+        <p>Loading your report…</p>
       </div>
+
+      <!-- Error state -->
       <div id="errorState"></div>
 
       <!--
-        Hidden references so JS can read Astro-resolved image URLs.
-        Astro transforms imports to hashed /assets/… paths at build time.
+        Hidden data bridges — Astro resolves image paths at build time
+        to hashed /assets/… URLs. We expose them via data attributes
+        so the client-side JS can read them without importing modules.
       -->
-      <span id="logoSrc"      data-src={LOGO.src}    style="display:none"></span>
-      <span id="coverImgSrc"  data-src={pdfMain.src}  style="display:none"></span>
+      <span id="__logoSrc"     data-src={LOGO.src}    style="display:none"></span>
+      <span id="__coverImgSrc" data-src={pdfMain.src}  style="display:none"></span>
 
       <!--
-        All page sections are built by JS below.
-        This avoids the "blank Assessment Results page" problem caused by
-        static <section class="page"> wrappers that exist before JS fires.
+        All page sections are built entirely by JS below.
+        There are NO static <section> wrappers here — that was
+        the root cause of the blank "Assessment Results" page bug.
+        JS injects: cover → summary → one page per test → career (if any)
+        Each page has its own header and footer in normal document flow.
       -->
       <div id="reportRoot" style="display:none;"></div>
 
@@ -62,30 +72,53 @@ import LOGO from '../../images/fitLogo.png';
 
 
   <script is:inline>
-  // ─────────────────────────────────────────────────────────────────
-  //  Helpers
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     CONSTANTS
+  ═══════════════════════════════════════════════════════════════ */
   const COLOURS = [
     "#0d6efd","#0dcaf0","#20c997","#ffc107",
     "#fd7e14","#6f42c1","#d63384","#198754","#dc3545","#6c757d"
   ];
 
-  const params  = new URLSearchParams(window.location.search);
-  const token   = params.get("token") || sessionStorage.getItem("assessmentToken");
-  if (!token) window.location.replace("/register");
+  /* ═══════════════════════════════════════════════════════════════
+     REPORT TOKEN — from URL only, no sessionStorage
+  ═══════════════════════════════════════════════════════════════ */
+  const params      = new URLSearchParams(window.location.search);
+  const reportToken = params.get("rt");
+    console.log("Report token at line 88:", reportToken);  // Debug log to verify token retrieval
+  if (!reportToken || !reportToken.startsWith("rt_")) {
+    // No valid token → show friendly error rather than blank page
+    document.getElementById("loadingState").style.display = "none";
+    const errEl = document.getElementById("errorState");
+    errEl.style.display = "block";
+    errEl.innerHTML =
+      "<p style='text-align:center;padding:60px 20px;color:#6c757d;'>" +
+        "<strong style='display:block;font-size:1.1rem;margin-bottom:8px;color:#1a1a2e;'>Invalid Report Link</strong>" +
+        "This link is missing or incorrect. Please use the link from your " +
+        "assessment completion page or contact " +
+        "<a href='mailto:successtepsnlpa@gmail.com'>successtepsnlpa@gmail.com</a>." +
+      "</p>";
+  }
 
-  const LOGO_SRC      = document.getElementById("logoSrc").dataset.src;
-  const COVER_IMG_SRC = document.getElementById("coverImgSrc").dataset.src;
+  /* ═══════════════════════════════════════════════════════════════
+     IMAGE SRCS  (resolved at build time by Astro, read here at runtime)
+  ═══════════════════════════════════════════════════════════════ */
+  const LOGO_SRC      = document.getElementById("__logoSrc").dataset.src;
+  const COVER_IMG_SRC = document.getElementById("__coverImgSrc").dataset.src;
 
+  /* ═══════════════════════════════════════════════════════════════
+     DATE LABELS
+  ═══════════════════════════════════════════════════════════════ */
   const now      = new Date();
   const genLabel = "Generated " + now.toLocaleDateString("en-GB", {
     day: "numeric", month: "long", year: "numeric"
   });
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Header / Footer HTML  (shared across all non-cover pages)
-  // ─────────────────────────────────────────────────────────────────
-  function pageHeaderHTML(name, date) {
+  /* ═══════════════════════════════════════════════════════════════
+     SHARED PAGE HEADER HTML
+     Appears at the top of every non-cover page.
+  ═══════════════════════════════════════════════════════════════ */
+  function pageHeaderHTML(name) {
     return `
       <div class="page-header">
         <div class="header-brand">
@@ -94,12 +127,16 @@ import LOGO from '../../images/fitLogo.png';
         </div>
         <div class="header-right">
           <span class="header-report-type">Psychometric Assessment</span>
-          <span class="header-name">${name || '—'}</span>
-          <span class="header-date">${date}</span>
+          <span class="header-name">${name || "—"}</span>
+          <span class="header-date">${genLabel}</span>
         </div>
       </div>`;
   }
 
+  /* ═══════════════════════════════════════════════════════════════
+     SHARED PAGE FOOTER HTML
+     Appears at the bottom of every non-cover page.
+  ═══════════════════════════════════════════════════════════════ */
   const PAGE_FOOTER_HTML = `
     <div class="page-footer">
       <span class="footer-left">Dr. Antony Augusthy · Neurocognitive Psychologist</span>
@@ -107,24 +144,24 @@ import LOGO from '../../images/fitLogo.png';
       <span class="footer-confidential">Confidential</span>
     </div>`;
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Build the COVER page section
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     PAGE 1 — COVER
+  ═══════════════════════════════════════════════════════════════ */
   function buildCoverPage(profile) {
-    const name    = profile.name   || "—";
-    const email   = profile.email  || "—";
-    const gender  = profile.gender || "—";
-    const age     = profile.age    || "—";
+    const name     = profile.name      || "—";
+    const email    = profile.email     || "—";
+    const gender   = profile.gender    || "—";
+    const age      = profile.age       || "—";
     const testedOn = profile.createdAt
       ? new Date(profile.createdAt).toLocaleDateString("en-GB", {
-          day: "numeric", month: "long", year: "numeric" })
+          day: "numeric", month: "long", year: "numeric"
+        })
       : "—";
 
     const sec = document.createElement("section");
     sec.className = "page cover";
     sec.innerHTML = `
 
-      <!-- Top bar -->
       <div class="cover-topbar">
         <div class="cover-topbar-brand">
           <img src="${LOGO_SRC}" alt="Success Steps NLP Academy" height="42" />
@@ -133,18 +170,15 @@ import LOGO from '../../images/fitLogo.png';
         <span class="cover-topbar-confidential">Confidential</span>
       </div>
 
-      <!-- Title -->
       <div class="cover-title-band">
         <div class="cover-report-label">Psychometric Assessment Report</div>
         <h1>Understanding Your<br/><em>Mind &amp; Potential</em></h1>
       </div>
 
-      <!-- Hero image — centred -->
       <div class="cover-image-wrap">
-        <img src="${COVER_IMG_SRC}" alt="Assessment Cover" />
+        <img src="${COVER_IMG_SRC}" alt="Assessment Report Cover" />
       </div>
 
-      <!-- Subject meta -->
       <div class="cover-meta-strip">
         <div class="cover-meta-item">
           <div class="cover-meta-label">Name</div>
@@ -164,12 +198,10 @@ import LOGO from '../../images/fitLogo.png';
         </div>
       </div>
 
-      <!-- Taxonomy -->
       <div class="cover-taxonomy">
         <h2>Neuro-Cognitive · Emotional Intelligence<br/>Behaviour Competency Mapping</h2>
       </div>
 
-      <!-- Analyst -->
       <div class="cover-analyst">
         <div class="cover-analyst-avatar">🧠</div>
         <div class="cover-analyst-info">
@@ -179,7 +211,6 @@ import LOGO from '../../images/fitLogo.png';
         </div>
       </div>
 
-      <!-- Credentials -->
       <div class="cover-credentials">
         <span class="cover-cred-pill">ABNLP · USA</span>
         <span class="cover-cred-pill">ICF Executive Coach</span>
@@ -187,7 +218,6 @@ import LOGO from '../../images/fitLogo.png';
         <span class="cover-cred-pill">25+ International Certifications</span>
       </div>
 
-      <!-- Bottom bar -->
       <div class="cover-bottombar">
         <span>Success Steps NLP Academy, Thane, Mumbai</span>
         <span>${genLabel}</span>
@@ -196,41 +226,36 @@ import LOGO from '../../images/fitLogo.png';
     return sec;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Build SUMMARY page  (page 2 — test index + guidance note)
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     PAGE 2 — SUMMARY  (test index + guidance note)
+  ═══════════════════════════════════════════════════════════════ */
   function buildSummaryPage(tests, name) {
-    const sec = document.createElement("section");
-    sec.className = "page";
-    sec.innerHTML = pageHeaderHTML(name, genLabel);
-
-    const body = document.createElement("div");
-    body.className = "page-body";
-
-    // ── Table of tests ──
-    const tableRows = tests.map((test, i) => {
+    const tableRows = tests.map(function(test, i) {
       const subtests    = test.subtests || [];
-      const maxPossible = subtests.reduce((s, st) => s + (Number(st.max_score) || 0), 0);
-      const totalScore  = subtests.reduce((s, st) => s + (Number(st.raw_score) || 0), 0);
+      const maxPossible = subtests.reduce(function(s, st){ return s + (Number(st.max_score) || 0); }, 0);
+      const totalScore  = subtests.reduce(function(s, st){ return s + (Number(st.raw_score) || 0); }, 0);
       const pct         = maxPossible > 0 ? Math.round((totalScore / maxPossible) * 100) : 0;
-      const subtestCount = subtests.length;
       return `
         <tr>
           <td><span class="summary-sn">${i + 1}</span></td>
           <td style="font-weight:600;">${test.test_name}</td>
-          <td>${subtestCount} subtest${subtestCount !== 1 ? 's' : ''}</td>
-          <td>
-            <span class="summary-score-badge">${totalScore} / ${maxPossible} &nbsp;·&nbsp; ${pct}%</span>
-          </td>
+          <td>${subtests.length} subtest${subtests.length !== 1 ? "s" : ""}</td>
+          <td><span class="summary-score-badge">${totalScore} / ${maxPossible} &nbsp;·&nbsp; ${pct}%</span></td>
         </tr>`;
     }).join("");
 
+    const sec = document.createElement("section");
+    sec.className = "page";
+    sec.innerHTML = pageHeaderHTML(name);
+
+    const body = document.createElement("div");
+    body.className = "page-body";
     body.innerHTML = `
       <h2 class="section-title">Assessment Overview</h2>
       <p class="summary-intro">
-        The following assessments were conducted as part of your personalised
-        psychometric evaluation. Each test is detailed in the pages that follow,
-        with subtest breakdowns, scores, and individual feedback.
+        The following assessments were conducted as part of your personalised psychometric
+        evaluation. Each test is detailed in the pages that follow, with subtest breakdowns,
+        scores, and individual feedback.
       </p>
 
       <table class="summary-table">
@@ -245,7 +270,6 @@ import LOGO from '../../images/fitLogo.png';
         <tbody>${tableRows}</tbody>
       </table>
 
-      <!-- Guidance note -->
       <div class="guidance-card">
         <div class="guidance-header">
           <div class="guidance-icon">💙</div>
@@ -254,7 +278,6 @@ import LOGO from '../../images/fitLogo.png';
             Students · Parents · Teachers
           </div>
         </div>
-
         <div class="guidance-body">
           <p>
             We warmly encourage parents and teachers to carefully read and reflect on this
@@ -270,11 +293,10 @@ import LOGO from '../../images/fitLogo.png';
           </p>
           <p>
             If questions arise, our team is available to walk you through the findings in a
-            one-to-one counselling session, so the report translates into meaningful,
-            positive action.
+            one-to-one counselling session so the report translates into meaningful,
+            positive action for your child.
           </p>
         </div>
-
         <div class="guidance-sign">
           <div>
             <div class="guidance-sign-name">Dr. Antony Augusthy</div>
@@ -289,28 +311,25 @@ import LOGO from '../../images/fitLogo.png';
     return sec;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Build ONE test page section  (header + body + footer)
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     PAGE 3…N — ONE PAGE PER TEST
+  ═══════════════════════════════════════════════════════════════ */
   function buildTestPage(test, ti, name) {
     const subtests    = test.subtests || [];
-    const maxPossible = subtests.reduce((s, st) => s + (Number(st.max_score) || 0), 0);
-    const totalScore  = subtests.reduce((s, st) => s + (Number(st.raw_score) || 0), 0);
+    const maxPossible = subtests.reduce(function(s, st){ return s + (Number(st.max_score) || 0); }, 0);
+    const totalScore  = subtests.reduce(function(s, st){ return s + (Number(st.raw_score) || 0); }, 0);
 
     const sec = document.createElement("section");
     sec.className = "page";
+    sec.innerHTML = pageHeaderHTML(name);
 
-    // Header
-    sec.innerHTML = pageHeaderHTML(name, genLabel);
-
-    // Body
     const body = document.createElement("div");
     body.className = "page-body";
 
-    // Test heading
-    const heading = document.createElement("div");
-    heading.className = "test-block";
-    heading.innerHTML = `
+    // Test heading + charts
+    const testBlock = document.createElement("div");
+    testBlock.className = "test-block";
+    testBlock.innerHTML = `
       <div class="test-heading">
         <h3>${test.test_name}</h3>
         <span class="total-badge">Total: ${totalScore} / ${maxPossible}</span>
@@ -326,10 +345,10 @@ import LOGO from '../../images/fitLogo.png';
         </div>
       </div>`;
 
-    // Subtest cards grid
+    // Subtest cards
     const grid = document.createElement("div");
     grid.className = "subtests-grid";
-    subtests.forEach((st, si) => {
+    subtests.forEach(function(st, si) {
       const colour = COLOURS[si % COLOURS.length];
       const card   = document.createElement("div");
       card.className = "subtest-card";
@@ -348,57 +367,37 @@ import LOGO from '../../images/fitLogo.png';
       grid.appendChild(card);
     });
 
-    heading.appendChild(grid);
-    body.appendChild(heading);
+    testBlock.appendChild(grid);
+    body.appendChild(testBlock);
     sec.appendChild(body);
-
-    // Footer
     sec.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
-
     return sec;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Build CAREER page section
-  // ─────────────────────────────────────────────────────────────────
-  function buildCareerPage(careerItems, name) {
-    const sec = document.createElement("section");
-    sec.className = "page";
-    sec.innerHTML = pageHeaderHTML(name, genLabel);
-
-    const body = document.createElement("div");
-    body.className = "page-body";
-    body.innerHTML = `<h2 class="section-title">Career Recommendations</h2>
-      <ol id="careerList"></ol>`;
-    sec.appendChild(body);
-    sec.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
-
-    return sec;
-  }
-
-  // ─────────────────────────────────────────────────────────────────
-  //  Chart drawing
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     CHART DRAWING
+  ═══════════════════════════════════════════════════════════════ */
   function drawRadar(test, ti) {
-    const ctx      = document.getElementById(`radar_${ti}`);
+    const ctx      = document.getElementById("radar_" + ti);
     if (!ctx) return;
     const subtests = test.subtests || [];
     new Chart(ctx, {
       type: "radar",
       data: {
-        labels: subtests.map(s => s.subtest_name),
+        labels: subtests.map(function(s){ return s.subtest_name; }),
         datasets: [{
-          label: test.test_name,
-          data:  subtests.map(s => Number(s.raw_score) || 0),
+          label:                test.test_name,
+          data:                 subtests.map(function(s){ return Number(s.raw_score) || 0; }),
           backgroundColor:      "rgba(13,110,253,0.12)",
           borderColor:          "#0d6efd",
           pointBackgroundColor: "#0d6efd",
-          pointRadius: 3,
-          borderWidth: 2
+          pointRadius:          3,
+          borderWidth:          2
         }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive:          true,
+        maintainAspectRatio: false,
         scales: {
           r: {
             beginAtZero: true,
@@ -412,36 +411,44 @@ import LOGO from '../../images/fitLogo.png';
   }
 
   function drawBar(test, ti) {
-    const ctx      = document.getElementById(`bar_${ti}`);
+    const ctx      = document.getElementById("bar_" + ti);
     if (!ctx) return;
     const subtests = test.subtests || [];
 
-    const wrap = document.getElementById(`barWrap_${ti}`);
+    // Scale height to number of subtests so bars don't get crushed
+    const wrap = document.getElementById("barWrap_" + ti);
     if (wrap) wrap.style.height = Math.max(200, subtests.length * 36) + "px";
 
     new Chart(ctx, {
       type: "bar",
       data: {
-        labels: subtests.map(s => s.subtest_name),
+        labels: subtests.map(function(s){ return s.subtest_name; }),
         datasets: [{
-          data:            subtests.map(s => Number(s.raw_score) || 0),
-          backgroundColor: subtests.map((_, i) => COLOURS[i % COLOURS.length]),
-          borderRadius: 3, borderSkipped: false
+          data:            subtests.map(function(s){ return Number(s.raw_score) || 0; }),
+          backgroundColor: subtests.map(function(_, i){ return COLOURS[i % COLOURS.length]; }),
+          borderRadius:    3,
+          borderSkipped:   false
         }]
       },
       options: {
-        indexAxis: "y", responsive: true, maintainAspectRatio: false,
+        indexAxis:           "y",
+        responsive:          true,
+        maintainAspectRatio: false,
         scales: {
-          x: { beginAtZero: true, ticks: { stepSize: 5, font: { size: 9 } } },
+          x: {
+            beginAtZero: true,
+            ticks: { stepSize: 5, font: { size: 9 } }
+          },
           y: {
             ticks: {
               font: { size: 9 },
-              callback(val, i) {
-                const label = subtests[i]?.subtest_name || "";
+              callback: function(val, i) {
+                // Wrap long labels onto multiple lines
+                const label = (subtests[i] && subtests[i].subtest_name) || "";
                 const words = label.split(" ");
                 const lines = [];
-                let cur = "";
-                words.forEach(w => {
+                let cur     = "";
+                words.forEach(function(w) {
                   if ((cur + " " + w).trim().length <= 18) {
                     cur = (cur + " " + w).trim();
                   } else {
@@ -460,8 +467,8 @@ import LOGO from '../../images/fitLogo.png';
           legend: { display: false },
           tooltip: {
             callbacks: {
-              title: items => subtests[items[0].dataIndex]?.subtest_name || "",
-              label: item  => ` Score: ${item.raw}`
+              title: function(items){ return (subtests[items[0].dataIndex] || {}).subtest_name || ""; },
+              label: function(item){ return " Score: " + item.raw; }
             }
           }
         }
@@ -469,71 +476,79 @@ import LOGO from '../../images/fitLogo.png';
     });
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  //  Main load
-  // ─────────────────────────────────────────────────────────────────
+  /* ═══════════════════════════════════════════════════════════════
+     MAIN LOAD FUNCTION
+  ═══════════════════════════════════════════════════════════════ */
   async function load() {
+    // Guard — if no valid token, the error was already shown above
+    console.log("Report token at line 484:", reportToken);  // Debug log to verify token retrieval
+    if (!reportToken || !reportToken.startsWith("rt_")) return;
+
     try {
-      const res  = await fetch("/api/psychotest-results", {
-        headers: { "x-assessment-token": token }
-      });
+      // Fetch via our Astro proxy — PSYCHO_GAS_URL stays server-side only
+      const res  = await fetch("/api/print-results?rt=" + encodeURIComponent(reportToken));
       const data = await res.json();
+
       if (data.error) throw new Error(data.error);
 
       const profile = data.profile || {};
       const tests   = data.results || [];
       const root    = document.getElementById("reportRoot");
 
-      // 1. Cover page
+      // ── 1. Cover page ──────────────────────────────────────────
       root.appendChild(buildCoverPage(profile));
 
-      // 2. Summary page — test index + guidance note
+      // ── 2. Summary page (overview table + guidance note) ───────
       if (tests.length) {
         root.appendChild(buildSummaryPage(tests, profile.name));
       }
 
-      // 3. One page per test
+      // ── 3. One page per test ───────────────────────────────────
       if (!tests.length) {
         const empty = document.createElement("section");
         empty.className = "page";
-        empty.innerHTML = pageHeaderHTML(profile.name, genLabel);
-        empty.innerHTML += `<div class="page-body"><p style="color:#6c757d">No results available yet.</p></div>`;
+        empty.innerHTML = pageHeaderHTML(profile.name);
+        const emptyBody = document.createElement("div");
+        emptyBody.className = "page-body";
+        emptyBody.innerHTML = "<p style='color:#6c757d;padding-top:24px;'>No results available yet. Please check back shortly.</p>";
+        empty.appendChild(emptyBody);
         empty.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
         root.appendChild(empty);
       } else {
-        tests.forEach((test, ti) => {
+        tests.forEach(function(test, ti) {
           root.appendChild(buildTestPage(test, ti, profile.name));
         });
       }
 
-      // 4. Career page (only if data exists)
-      if (data.career && data.career.length) {
-        const careerSec = buildCareerPage(data.career, profile.name);
-        root.appendChild(careerSec);
-        const ol = careerSec.querySelector("#careerList");
-        data.career.forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = item;
-          ol.appendChild(li);
-        });
-      }
-
-      // 5. Show report, hide loader
+      // ── 4. Show report, hide loader ────────────────────────────
       document.getElementById("loadingState").style.display = "none";
       root.style.display = "block";
 
-      // 6. Draw charts AFTER elements are in DOM
-      await new Promise(r => setTimeout(r, 60));
-      tests.forEach((test, ti) => {
+      // ── 5. Draw charts AFTER elements are in the DOM ───────────
+      await new Promise(function(resolve){ setTimeout(resolve, 60); });
+      tests.forEach(function(test, ti) {
         drawRadar(test, ti);
         drawBar(test, ti);
       });
 
     } catch (err) {
       document.getElementById("loadingState").style.display = "none";
-      const el = document.getElementById("errorState");
-      el.style.display = "block";
-      el.textContent   = "Failed to load results: " + err.message;
+      const errEl = document.getElementById("errorState");
+      errEl.style.display = "block";
+
+      // Friendly messages for known error conditions
+      const msg = err.message || "";
+      let friendly = "Failed to load report. Please try again or contact support.";
+      if (msg.includes("not found"))      friendly = "This report link is invalid or has been removed.";
+      if (msg.includes("No results"))     friendly = "Your results are still being processed. Please try again in a few minutes.";
+      if (msg.includes("column missing")) friendly = "Report system configuration error. Please contact support.";
+
+      errEl.innerHTML =
+        "<p style='text-align:center;padding:60px 20px;color:#6c757d;'>" +
+          "<strong style='display:block;font-size:1.1rem;margin-bottom:8px;color:#1a1a2e;'>Could not load report</strong>" +
+          friendly + "<br/><br/>" +
+          "<a href='mailto:successtepsnlpa@gmail.com' style='color:#0d6efd;'>successtepsnlpa@gmail.com</a>" +
+        "</p>";
     }
   }
 

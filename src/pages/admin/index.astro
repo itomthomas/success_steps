@@ -1,0 +1,412 @@
+---
+// src/pages/admin/index.astro
+// Password-protected admin panel.
+// Server-side renders the login form or the full panel depending on cookie.
+export const prerender = false;
+
+const session = Astro.cookies.get("admin_session")?.value;
+const authed  = session === import.meta.env.ADMIN_PASSWORD;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Success Steps</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    body { background: #f0f2f5; font-family: 'Inter', system-ui, sans-serif; font-size: 0.9rem; }
+
+    /* ── Login ── */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      padding: 40px 36px; width: 100%; max-width: 360px;
+    }
+    .login-card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 22px; }
+
+    /* ── Shell ── */
+    .admin-header {
+      background: #1a1a2e; color: #fff;
+      padding: 12px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 2px solid #45a0f0;
+    }
+    .admin-header h1 { font-size: 0.95rem; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+    .admin-body { max-width: 1140px; margin: 28px auto; padding: 0 20px 80px; }
+
+    /* ── Stat cards ── */
+    .stat-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); padding: 18px 22px; }
+    .stat-val  { font-size: 1.9rem; font-weight: 700; line-height: 1; }
+    .stat-lbl  { font-size: 0.74rem; color: #6c757d; margin-top: 3px; }
+
+    /* ── Table ── */
+    .users-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow: hidden; }
+    .users-card .table { margin: 0; }
+    .users-card thead th {
+      font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase;
+      color: #6c757d; background: #f8f9fa; border-bottom: 1.5px solid #e9ecef;
+      padding: 10px 14px; font-weight: 600;
+    }
+    .users-card tbody td { padding: 11px 14px; vertical-align: middle; border-color: #f1f3f5; }
+    .users-card tbody tr:hover td { background: #f8f9ff; }
+
+    .status-pill {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 2px 9px; border-radius: 20px;
+    }
+    .pill-approved { background: #d1fae5; color: #065f46; }
+    .pill-pending  { background: #fef3c7; color: #92400e; }
+    .pill-other    { background: #f1f5f9; color: #475569; }
+
+    /* ── Report actions ── */
+    .btn-open {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; font-weight: 600; padding: 5px 12px;
+      border-radius: 20px; border: none;
+      background: #e8f0fe; color: #1a56db; cursor: pointer;
+      text-decoration: none; transition: background 0.15s;
+    }
+    .btn-open:hover { background: #c5d8fc; color: #1347b8; text-decoration: none; }
+
+    .btn-copy {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.76rem; padding: 5px 10px; border-radius: 20px;
+      border: 1.5px solid #dee2e6; background: #fff;
+      color: #495057; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-copy:hover  { border-color: #0d6efd; color: #0d6efd; }
+    .btn-copy.copied { border-color: #20c997; color: #0d9488; background: #d1fae5; }
+
+    .no-report { font-size: 0.76rem; color: #adb5bd; font-style: italic; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .filter-bar input,
+    .filter-bar select {
+      height: 36px; border: 1.5px solid #dee2e6; border-radius: 8px;
+      padding: 0 12px; font-size: 0.84rem; color: #1a1a2e;
+      background: #fff; outline: none; transition: border-color 0.15s;
+    }
+    .filter-bar input:focus,
+    .filter-bar select:focus { border-color: #0d6efd; }
+    .filter-bar input { flex: 1; min-width: 200px; }
+
+    /* ── Misc ── */
+    .section-heading {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; color: #6c757d; margin-bottom: 14px;
+    }
+    #tableLoading, #tableError { min-height: 120px; display: flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body>
+
+{authed ? (
+  <div id="adminShell">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <h1><i class="bi bi-shield-check me-2"></i>Success Steps — Admin Panel</h1>
+      <button class="btn btn-sm btn-outline-light" onclick="doLogout()">
+        <i class="bi bi-box-arrow-right me-1"></i>Logout
+      </button>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- Stats -->
+      <p class="section-heading">Overview</p>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-val text-primary"  id="statTotal">—</div>
+            <div class="stat-lbl">Total registrations</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-val text-success"  id="statReports">—</div>
+            <div class="stat-lbl">Reports available</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-val text-warning"  id="statPending">—</div>
+            <div class="stat-lbl">No report yet</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-val text-info"     id="statApproved">—</div>
+            <div class="stat-lbl">Approved users</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <p class="section-heading">Registered Users</p>
+
+      <div class="filter-bar">
+        <input  type="text" id="searchInput"  placeholder="Search name or email…" oninput="filterTable()" />
+        <select id="statusFilter" onchange="filterTable()">
+          <option value="">All statuses</option>
+          <option value="APPROVED">Approved</option>
+          <option value="PENDING">Pending</option>
+        </select>
+        <select id="reportFilter" onchange="filterTable()">
+          <option value="">All users</option>
+          <option value="yes">Has report</option>
+          <option value="no">No report yet</option>
+        </select>
+        <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+      </div>
+
+      <div id="tableLoading" class="text-muted">
+        <span><span class="spinner-border spinner-border-sm me-2"></span>Loading users…</span>
+      </div>
+      <div id="tableError" class="alert alert-danger d-none" style="min-height:auto"></div>
+
+      <div class="users-card d-none" id="usersCard">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th style="width:36px">#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Registered</th>
+                <th>Report</th>
+              </tr>
+            </thead>
+            <tbody id="usersTbody"></tbody>
+          </table>
+        </div>
+        <div class="px-3 py-2 border-top text-end">
+          <small class="text-muted" id="rowCountLabel"></small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+) : (
+
+  <!-- Login screen -->
+  <div class="login-wrap">
+    <div class="login-card">
+      <h2><i class="bi bi-shield-lock text-primary me-2"></i>Admin Login</h2>
+      <div id="loginError" class="alert alert-danger py-2 d-none mb-3" style="font-size:0.86rem"></div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold" for="pwInput">Password</label>
+        <input type="password" id="pwInput" class="form-control"
+               placeholder="Enter admin password"
+               onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+      </div>
+      <button class="btn btn-primary w-100 fw-semibold" onclick="doLogin()">
+        <span id="loginLabel">Login</span>
+      </button>
+    </div>
+  </div>
+
+)}
+
+<script is:inline>
+
+/* ═══════════════════════════════════════════════════════════
+   LOGIN / LOGOUT
+═══════════════════════════════════════════════════════════ */
+async function doLogin() {
+  const pw  = document.getElementById("pwInput")?.value?.trim();
+  const lbl = document.getElementById("loginLabel");
+  const err = document.getElementById("loginError");
+  if (!pw) return;
+
+  if (lbl) lbl.textContent = "Logging in…";
+  if (err) err.classList.add("d-none");
+
+  try {
+    const res  = await fetch("/api/admin/login", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.reload();
+    } else {
+      if (err) { err.textContent = "Incorrect password."; err.classList.remove("d-none"); }
+      if (lbl) lbl.textContent = "Login";
+    }
+  } catch {
+    if (err) { err.textContent = "Network error — please try again."; err.classList.remove("d-none"); }
+    if (lbl) lbl.textContent = "Login";
+  }
+}
+
+async function doLogout() {
+  await fetch("/api/admin/logout", { method: "POST" });
+  window.location.reload();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+var allUsers = [];
+
+async function loadUsers() {
+  var loading = document.getElementById("tableLoading");
+  var errEl   = document.getElementById("tableError");
+  var card    = document.getElementById("usersCard");
+  if (!loading) return;   // not in authed view
+
+  loading.style.display = "flex";
+  card.classList.add("d-none");
+  errEl.classList.add("d-none");
+
+  try {
+    var res  = await fetch("/api/admin/users");
+    if (res.status === 401) { window.location.reload(); return; }
+
+    // FIX: Check if the response is actually JSON before parsing
+    var contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Server returned HTML instead of data. (Status: " + res.status + ")");
+    }
+    
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    console.log("Fetched users:", data.users);
+    allUsers = data.users || [];
+    renderStats(allUsers);
+    renderTable(allUsers);
+
+  } catch (e) {
+    errEl.textContent = "Failed to load users: " + e.message;
+    errEl.classList.remove("d-none");
+  } finally {
+    loading.style.display = "none";
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════════ */
+function renderStats(users) {
+  document.getElementById("statTotal").textContent    = users.length;
+  document.getElementById("statReports").textContent  = users.filter(function(u){ return u.reportToken; }).length;
+  document.getElementById("statPending").textContent  = users.filter(function(u){ return !u.reportToken; }).length;
+  document.getElementById("statApproved").textContent = users.filter(function(u){ return u.status === "APPROVED"; }).length;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════════ */
+function renderTable(users) {
+  var tbody = document.getElementById("usersTbody");
+  var card  = document.getElementById("usersCard");
+  var lbl   = document.getElementById("rowCountLabel");
+  if (!tbody) return;
+
+  var origin = window.location.origin;
+
+  tbody.innerHTML = users.map(function(u, i) {
+    var date = u.createdAt
+      ? new Date(u.createdAt).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })
+      : "—";
+
+    var pillClass = u.status === "APPROVED" ? "pill-approved"
+                  : u.status === "PENDING"  ? "pill-pending"
+                  : "pill-other";
+
+    var reportUrl = u.reportToken
+      ? origin + "/assessment/print?rt=" + u.reportToken
+      : null;
+
+    var reportCell = reportUrl
+      ? '<div class="d-flex align-items-center gap-2 flex-wrap">' +
+          '<a href="' + reportUrl + '" target="_blank" class="btn-open">' +
+            '<i class="bi bi-box-arrow-up-right"></i> Open' +
+          '</a>' +
+          '<button class="btn-copy" data-url="' + reportUrl + '" onclick="copyLink(this)">' +
+            '<i class="bi bi-clipboard"></i> Copy link' +
+          '</button>' +
+        '</div>'
+      : '<span class="no-report">Not yet available</span>';
+
+    return '<tr' +
+      ' data-name="'   + (u.name  || "").toLowerCase() + '"' +
+      ' data-email="'  + (u.email || "").toLowerCase() + '"' +
+      ' data-status="' + (u.status || "") + '"' +
+      ' data-report="' + (u.reportToken ? "yes" : "no") + '">' +
+      '<td class="text-muted">' + (i + 1) + '</td>' +
+      '<td><strong>' + (u.name || "—") + '</strong></td>' +
+      '<td class="text-muted">' + (u.email || "—") + '</td>' +
+      '<td class="text-muted">' + (u.userType || "—") + '</td>' +
+      '<td><span class="status-pill ' + pillClass + '">' + (u.status || "—") + '</span></td>' +
+      '<td class="text-muted">' + date + '</td>' +
+      '<td>' + reportCell + '</td>' +
+      '</tr>';
+  }).join("");
+
+  card.classList.remove("d-none");
+  if (lbl) lbl.textContent = "Showing " + users.length + " user" + (users.length !== 1 ? "s" : "");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTER
+═══════════════════════════════════════════════════════════ */
+function filterTable() {
+  var q      = (document.getElementById("searchInput")?.value || "").toLowerCase();
+  var status = document.getElementById("statusFilter")?.value || "";
+  var report = document.getElementById("reportFilter")?.value  || "";
+
+  var filtered = allUsers.filter(function(u) {
+    var matchQ  = !q      || (u.name  || "").toLowerCase().includes(q)
+                           || (u.email || "").toLowerCase().includes(q);
+    var matchSt = !status || u.status === status;
+    var matchRp = !report || (report === "yes" ? !!u.reportToken : !u.reportToken);
+    return matchQ && matchSt && matchRp;
+  });
+
+  renderTable(filtered);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COPY LINK
+═══════════════════════════════════════════════════════════ */
+function copyLink(btn) {
+  var url = btn.getAttribute("data-url");
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(function() {
+    btn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+    btn.classList.add("copied");
+    setTimeout(function() {
+      btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy link';
+      btn.classList.remove("copied");
+    }, 2500);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+if (document.getElementById("adminShell")) {
+  loadUsers();
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>
