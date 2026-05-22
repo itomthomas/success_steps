@@ -708,6 +708,306 @@ body {
 .student-info p { font-size: 0.88rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; }
 
 /* ═══════════════════════════════════════════════════════════════════
+   CONFIGURABLE TEST PAGE LAYOUTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Test header band (themed per-test) ── */
+.test-header-band {
+  display: flex;
+  align-items: stretch;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  min-height: 88px;
+}
+
+.test-header-band-color {
+  /* background-color set inline via JS themeColor */
+  width: 6px;
+  flex-shrink: 0;
+}
+
+.test-header-band-content {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.test-header-band-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.2;
+  /* color set inline via JS themeColor */
+}
+
+/* ── Single chart panel (full-width, no image) ── */
+.chart-panel-full {
+  border: 1px solid var(--grey-rule);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 22px;
+}
+
+.chart-panel-full h6 {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--grey); margin-bottom: 12px;
+}
+
+/* ── Image + chart row ── */
+.test-visual-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  margin-bottom: 22px;
+  align-items: start;
+}
+
+.test-visual-row .test-image-panel {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--grey-rule);
+}
+
+.test-visual-row .test-image-panel img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.test-image-caption {
+  font-size: 0.66rem;
+  color: var(--grey);
+  text-align: center;
+  padding: 6px 8px;
+  border-top: 1px solid var(--grey-rule);
+  font-style: italic;
+}
+
+/* ── Layout: side_image — redesigned card ── */
+
+/* Outer wrapper: single-column stack, one card per row */
+.si-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The card itself */
+.si-card {
+  border: 1px solid var(--grey-rule);
+  border-top-width: 3px;   /* themed top accent */
+  border-left-width: 4px;  /* themed left accent */
+  border-radius: 10px;
+  overflow: hidden;
+  break-inside: avoid;
+  background: var(--paper);
+}
+
+/* ── Top section: name + score rows, full width ── */
+.si-card-top {
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--grey-rule);
+}
+
+.si-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.si-subtest-name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.si-score-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.si-score-text {
+  font-size: 0.82rem;
+  color: var(--grey);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.si-score-text strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+/* Mini progress bar inside score row */
+.score-mini-bar-wrap.si-bar {
+  flex: 1;
+  height: 6px;
+  margin: 0;   /* override any margin from the shared class */
+}
+
+/* ── Bottom section: image | bulleted feedback, 50/50 ── */
+.si-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 160px;
+}
+
+/* Left half — image */
+.si-image-half {
+  border-right: 1px solid var(--grey-rule);
+  background: var(--grey-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.si-image-half img {
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.si-thumb-placeholder {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: var(--grey);
+  border: 2px dashed;
+  border-radius: 6px;
+  margin: 12px;
+  width: calc(100% - 24px);
+}
+
+/* Right half — bulleted feedback */
+.si-feedback-half {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.si-feedback-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.si-bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.si-bullet-list li {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.55;
+  padding-left: 14px;
+  position: relative;
+}
+
+.si-bullet-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: currentColor;   /* inherits from parent, which gets themeColor via JS */
+  font-weight: 700;
+}
+
+/* ── Layout: full_width — one subtest per full row ── */
+.subtest-full-width {
+  border: 1px solid var(--grey-rule);
+  border-radius: 10px;
+  border-left-width: 4px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  break-inside: avoid;
+}
+
+.subtest-full-width .subtest-fw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
+.subtest-full-width .subtest-fw-score {
+  font-size: 0.78rem;
+  color: var(--grey);
+  margin-bottom: 8px;
+}
+
+.subtest-full-width .subtest-fw-feedback {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+/* ── Score bar (horizontal mini-bar inside subtest cards) ── */
+.score-mini-bar-wrap {
+  height: 6px;
+  background: var(--grey-rule);
+  border-radius: 4px;
+  margin: 8px 0 10px;
+  overflow: hidden;
+}
+
+.score-mini-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ── Vertical bar chart sizing ── */
+.chart-wrap-vertical {
+  position: relative;
+  height: 220px;
+}
+
+/* ── Shared subtest header / pill (reused across all layouts) ── */
+.subtest-name-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.subtest-score-text {
+  font-size: 0.76rem;
+  color: var(--grey);
+  margin-bottom: 5px;
+}
+.subtest-score-text strong { color: var(--ink); font-size: 0.88rem; }
+
+.subtest-feedback-text {
+  font-size: 0.76rem;
+  color: var(--grey);
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════ */
 @media (max-width: 620px) {
@@ -718,4 +1018,18 @@ body {
   .cover-topbar, .cover-title-band, .cover-image-wrap,
   .cover-taxonomy, .cover-analyst, .cover-credentials,
   .cover-bottombar { padding-left: 20px; padding-right: 20px; }
+  /* Configurable layouts */
+  .test-visual-row { grid-template-columns: 1fr; }
+  /* si-card: stack image above feedback on very small screens */
+  .si-card-body { grid-template-columns: 1fr; }
+  .si-image-half { border-right: none; border-bottom: 1px solid var(--grey-rule); min-height: 140px; }
+  .si-image-half img { min-height: 140px; }
+}
+
+@media print {
+  .test-visual-row        { grid-template-columns: 180px 1fr; }
+  .si-card                { break-inside: avoid; }
+  .subtest-full-width     { break-inside: avoid; }
+  /* Keep 50/50 split in print */
+  .si-card-body           { grid-template-columns: 1fr 1fr; }
 }
