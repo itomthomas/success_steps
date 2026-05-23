@@ -506,7 +506,7 @@ body {
 }
 .subtest-score { font-size: 0.76rem; color: var(--grey); margin-bottom: 5px; }
 .subtest-score strong { color: var(--ink); font-size: 0.88rem; }
-.subtest-feedback { font-size: 0.76rem; color: var(--grey); line-height: 1.55; }
+.subtest-feedback { font-size: 0.76rem;  line-height: 1.55; }
 
 /* ═══════════════════════════════════════════════════════════════════
    SUMMARY PAGE  (page 2 — test index + guidance note)
@@ -842,18 +842,24 @@ body {
   overflow: hidden;
   display: flex;
   align-items: stretch;
+  width: 100%; /* Keeps layout anchored to the exact sheet percentage */
+}
+
+/* Inner container isolates the image aspect ratio */
+.si-image-container {
+  width: 100%;
+  position: relative;
 }
 
 /* Image fills the full half — width/height set inline by JS */
 .si-image-half img {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;   /* Overrides giant native width files */
+  height: 100% !important;  /* Fills the height boundaries cleanly */
   min-height: 180px;
   max-height: 320px;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;        /* Clips wide edges without breaking grid proportions */
+  object-position: center;  /* removed earlier option center top to be used with object-fit: cover */
   display: block;
-  margin-left: 20px;
 }
 
 /* Right half — bulleted feedback */

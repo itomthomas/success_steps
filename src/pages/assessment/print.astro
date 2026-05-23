@@ -333,9 +333,12 @@ import LOGO    from '../../images/fitLogo.png';
 
       // Per-subtest image URL — falls back to blank if not set
       var stImgUrl = (subtestImageUrls[si] || "").trim();
-      var imgWidthStyle = 'width:' + imageSizePct + '%;height:100%;object-fit:cover;display:block;';
+      
+      // FIX 1: Removed inline 'width' percentage from the img tag itself. 
+      // It should just fill 100% of its available container space.
+     // var imgWidthStyle = 'width:100%;height:100%;object-fit:cover;display:block;';
       var thumbHTML = stImgUrl
-        ? '<img src="' + stImgUrl + '" alt="' + st.subtest_name + '" style="' + imgWidthStyle + '" />'
+        ? '<img src="' + stImgUrl + '" alt="' + st.subtest_name + '" style="' + '" />'
         : '';   // blank → triggers cards fallback below
 
       var bulletItems = feedbackToBullets(st.feedback);
@@ -387,7 +390,9 @@ import LOGO    from '../../images/fitLogo.png';
         '</div>' +
         /* ── Bottom: image | bullets, widths set by imageSizePct ── */
         '<div class="si-card-body" style="grid-template-columns:' + imageSizePct + '% ' + feedbackPct + '">' +
-          '<div class="si-image-half">' + thumbHTML + '</div>' +
+          '<div class="si-image-half">' + 
+             '<div class="si-image-container">' + thumbHTML + '</div>' + 
+          '</div>' +
           '<div class="si-feedback-half">' +
             '<div class="si-feedback-label" style="color:' + colour + '">Feedback</div>' +
             '<ul class="si-bullet-list">' + bulletItems + '</ul>' +
@@ -532,13 +537,57 @@ import LOGO    from '../../images/fitLogo.png';
     var ctx        = document.getElementById("chart_" + ti);
     if (!ctx) return;
 
-    if (chartType === "radar") {
-      drawRadarChart(ctx, test.test_name, labels, scores, themeColor);
-    } else {
-      drawVerticalBarChart(ctx, labels, scores, themeColor, subtests);
+    switch (chartType) {
+        case "radar":
+          drawRadarChart(ctx, test.test_name, labels, scores, themeColor);
+          break;
+        case "pie":
+          drawPieChart(ctx, test.test_name, labels, scores, themeColor, subtests);
+          break;
+        default:
+          drawVerticalBarChart(ctx, labels, scores, themeColor, subtests);
     }
   }
+  
+    /* ── Pie Chart ── */
+    function drawPieChart(ctx, testName, labels, scores, themeColor, subtests) {
+      // Generates different opacity steps for slices so they are distinguishable
+      const backgroundColors = scores.map((_, i) => {
+        const opacity = 0.9 - (i * 0.15) > 0.2 ? 0.9 - (i * 0.15) : 0.2;
+        return hexToRgba(themeColor, opacity);
+      });
 
+      new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: labels,
+          datasets: [{
+            label:           "Score",
+            data:            scores,
+            backgroundColor: backgroundColors,
+            borderColor:     "#ffffff",
+            borderWidth:     2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: "bottom",
+              labels: { font: { size: 9 }, boxWidth: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(items){ return (subtests[items[0].dataIndex] || {}).subtest_name || ""; },
+                label: function(item){ return " Score: " + item.raw; }
+              }
+            }
+          }
+        }
+      });
+    }
+  
   /* ── Radar ── */
   function drawRadarChart(ctx, testName, labels, scores, themeColor) {
     new Chart(ctx, {
