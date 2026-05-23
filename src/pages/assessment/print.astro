@@ -5,7 +5,7 @@
 //
 // Per-test display is driven by the "Test_Display_Config" sheet in GAS:
 //   Image_URL      → test header image (path in /public or full https URL)
-//   Chart_Type     → bar_vertical | bar_horizontal | radar | auto
+//   Chart_Type     → bar_vertical | radar | auto  (bar_horizontal removed)
 //   Theme_Color    → hex colour for the test band and chart
 //   Subtest_Layout → side_image | cards | full_width
 //   Section_Color  → light background tint for the test band
@@ -138,15 +138,7 @@ import LOGO    from '../../images/fitLogo.png';
     return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     HELPER: resolve chart type from config + subtest count
-     "auto" → radar if ≥4 subtests, bar_vertical if ≤3
-  ═══════════════════════════════════════════════════════════════ */
-  function resolveChartType(display, subtestCount) {
-    var ct = (display && display.chartType) || "auto";
-    if (ct === "auto") return subtestCount >= 4 ? "radar" : "bar_vertical";
-    return ct;
-  }
+
 
   /* ═══════════════════════════════════════════════════════════════
      PAGE 1 — COVER
@@ -329,7 +321,7 @@ import LOGO    from '../../images/fitLogo.png';
      └─────────────────────┴───────────────────────────────┘
      One card per row — no grid wrapping.
   */
-  function renderSubtestsSideImage(subtests, themeColor, testImageUrl) {
+  function renderSubtestsSideImage(subtests, themeColor, subtestImageUrls, imageSizePct) {
     var wrap = document.createElement("div");
     wrap.className = "si-cards-wrap";
 
@@ -339,12 +331,39 @@ import LOGO    from '../../images/fitLogo.png';
       var rawS   = Number(st.raw_score) || 0;
       var pct    = Math.min(100, Math.round((rawS / maxS) * 100));
 
-      var thumbHTML = testImageUrl
-        ? '<img src="' + testImageUrl + '" alt="' + st.subtest_name + '" />'
-        : '<div class="si-thumb-placeholder" style="border-color:' + colour + '">🧠</div>';
+      // Per-subtest image URL — falls back to blank if not set
+      var stImgUrl = (subtestImageUrls[si] || "").trim();
+      var imgWidthStyle = 'width:' + imageSizePct + '%;height:100%;object-fit:cover;display:block;';
+      var thumbHTML = stImgUrl
+        ? '<img src="' + stImgUrl + '" alt="' + st.subtest_name + '" style="' + imgWidthStyle + '" />'
+        : '';   // blank → triggers cards fallback below
 
       var bulletItems = feedbackToBullets(st.feedback);
 
+      // If no image URL for this subtest → render as a standard card (cards fallback)
+      if (!stImgUrl) {
+        var fallbackCard = document.createElement("div");
+        fallbackCard.className = "subtest-card";
+        fallbackCard.style.borderLeftColor = colour;
+        fallbackCard.innerHTML =
+          '<div class="subtest-card-header">' +
+            '<h4>' + st.subtest_name + '</h4>' +
+            '<span class="level-pill" style="background:' + colour + '">' + (st.level_label || "—") + '</span>' +
+          '</div>' +
+          '<div class="subtest-score">' +
+            'Score: <strong>' + st.raw_score + '</strong>' +
+            '<span style="color:#adb5bd"> / ' + st.max_score + '</span>' +
+            '&nbsp;<span style="color:#adb5bd">(' + (st.score_range || "") + ')</span>' +
+          '</div>' +
+          '<div class="score-mini-bar-wrap"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
+          '<div class="subtest-feedback">' + (st.feedback || "—") + '</div>';
+        wrap.appendChild(fallbackCard);
+        return;   // skip si-card for this subtest
+      }
+
+      // Has image → full si-card with image | bullets
+      // image-half width is controlled by imageSizePct from sheet
+      var feedbackPct = (100 - imageSizePct) + "%";
       var card = document.createElement("div");
       card.className = "si-card";
       card.style.borderLeftColor = colour;
@@ -366,8 +385,8 @@ import LOGO    from '../../images/fitLogo.png';
             '<div class="score-mini-bar-wrap si-bar"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
           '</div>' +
         '</div>' +
-        /* ── Bottom: image | bullets, 50/50 split ── */
-        '<div class="si-card-body">' +
+        /* ── Bottom: image | bullets, widths set by imageSizePct ── */
+        '<div class="si-card-body" style="grid-template-columns:' + imageSizePct + '% ' + feedbackPct + '">' +
           '<div class="si-image-half">' + thumbHTML + '</div>' +
           '<div class="si-feedback-half">' +
             '<div class="si-feedback-label" style="color:' + colour + '">Feedback</div>' +
@@ -410,19 +429,42 @@ import LOGO    from '../../images/fitLogo.png';
   }
 
   /* ═══════════════════════════════════════════════════════════════
-     PAGE 3…N — ONE PAGE PER TEST (configurable)
+     HELPER — resolve chart type (bar_vertical | radar only)
+     "auto" → radar if ≥4 subtests, bar_vertical otherwise
+     bar_horizontal is removed; any old value maps to bar_vertical.
+  ═══════════════════════════════════════════════════════════════ */
+  function resolveChartType(display, subtestCount) {
+    var ct = (display && display.chartType) || "bar_vertical";
+    if (ct === "auto")          return subtestCount >= 4 ? "radar" : "bar_vertical";
+    if (ct === "bar_horizontal") return "bar_vertical";   // removed — always vertical
+    return ct;   // "bar_vertical" | "radar"
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     PAGE 3…N — ONE PAGE PER TEST
+     Rules:
+       a. No test-image-panel — chart is always full-width below band
+       b. Single chart, type from sheet, default bar_vertical
+       c. bar_vertical only — fixed medium bar width
+       d. ≤2 subtests → no chart row at all
+       e. Per-subtest imageUrl from display.subtestImageUrls[]
+          blank url for a subtest → falls back to cards style for that card
+       f. Image size % from display.imageSizePct (default 45)
   ═══════════════════════════════════════════════════════════════ */
   function buildTestPage(test, ti, name) {
-    var subtests      = test.subtests || [];
-    var display       = test.display  || {};
-    var themeColor    = display.themeColor    || "#0d6efd";
-    var sectionColor  = display.sectionColor  || "#f0f7ff";
-    var imageUrl      = display.imageUrl      || "";
-    var subtestLayout = display.subtestLayout || "cards";
-    var chartType     = resolveChartType(display, subtests.length);
+    var subtests         = test.subtests || [];
+    var display          = test.display  || {};
+    var themeColor       = display.themeColor       || "#0d6efd";
+    var sectionColor     = display.sectionColor     || "#f0f7ff";
+    var subtestLayout    = display.subtestLayout    || "cards";
+    var chartType        = resolveChartType(display, subtests.length);
+    var imageSizePct     = Number(display.imageSizePct) || 45;
+    // Per-subtest image URLs: array aligned to subtests array
+    var subtestImageUrls = display.subtestImageUrls || [];
 
     var maxPossible = subtests.reduce(function(s, st){ return s + (Number(st.max_score) || 0); }, 0);
     var totalScore  = subtests.reduce(function(s, st){ return s + (Number(st.raw_score) || 0); }, 0);
+    var showChart   = subtests.length > 2;   // rule d: skip chart for ≤2 subtests
 
     var sec = document.createElement("section");
     sec.className = "page";
@@ -431,9 +473,9 @@ import LOGO    from '../../images/fitLogo.png';
     var body = document.createElement("div");
     body.className = "page-body";
 
-    /* ── Test header band ── */
-    var bandSection = document.createElement("div");
-    bandSection.innerHTML =
+    /* ── a. Test header band ── */
+    var bandDiv = document.createElement("div");
+    bandDiv.innerHTML =
       '<div class="test-header-band">' +
         '<div class="test-header-band-color" style="background:' + themeColor + '"></div>' +
         '<div class="test-header-band-content" style="background:' + sectionColor + '">' +
@@ -443,48 +485,29 @@ import LOGO    from '../../images/fitLogo.png';
           '</span>' +
         '</div>' +
       '</div>';
-    body.appendChild(bandSection);
+    body.appendChild(bandDiv);
 
-    /* ── Visual row: image (if configured) + chart ── */
-    var visualRow = document.createElement("div");
-
-    if (imageUrl) {
-      /* Image + chart side-by-side */
-      visualRow.className = "test-visual-row";
-      visualRow.innerHTML =
-        '<div class="test-image-panel">' +
-          '<img src="' + imageUrl + '" alt="' + test.test_name + '" />' +
-          '<div class="test-image-caption">' + test.test_name + '</div>' +
-        '</div>' +
-        '<div class="chart-panel-full">' +
-          '<h6>' + (chartType === "radar" ? "Profile Overview" : "Subtest Scores") + '</h6>' +
-          '<div class="' + (chartType === "bar_vertical" ? "chart-wrap-vertical" : "chart-wrap") + '">' +
-            '<canvas id="mainchart_' + ti + '"></canvas>' +
-          '</div>' +
+    /* ── b/c/d. Chart — full-width, single, only when >2 subtests ── */
+    if (showChart) {
+      var chartDiv = document.createElement("div");
+      chartDiv.className = "chart-panel-full";
+      chartDiv.innerHTML =
+        '<h6>' + (chartType === "radar" ? "Profile Overview" : "Subtest Scores") + '</h6>' +
+        '<div class="chart-wrap-vertical">' +
+          '<canvas id="chart_' + ti + '"></canvas>' +
         '</div>';
-    } else {
-      /* No image → full-width chart with both radar + bar side by side */
-      visualRow.className = "charts-row";
-      visualRow.innerHTML =
-        '<div class="chart-card">' +
-          '<h6>Profile Overview</h6>' +
-          '<div class="chart-wrap"><canvas id="radar_' + ti + '"></canvas></div>' +
-        '</div>' +
-        '<div class="chart-card">' +
-          '<h6>Subtest Scores</h6>' +
-          '<div class="chart-wrap" id="barWrap_' + ti + '"><canvas id="bar_' + ti + '"></canvas></div>' +
-        '</div>';
+      body.appendChild(chartDiv);
     }
-    body.appendChild(visualRow);
 
-    /* ── Subtest section ── */
+    /* ── e/f. Subtest cards ── */
     var subtestSection = document.createElement("div");
     if (subtestLayout === "side_image") {
-      subtestSection.appendChild(renderSubtestsSideImage(subtests, themeColor, imageUrl));
+      subtestSection.appendChild(
+        renderSubtestsSideImage(subtests, themeColor, subtestImageUrls, imageSizePct)
+      );
     } else if (subtestLayout === "full_width") {
       subtestSection.appendChild(renderSubtestsFullWidth(subtests, themeColor));
     } else {
-      /* default: cards */
       subtestSection.appendChild(renderSubtestsCards(subtests, themeColor));
     }
     body.appendChild(subtestSection);
@@ -495,39 +518,24 @@ import LOGO    from '../../images/fitLogo.png';
   }
 
   /* ═══════════════════════════════════════════════════════════════
-     CHART DRAWING  — unified, handles all chart types
+     CHART DRAWING — single chart per test, bar_vertical or radar
   ═══════════════════════════════════════════════════════════════ */
   function drawCharts(test, ti) {
     var subtests   = test.subtests || [];
+    if (subtests.length <= 2) return;   // rule d: no chart for ≤2 subtests
+
     var display    = test.display  || {};
     var themeColor = display.themeColor || "#0d6efd";
     var chartType  = resolveChartType(display, subtests.length);
-    var imageUrl   = display.imageUrl || "";
     var labels     = subtests.map(function(s){ return s.subtest_name; });
     var scores     = subtests.map(function(s){ return Number(s.raw_score) || 0; });
+    var ctx        = document.getElementById("chart_" + ti);
+    if (!ctx) return;
 
-    if (imageUrl) {
-      /* Single chart canvas: mainchart_ti */
-      var ctx = document.getElementById("mainchart_" + ti);
-      if (!ctx) return;
-
-      if (chartType === "radar") {
-        drawRadarChart(ctx, test.test_name, labels, scores, themeColor);
-      } else if (chartType === "bar_vertical") {
-        drawVerticalBarChart(ctx, labels, scores, themeColor, subtests);
-      } else if (chartType === "bar_horizontal") {
-        drawHorizontalBarChart(ctx, labels, scores, themeColor, subtests, "barWrap_" + ti);
-      } else {
-        drawVerticalBarChart(ctx, labels, scores, themeColor, subtests);
-      }
+    if (chartType === "radar") {
+      drawRadarChart(ctx, test.test_name, labels, scores, themeColor);
     } else {
-      /* Dual charts: radar_ti + bar_ti */
-      var radarCtx = document.getElementById("radar_" + ti);
-      var barCtx   = document.getElementById("bar_"   + ti);
-      var barWrap  = document.getElementById("barWrap_" + ti);
-
-      if (radarCtx) drawRadarChart(radarCtx, test.test_name, labels, scores, themeColor);
-      if (barCtx)   drawHorizontalBarChart(barCtx, labels, scores, themeColor, subtests, "barWrap_" + ti);
+      drawVerticalBarChart(ctx, labels, scores, themeColor, subtests);
     }
   }
 
@@ -561,7 +569,7 @@ import LOGO    from '../../images/fitLogo.png';
     });
   }
 
-  /* ── Vertical bar (like expected output) ── */
+  /* ── Vertical bar — fixed medium bar width (rule c) ── */
   function drawVerticalBarChart(ctx, labels, scores, themeColor, subtests) {
     new Chart(ctx, {
       type: "bar",
@@ -574,7 +582,8 @@ import LOGO    from '../../images/fitLogo.png';
           borderColor:     themeColor,
           borderWidth:     1.5,
           borderRadius:    4,
-          borderSkipped:   false
+          borderSkipped:   false,
+          barThickness:    28   /* fixed medium width — not auto-sized */
         }]
       },
       options: {
@@ -587,63 +596,6 @@ import LOGO    from '../../images/fitLogo.png';
           y: {
             beginAtZero: true,
             ticks: { stepSize: 5, font: { size: 9 } }
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              title: function(items){ return (subtests[items[0].dataIndex] || {}).subtest_name || ""; },
-              label: function(item){ return " Score: " + item.raw; }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  /* ── Horizontal bar ── */
-  function drawHorizontalBarChart(ctx, labels, scores, themeColor, subtests, wrapId) {
-    /* Dynamic height based on number of subtests */
-    if (wrapId) {
-      var wrap = document.getElementById(wrapId);
-      if (wrap) wrap.style.height = Math.max(200, subtests.length * 36) + "px";
-    }
-
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [{
-          data:            scores,
-          backgroundColor: scores.map(function(_, i){
-            return i === 0 ? themeColor : hexToRgba(themeColor, 0.55 + i * 0.08);
-          }),
-          borderRadius:    3,
-          borderSkipped:   false
-        }]
-      },
-      options: {
-        indexAxis: "y",
-        responsive: true, maintainAspectRatio: false,
-        scales: {
-          x: { beginAtZero: true, ticks: { stepSize: 5, font: { size: 9 } } },
-          y: {
-            ticks: {
-              font: { size: 9 },
-              callback: function(val, i) {
-                var label = (subtests[i] && subtests[i].subtest_name) || "";
-                var words = label.split(" ");
-                var lines = []; var cur = "";
-                words.forEach(function(w){
-                  if ((cur + " " + w).trim().length <= 18) { cur = (cur + " " + w).trim(); }
-                  else { if (cur) lines.push(cur); cur = w; }
-                });
-                if (cur) lines.push(cur);
-                return lines;
-              }
-            },
-            grid: { display: false }
           }
         },
         plugins: {

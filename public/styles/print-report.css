@@ -757,36 +757,7 @@ body {
   text-transform: uppercase; color: var(--grey); margin-bottom: 12px;
 }
 
-/* ── Image + chart row ── */
-.test-visual-row {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 16px;
-  margin-bottom: 22px;
-  align-items: start;
-}
-
-.test-visual-row .test-image-panel {
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--grey-rule);
-}
-
-.test-visual-row .test-image-panel img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  display: block;
-}
-
-.test-image-caption {
-  font-size: 0.66rem;
-  color: var(--grey);
-  text-align: center;
-  padding: 6px 8px;
-  border-top: 1px solid var(--grey-rule);
-  font-style: italic;
-}
+/* test-visual-row and test-image-panel removed (rule a) */
 
 /* ── Layout: side_image — redesigned card ── */
 
@@ -855,43 +826,34 @@ body {
   margin: 0;   /* override any margin from the shared class */
 }
 
-/* ── Bottom section: image | bulleted feedback, 50/50 ── */
+/* ── Bottom section: image | bulleted feedback ──
+   grid-template-columns is set inline by JS using imageSizePct from sheet.
+   Default 45% image / 55% feedback. */
 .si-card-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 160px;
+  /* columns set inline: e.g. style="grid-template-columns:45% 55%" */
+  min-height: 180px;
 }
 
 /* Left half — image */
 .si-image-half {
   border-right: 1px solid var(--grey-rule);
   background: var(--grey-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+  display: flex;
+  align-items: stretch;
 }
 
+/* Image fills the full half — width/height set inline by JS */
 .si-image-half img {
   width: 100%;
   height: 100%;
-  min-height: 160px;
+  min-height: 180px;
+  max-height: 320px;
   object-fit: cover;
+  object-position: center top;
   display: block;
-}
-
-.si-thumb-placeholder {
-  width: 100%;
-  min-height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  color: var(--grey);
-  border: 2px dashed;
-  border-radius: 6px;
-  margin: 12px;
-  width: calc(100% - 24px);
+  margin-left: 20px;
 }
 
 /* Right half — bulleted feedback */
@@ -980,10 +942,10 @@ body {
   transition: width 0.3s ease;
 }
 
-/* ── Vertical bar chart sizing ── */
+/* ── Single full-width chart panel — bar_vertical or radar ── */
 .chart-wrap-vertical {
   position: relative;
-  height: 220px;
+  height: 260px;   /* tall enough for ≥3 subtests at medium bar width */
 }
 
 /* ── Shared subtest header / pill (reused across all layouts) ── */
@@ -1018,8 +980,6 @@ body {
   .cover-topbar, .cover-title-band, .cover-image-wrap,
   .cover-taxonomy, .cover-analyst, .cover-credentials,
   .cover-bottombar { padding-left: 20px; padding-right: 20px; }
-  /* Configurable layouts */
-  .test-visual-row { grid-template-columns: 1fr; }
   /* si-card: stack image above feedback on very small screens */
   .si-card-body { grid-template-columns: 1fr; }
   .si-image-half { border-right: none; border-bottom: 1px solid var(--grey-rule); min-height: 140px; }
@@ -1027,9 +987,9 @@ body {
 }
 
 @media print {
-  .test-visual-row        { grid-template-columns: 180px 1fr; }
+  /* test-visual-row removed — chart is always full-width (rule a) */
   .si-card                { break-inside: avoid; }
   .subtest-full-width     { break-inside: avoid; }
-  /* Keep 50/50 split in print */
-  .si-card-body           { grid-template-columns: 1fr 1fr; }
+  /* si-card-body columns are set inline by JS (imageSizePct from sheet) */
+  /* Do NOT override grid-template-columns here — it fights the inline style */
 }
