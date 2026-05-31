@@ -13,7 +13,7 @@
 export const prerender = false;
 
 import { Image } from 'astro:assets';
-import pdfMain from '../../images/pdf_Front1.jpg';
+//import pdfMain from '../../images/pdf_Front1.jpg';
 import LOGO    from '../../images/fitLogo.png';
 ---
 
@@ -50,7 +50,7 @@ import LOGO    from '../../images/fitLogo.png';
 
       <!-- Astro-resolved image paths exposed to client JS via data attributes -->
       <span id="__logoSrc"     data-src={LOGO.src}    style="display:none"></span>
-      <span id="__coverImgSrc" data-src={pdfMain.src}  style="display:none"></span>
+      <span id="__coverImgSrc" data-src=/images/pdfreport/brain-mapping-neurosience.webp  style="display:none"></span>
 
       <!-- All pages injected here by JS -->
       <div id="reportRoot" style="display:none;"></div>
