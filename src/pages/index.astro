@@ -6,6 +6,7 @@ import bgHero from '../images/newbg.webp';
 import brainLobes from '../images/brain.png';
 import ImageGallery from '../components/ImageGallery.astro';
 // import testifyplaceholder from '../images/testimonial-1.jpg';
+const serverGasUrl = import.meta.env.CONTACT_FORM_GS_API;
 export const prerender = true;  // keeping this page static for blazing fast load and SEO benefits
 ---
 
@@ -513,8 +514,8 @@ export const prerender = true;  // keeping this page static for blazing fast loa
   }
 </style>
 
-<script>
-  const scriptURL = import.meta.env.CONTACT_FORM_GS_API;
+<script define:vars={{ scriptURL: serverGasUrl }}>
+  console.log('Using Google Script URL:', scriptURL);
   // ─────────────────────────────────────────────────────────
 
   // Record page load time for timing trap
