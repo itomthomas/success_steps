@@ -514,8 +514,7 @@ export const prerender = true;  // keeping this page static for blazing fast loa
 </style>
 
 <script>
-  // ── CONFIG: paste your Apps Script deployment URL here ────
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbySi_kLWhxXNSjtfOzUnjdFsurLcGP40XFXrZiPX5JhRCs6DH2qsR06rbMGdQqL5Lln/exec';
+  const scriptURL = import.meta.env.CONTACT_FORM_GS_API;
   // ─────────────────────────────────────────────────────────
 
   // Record page load time for timing trap
@@ -594,26 +593,26 @@ export const prerender = true;  // keeping this page static for blazing fast loa
     btnText.classList.add('d-none');
     messageDiv.classList.add('d-none');
 
-    // Build JSON payload — matches what Code.gs expects via e.parameter
-    const payload = {
-      name:          form.querySelector('[name="name"]').value.trim(),
-      phone:         form.querySelector('[name="phone"]').value.trim(),
-      country:       form.querySelector('[name="country"]').value,
-      country_other: countryOtherInput.value.trim(),
-      email:         form.querySelector('[name="email"]').value.trim(),
-      service:       form.querySelector('[name="service"]').value,
-      message:       form.querySelector('[name="message"]').value.trim(),
-      honeypot:      form.honeypot.value,  // server-side honeypot check too
-    };
+    // Change your payload creation to use standard URL encoding parameters
+    const payload = new URLSearchParams();
+    payload.append('name', form.querySelector('[name="name"]').value.trim());
+    payload.append('phone', form.querySelector('[name="phone"]').value.trim());
+    payload.append('email', form.querySelector('[name="email"]').value.trim());
+    payload.append('country', form.querySelector('[name="country"]').value);
+    payload.append('country_other', countryOtherInput.value.trim());
+    payload.append('service', form.querySelector('[name="service"]').value);
+    payload.append('message', form.querySelector('[name="message"]').value.trim());
+    payload.append('honeypot', form.honeypot.value);
 
     try {
       const response = await fetch(scriptURL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+        body: payload.toString(),
       });
 
-      const result = await response.json();
+      // Because you are passing text parameters, Google cleanly redirects and responds!
+      const result = await response.json(); 
 
       if (result.success) {
         showMessage("Thank you! We'll contact you within 24 hours.", 'success');
@@ -624,7 +623,7 @@ export const prerender = true;  // keeping this page static for blazing fast loa
       }
     } catch (error) {
       console.error('ERROR!', error.message);
-      showMessage('Oops! Something went wrong. Please try again.', 'error');
+      showMessage('Oops! Something went wrong. Please try again in some time.', 'error');
     } finally {
       submitBtn.disabled = false;
       spinner.classList.add('d-none');
