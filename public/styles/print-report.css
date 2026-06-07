@@ -954,6 +954,12 @@ body {
   height: 260px;   /* tall enough for ≥3 subtests at medium bar width */
 }
 
+/* ── Horizontal bar — height is set dynamically by JS (40px × subtests) ── */
+.chart-wrap-horizontal {
+  position: relative;
+  min-height: 160px;   /* JS overrides this inline; acts as floor */
+}
+
 /* ── Shared subtest header / pill (reused across all layouts) ── */
 .subtest-name-text {
   font-size: 0.88rem;

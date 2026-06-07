@@ -5,7 +5,7 @@
 //
 // Per-test display is driven by the "Test_Display_Config" sheet in GAS:
 //   Image_URL      → test header image (path in /public or full https URL)
-//   Chart_Type     → bar_vertical | radar | auto  (bar_horizontal removed)
+//   Chart_Type     → bar_vertical | radar | bar_horizontal 
 //   Theme_Color    → hex colour for the test band and chart
 //   Subtest_Layout → side_image | cards | full_width
 //   Section_Color  → light background tint for the test band
@@ -436,13 +436,12 @@ import LOGO    from '../../images/fitLogo.png';
   /* ═══════════════════════════════════════════════════════════════
      HELPER — resolve chart type (bar_vertical | radar only)
      "auto" → radar if ≥4 subtests, bar_vertical otherwise
-     bar_horizontal is removed; any old value maps to bar_vertical.
+     bar_horizontal = horizontal bar chart.
   ═══════════════════════════════════════════════════════════════ */
   function resolveChartType(display, subtestCount) {
     var ct = (display && display.chartType) || "bar_vertical";
     if (ct === "auto")          return subtestCount >= 4 ? "radar" : "bar_vertical";
-    if (ct === "bar_horizontal") return "bar_vertical";   // removed — always vertical
-    return ct;   // "bar_vertical" | "radar"
+    return ct;   // "bar_vertical" | "bar_horizontal" | "radar"
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -498,7 +497,8 @@ import LOGO    from '../../images/fitLogo.png';
       chartDiv.className = "chart-panel-full";
       chartDiv.innerHTML =
         '<h6>' + (chartType === "radar" ? "Profile Overview" : "Subtest Scores") + '</h6>' +
-        '<div class="chart-wrap-vertical">' +
+        '<div class="' + (chartType === "bar_horizontal" ? "chart-wrap-horizontal" : "chart-wrap-vertical") + '"' +
+          (chartType === "bar_horizontal" ? ' id="chartWrap_' + ti + '"' : '') + '>' +
           '<canvas id="chart_' + ti + '"></canvas>' +
         '</div>';
       body.appendChild(chartDiv);
@@ -540,6 +540,9 @@ import LOGO    from '../../images/fitLogo.png';
     switch (chartType) {
         case "radar":
           drawRadarChart(ctx, test.test_name, labels, scores, themeColor);
+          break;
+        case "bar_horizontal":
+          drawHorizontalBarChart(ctx, "chartWrap_" + ti, labels, scores, themeColor, subtests);
           break;
         case "pie":
           drawPieChart(ctx, test.test_name, labels, scores, themeColor, subtests);
@@ -645,6 +648,65 @@ import LOGO    from '../../images/fitLogo.png';
           y: {
             beginAtZero: true,
             ticks: { stepSize: 5, font: { size: 9 } }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: function(items){ return (subtests[items[0].dataIndex] || {}).subtest_name || ""; },
+              label: function(item){ return " Score: " + item.raw; }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ── Horizontal bar ── */
+  function drawHorizontalBarChart(ctx, wrapId, labels, scores, themeColor, subtests) {
+    /* Height scales with number of subtests: 40px per bar, min 160px */
+    var wrap = wrapId ? document.getElementById(wrapId) : null;
+    if (wrap) wrap.style.height = Math.max(160, subtests.length * 40) + "px";
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          data:            scores,
+          backgroundColor: hexToRgba(themeColor, 0.75),
+          borderColor:     themeColor,
+          borderWidth:     1.5,
+          borderRadius:    4,
+          borderSkipped:   false,
+          barThickness:    22   /* fixed medium width for horizontal bars */
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { stepSize: 5, font: { size: 9 } }
+          },
+          y: {
+            ticks: {
+              font: { size: 9 },
+              callback: function(val, i) {
+                var label = (subtests[i] && subtests[i].subtest_name) || "";
+                var words = label.split(" ");
+                var lines = []; var cur = "";
+                words.forEach(function(w) {
+                  if ((cur + " " + w).trim().length <= 18) { cur = (cur + " " + w).trim(); }
+                  else { if (cur) lines.push(cur); cur = w; }
+                });
+                if (cur) lines.push(cur);
+                return lines;
+              }
+            },
+            grid: { display: false }
           }
         },
         plugins: {
