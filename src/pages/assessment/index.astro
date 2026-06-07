@@ -467,6 +467,12 @@ Page unload protection auto-saves
   --------------------------------------------------------- */
   function renderTest(test) {
     const progress = testProgress[test.test_id];
+    const totalQuestions = progress?.total || 0;
+    const answeredQuestions = Object.keys(progress?.answers || {}).length;
+
+    const percentComplete = totalQuestions > 0 
+      ? Math.round((answeredQuestions / totalQuestions) * 100) 
+      : 0;
     
     questionsContainer.innerHTML = `
       <div class="accordion accordion-flush" id="testAccordion_${test.test_id}">
@@ -530,15 +536,15 @@ Page unload protection auto-saves
           <div class="progress" style="height: 28px;">
             <div class="progress-bar bg-success" 
                 role="progressbar" 
-                style="width: ${progress.total > 0 ? Math.round((Object.keys(progress.answers).length / progress.total) * 100) : 0}%"
-                aria-valuenow="${Object.keys(progress.answers).length}" 
-                aria-valuemax="${progress.total}">
-              <strong>${Object.keys(progress.answers).length}/${progress.total} answered</strong>
+                style="width: ${percentComplete}%"
+                aria-valuenow="${answeredQuestions}" 
+                aria-valuemax="${totalQuestions}">
+              <strong>${answeredQuestions}/${totalQuestions} answered</strong>
             </div>
           </div>
         </div>
         <div class="col-md-4 text-md-end">
-          <small class="text-muted">${progress.total > 0 ? Math.round((Object.keys(progress.answers).length / progress.total) * 100) : 0}% complete</small>
+          <small class="text-muted">${percentComplete}% complete</small>
         </div>
       </div>
     `;
