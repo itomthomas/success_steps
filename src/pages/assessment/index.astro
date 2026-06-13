@@ -736,9 +736,15 @@ Page unload protection auto-saves
   /* ---------------------------------------------------------
      17. Final Submit ALL TESTS
   --------------------------------------------------------- */
-  document.getElementById("confirmSubmitBtn").addEventListener("click", async () => {
+  document.getElementById("confirmSubmitBtn").addEventListener("click", async (e) => {
+    const confirmBtn = e.currentTarget;
+    
+    // 1. Immediately disable the button to block multi-clicks
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Processing...";
+    
     const modalElement = document.getElementById("submitWarningModal");
-    const bootstrapModal = new bootstrap.Modal(modalElement);
+    const bootstrapModal = bootstrap.Modal.getInstance(modalElement);
     bootstrapModal.hide();
     await handleFinalSubmit();
   });
