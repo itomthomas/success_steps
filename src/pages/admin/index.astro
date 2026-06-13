@@ -143,8 +143,8 @@ const authed  = session === import.meta.env.ADMIN_PASSWORD;
         </div>
         <div class="col-6 col-md-3">
           <div class="stat-card">
-            <div class="stat-val text-info"     id="statApproved">—</div>
-            <div class="stat-lbl">Approved users</div>
+            <div class="stat-val text-info"     id="statCompleted">—</div>
+            <div class="stat-lbl">Completed users</div>
           </div>
         </div>
       </div>
@@ -158,6 +158,7 @@ const authed  = session === import.meta.env.ADMIN_PASSWORD;
           <option value="">All statuses</option>
           <option value="APPROVED">Approved</option>
           <option value="PENDING">Pending</option>
+          <option value="COMPLETED">Completed</option>
         </select>
         <select id="reportFilter" onchange="filterTable()">
           <option value="">All users</option>
@@ -210,7 +211,7 @@ const authed  = session === import.meta.env.ADMIN_PASSWORD;
         <label class="form-label fw-semibold" for="pwInput">Password</label>
         <input type="password" id="pwInput" class="form-control"
                placeholder="Enter admin password"
-               onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+               autofocus />
       </div>
       <button class="btn btn-primary w-100 fw-semibold" onclick="doLogin()">
         <span id="loginLabel">Login</span>
@@ -225,6 +226,14 @@ const authed  = session === import.meta.env.ADMIN_PASSWORD;
 /* ═══════════════════════════════════════════════════════════
    LOGIN / LOGOUT
 ═══════════════════════════════════════════════════════════ */
+const pwInput = document.getElementById('pwInput');
+// Handle the 'Enter' keypress cleanly using the native event argument
+  pwInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      doLogin();
+    }
+  });
+
 async function doLogin() {
   const pw  = document.getElementById("pwInput")?.value?.trim();
   const lbl = document.getElementById("loginLabel");
@@ -307,7 +316,7 @@ function renderStats(users) {
   document.getElementById("statTotal").textContent    = users.length;
   document.getElementById("statReports").textContent  = users.filter(function(u){ return u.reportToken; }).length;
   document.getElementById("statPending").textContent  = users.filter(function(u){ return !u.reportToken; }).length;
-  document.getElementById("statApproved").textContent = users.filter(function(u){ return u.status === "APPROVED"; }).length;
+  document.getElementById("statCompleted").textContent = users.filter(function(u){ return u.status === "COMPLETED"; }).length;
 }
 
 /* ═══════════════════════════════════════════════════════════
