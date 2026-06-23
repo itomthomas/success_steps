@@ -69,6 +69,78 @@ import LOGO    from '../../images/fitLogo.png';
   ];
 
   /* ═══════════════════════════════════════════════════════════════
+     LEVEL LABEL → PILL COLOUR MAP
+     Each label has a fixed semantic colour regardless of test theme.
+     Groups:
+       Red family    — needs improvement / low / high dependency
+       Amber family  — below avg / developing / room for improvement
+       Blue family   — average / progressing / moderate
+       Teal/green    — above avg / proficiency / balanced
+       Emerald       — strong / excelling / competing
+       Purple        — exceptional / outstanding / mastery
+     Brain dominance labels get a dedicated indigo/violet pair.
+  ═══════════════════════════════════════════════════════════════ */
+  var LEVEL_COLOURS = {
+    // ── Needs improvement tier ──
+    "Needs Significant Improvement": "#c0392b",
+    "Needs Improvement":             "#e74c3c",
+    "Room for Improvement":          "#e67e22",
+
+    // ── Below / Low tier ──
+    "Below Average":                 "#d35400",
+    "Low":                           "#e74c3c",
+    "Low Dependency":                "#27ae60",   // low dependency = good
+
+    // ── Developing / Mild tier ──
+    "Developing":                    "#e67e22",
+    "Developing Skills":             "#e67e22",
+    "Mild":                          "#f39c12",
+
+    // ── Average / Moderate tier ──
+    "Average":                       "#2980b9",
+    "Moderate":                      "#f39c12",
+    "Moderate Dependency":           "#f39c12",
+    "Moderate-Low Dependency":       "#27ae60",   // leaning low = better
+    "Moderate-High Dependency":      "#e67e22",   // leaning high = worse
+    "Progressing":                   "#2980b9",
+
+    // ── Above average / basic proficiency ──
+    "Above Average":                 "#16a085",
+    "Basic Proficiency":             "#16a085",
+
+    // ── Competing / High Dependency ──
+    "Competing":                     "#1abc9c",
+    "High Dependency":               "#c0392b",   // high dependency = bad
+    "High":                          "#c0392b",
+
+    // ── Strong / Proficiency ──
+    "Strong Proficiency":            "#27ae60",
+    "Excelling":                     "#27ae60",
+
+    // ── Excellent / Exceptional ──
+    "Excellent":                     "#8e44ad",
+    "Exceptional Mastery":           "#6c3483",
+    "Outstanding":                   "#6c3483",
+
+    // ── Brain dominance — L.B ──
+    "Limited L.B Dominance":         "#7f8c8d",
+    "Developing L.B Dominance":      "#2471a3",
+    "Balanced L.B Dominance":        "#1a5276",
+    "Strong L.B Dominance":          "#154360",
+
+    // ── Brain dominance — R.B ──
+    "Limited R.B Dominance":         "#7f8c8d",
+    "Developing R.B Dominance":      "#76448a",
+    "Balanced R.B Dominance":        "#6c3483",
+    "Strong R.B Dominance":          "#4a235a"
+  };
+
+  /** Returns the fixed pill colour for a level label, or a neutral grey fallback */
+  function levelColour(label) {
+    return LEVEL_COLOURS[label] || "#6c757d";
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
      REPORT TOKEN
   ═══════════════════════════════════════════════════════════════ */
   var params      = new URLSearchParams(window.location.search);
@@ -282,7 +354,7 @@ import LOGO    from '../../images/fitLogo.png';
       card.innerHTML =
         '<div class="subtest-card-header">' +
           '<h4>' + st.subtest_name + '</h4>' +
-          '<span class="level-pill" style="background:' + colour + '">' + (st.level_label || "—") + '</span>' +
+          '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
         '</div>' +
         '<div class="subtest-score">' +
           'Score: <strong>' + st.raw_score + '</strong>' +
@@ -351,7 +423,7 @@ import LOGO    from '../../images/fitLogo.png';
         fallbackCard.innerHTML =
           '<div class="subtest-card-header">' +
             '<h4>' + st.subtest_name + '</h4>' +
-            '<span class="level-pill" style="background:' + colour + '">' + (st.level_label || "—") + '</span>' +
+            '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
           '</div>' +
           '<div class="subtest-score">' +
             'Score: <strong>' + st.raw_score + '</strong>' +
@@ -377,7 +449,7 @@ import LOGO    from '../../images/fitLogo.png';
         '<div class="si-card-top">' +
           '<div class="si-card-header">' +
             '<h4 class="si-subtest-name">' + st.subtest_name + '</h4>' +
-            '<span class="level-pill" style="background:' + colour + '">' + (st.level_label || "—") + '</span>' +
+            '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
           '</div>' +
           '<div class="si-score-row">' +
             '<span class="si-score-text">' +
@@ -419,7 +491,7 @@ import LOGO    from '../../images/fitLogo.png';
       row.innerHTML =
         '<div class="subtest-fw-header">' +
           '<h4 class="subtest-name-text">' + st.subtest_name + '</h4>' +
-          '<span class="level-pill" style="background:' + colour + '">' + (st.level_label || "—") + '</span>' +
+          '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
         '</div>' +
         '<div class="subtest-fw-score">' +
           'Score: <strong>' + st.raw_score + '</strong>' +
@@ -430,6 +502,63 @@ import LOGO    from '../../images/fitLogo.png';
         '<div class="subtest-fw-feedback">' + (st.feedback || "—") + '</div>';
       wrap.appendChild(row);
     });
+    return wrap;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     WHEEL TABLE — used when test name contains "Wheel"
+     Columns: # | Subtest name + feedback | Score
+  ───────────────────────────────────────────────────────────── */
+  function renderSubtestsWheelTable(subtests, themeColor) {
+    var wrap = document.createElement("div");
+    wrap.className = "wheel-table-wrap";
+
+    var headerBg = themeColor || "#0d6efd";
+
+    var thead =
+      '<thead><tr style="background:' + headerBg + '">' +
+        '<th>#</th>' +
+        '<th>Wellness Dimensions</th>' +
+        '<th style="text-align:right;padding-right:18px;">Score</th>' +
+      '</tr></thead>';
+
+    var tbodyRows = subtests.map(function(st, si) {
+      var colour  = themeColor || DEFAULT_COLOURS[si % DEFAULT_COLOURS.length];
+      var maxS    = Number(st.max_score) || 1;
+      var rawS    = Number(st.raw_score) || 0;
+      var pct     = Math.min(100, Math.round((rawS / maxS) * 100));
+      var level   = st.level_label || "—";
+      var feedback = (st.feedback || "—").replace(/\r?\n/g, " ");
+
+      return '<tr>' +
+        /* Col 1 — number */
+        '<td class="wt-num" style="border-left:4px solid ' + colour + '">' +
+          '<span class="wt-num-badge" style="background:' + colour + '">' + (si + 1) + '</span>' +
+        '</td>' +
+        /* Col 2 — name + feedback */
+        '<td class="wt-body">' +
+          '<div class="wt-name-row">' +
+            '<span class="wt-subtest-name">' + st.subtest_name + '</span>' +
+            '<span class="wt-level-pill" style="background:' + levelColour(st.level_label) + '">' + level + '</span>' +
+          '</div>' +
+          '<div class="wt-feedback">' + feedback + '</div>' +
+        '</td>' +
+        /* Col 3 — score */
+        '<td class="wt-score">' +
+          '<div class="wt-score-badge">' +
+            '<span class="wt-score-value">' + rawS + '<span style="font-size:0.72rem;font-weight:400;color:var(--grey)"> / ' + st.max_score + '</span></span>' +
+            '<span class="wt-score-range">' + (st.score_range || "") + '</span>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+
+    wrap.innerHTML =
+      '<table class="wheel-table">' +
+        thead +
+        '<tbody>' + tbodyRows + '</tbody>' +
+      '</table>';
+
     return wrap;
   }
 
@@ -506,7 +635,10 @@ import LOGO    from '../../images/fitLogo.png';
 
     /* ── e/f. Subtest cards ── */
     var subtestSection = document.createElement("div");
-    if (subtestLayout === "side_image") {
+    var isWheelTest = test.test_name && test.test_name.toLowerCase().indexOf("wheel") !== -1;
+    if (isWheelTest) {
+      subtestSection.appendChild(renderSubtestsWheelTable(subtests, themeColor));
+    } else if (subtestLayout === "side_image") {
       subtestSection.appendChild(
         renderSubtestsSideImage(subtests, themeColor, subtestImageUrls, imageSizePct)
       );

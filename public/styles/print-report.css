@@ -1005,3 +1005,168 @@ body {
   /* si-card-body columns are set inline by JS (imageSizePct from sheet) */
   /* Do NOT override grid-template-columns here — it fights the inline style */
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   WHEEL TABLE LAYOUT
+   Used for any test whose name contains "Wheel".
+   Columns: # | Subtest Name + Feedback | Score badge
+   ═══════════════════════════════════════════════════════════════════ */
+.wheel-table-wrap {
+  width: 100%;
+  overflow: hidden;
+}
+
+.wheel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+/* Themed header row — background set inline via JS themeColor */
+.wheel-table thead tr {
+  color: #fff;
+}
+
+.wheel-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.wheel-table thead th:first-child {
+  width: 42px;
+  text-align: center;
+  border-radius: 8px 0 0 0;
+}
+
+.wheel-table thead th:last-child {
+  width: 120px;
+  text-align: right;
+  border-radius: 0 8px 0 0;
+  padding-right: 18px;
+}
+
+/* Body rows */
+.wheel-table tbody tr {
+  border-bottom: 1px solid var(--grey-rule);
+}
+
+.wheel-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.wheel-table tbody tr:nth-child(even) {
+  background: var(--grey-light);
+}
+
+/* Col 1 — row number */
+.wheel-table td.wt-num {
+  text-align: center;
+  padding: 14px 10px;
+  vertical-align: top;
+}
+
+.wt-num-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  /* background set inline via JS themeColor */
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Col 2 — subtest name + level pill + feedback */
+.wheel-table td.wt-body {
+  padding: 14px 14px 14px 10px;
+  vertical-align: top;
+}
+
+.wt-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.wt-subtest-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.wt-feedback {
+  font-size: 0.78rem;
+  color: #3c4a5a;
+  line-height: 1.65;
+}
+
+/* Accent left border — color set inline */
+.wheel-table tbody tr td.wt-num {
+  border-left: 4px solid transparent; /* overridden inline */
+}
+
+/* Col 3 — score */
+.wheel-table td.wt-score {
+  text-align: right;
+  padding: 14px 18px 14px 10px;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.wt-score-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.wt-score-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.wt-score-range {
+  font-size: 0.68rem;
+  color: var(--grey);
+}
+
+.wt-level-pill {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 50px;
+  padding: 2px 9px;
+  white-space: nowrap;
+  /* background set inline */
+}
+
+/* Mini bar inside score cell */
+.wt-mini-bar-wrap {
+  height: 4px;
+  width: 80px;
+  background: var(--grey-rule);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.wt-mini-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+@media print {
+  .wheel-table tbody tr { break-inside: avoid; }
+}
