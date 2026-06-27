@@ -828,7 +828,9 @@ body {
 
 /* ── Bottom section: image | bulleted feedback ──
    grid-template-columns is set inline by JS using imageSizePct from sheet.
-   Default 45% image / 55% feedback. */
+   Default 45% image / 55% feedback. Used only when the image is "narrow"
+   (tall/portrait-ish) and can't be stretched full-width — see
+   .si-card-body--stacked below for the default full-width-image layout. */
 .si-card-body {
   display: grid;
   /* columns set inline: e.g. style="grid-template-columns:45% 55%" */
@@ -862,11 +864,13 @@ body {
   display: block;
 }
 
-/* Right half — bulleted feedback */
+/* Right half — feedback content (Feedback / Career Suggestions /
+   Characteristics subsections) for the narrow-image 50/50 fallback */
 .si-feedback-half {
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
 .si-feedback-label {
@@ -901,6 +905,81 @@ body {
   top: 0;
   color: currentColor;   /* inherits from parent, which gets themeColor via JS */
   font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STACKED VARIANT — new default for si-card when the image is wide
+   enough to stretch full-width (e.g. landscape illustrations).
+   Order: full-width image (medium, fixed height) → Feedback →
+   Career Suggestions → Characteristics (one sentence per line).
+   Falls back to the 50/50 .si-card-body split above when the image
+   is narrow/portrait (e.g. Left/Right Brain artwork) — decided
+   client-side once the image's natural aspect ratio is known.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Full-width image strip — aspect-ratio-driven, no cropping.
+   Strategy:
+   - The <img> is display:block; width:100%; height:auto so the browser
+     sizes it by its natural proportions automatically — no JS needed for
+     normal images.
+   - max-height clamps very tall/portrait images (the narrow-image path
+     handles those anyway) so they don't eat the page.
+   - min-height gives tiny images a floor so they don't look like a stamp.
+   - object-fit:contain is a safety net when the height gets clamped by
+     max-height, ensuring the full image is still visible without cropping.
+   - JS sets aspect-ratio inline on the strip for print, where height:auto
+     on an img can misbehave across page-break boundaries. */
+.si-image-full {
+  width: 100%;
+  background: var(--grey-light);
+  border-bottom: 1px solid var(--grey-rule);
+  overflow: hidden;
+  /* flex keeps the image centred if min-height kicks in */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.si-image-full img {
+  display: block;
+  width: 100%;        /* always fill the full card width */
+  height: auto;       /* let the image's natural ratio dictate its height */
+  max-height: 420px;  /* cap extremely tall images so they don't swamp the card */
+  min-height: 120px;  /* floor so very small images still read as a proper banner */
+  object-fit: contain;/* if height is clamped, show the whole image (no crop) */
+  object-position: center;
+}
+
+/* Stacked body — wraps the full-bleed image strip (if any) plus the
+   padded text sections below it. The image strip itself must NOT
+   inherit this padding, or it won't reach the card edges. */
+.si-card-body--stacked {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Padded wrapper for the text subsections (Feedback / Career / Characteristics),
+   sits below the full-bleed image strip */
+.si-card-sections {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Each labelled subsection: Feedback / Career Suggestions / Characteristics */
+.si-subsection-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* Career Suggestions reads as a single flowing line, not bullets */
+.si-career-text {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.6;
 }
 
 /* ── Layout: full_width — one subtest per full row ── */
@@ -992,10 +1071,11 @@ body {
   .cover-topbar, .cover-title-band, .cover-image-wrap,
   .cover-taxonomy, .cover-analyst, .cover-credentials,
   .cover-bottombar { padding-left: 20px; padding-right: 20px; }
-  /* si-card: stack image above feedback on very small screens */
+  /* si-card (narrow-image fallback): stack image above feedback on very small screens */
   .si-card-body { grid-template-columns: 1fr; }
   .si-image-half { border-right: none; border-bottom: 1px solid var(--grey-rule); min-height: 140px; }
   .si-image-half img { min-height: 140px; }
+  /* .si-image-full needs no override — it sizes itself from the img's natural ratio */
 }
 
 @media print {

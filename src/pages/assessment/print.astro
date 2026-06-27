@@ -382,6 +382,107 @@ import LOGO    from '../../images/fitLogo.png';
     return parts.map(function(p){ return "<li>" + p + "</li>"; }).join("");
   }
 
+  /* ─────────────────────────────────────────────────────────────
+     HELPER: parse a raw feedback string into three structured
+     sections — Feedback, Career Suggestions, Characteristics —
+     so each can be displayed under its own heading.
+
+     The GAS feedback text follows the loose pattern:
+       "<intro/feedback sentences> Career Suggestions: A, B, etc.
+        <Subject> Characteristics: • point one• point two• ..."
+
+     Detection is done with case-insensitive markers so it degrades
+     gracefully (whole string becomes "feedback" with bullets) when
+     a particular subtest's text doesn't follow the pattern.
+  ───────────────────────────────────────────────────────────── */
+  function parseFeedbackSections(feedbackRaw) {
+    var result = { feedback: "", career: "", characteristics: "" };
+    if (!feedbackRaw) return result;
+
+    var text = feedbackRaw.trim();
+
+    // Locate "Career Suggestions:" (case-insensitive)
+    var careerMatch = /career\s+suggestions\s*:/i.exec(text);
+    // Locate "...Characteristics:" — matches "Visual/spatial Characteristics:",
+    // "Characteristics:", etc. — i.e. an optional short label before the word.
+    var charMatch = /([A-Za-z\/\-\s]{0,40}characteristics\s*:)/i.exec(text);
+
+    var careerIdx = careerMatch ? careerMatch.index : -1;
+    var charIdx   = charMatch   ? charMatch.index   : -1;
+
+    // Feedback = everything before the first marker found
+    var firstCut = text.length;
+    if (careerIdx !== -1) firstCut = Math.min(firstCut, careerIdx);
+    if (charIdx   !== -1) firstCut = Math.min(firstCut, charIdx);
+    result.feedback = text.slice(0, firstCut).trim();
+    // Strip a redundant leading "Feedback:" label since the card already
+    // renders its own "FEEDBACK" section heading above this text.
+    result.feedback = result.feedback.replace(/^feedback\s*:\s*/i, "");
+
+    // Career Suggestions = text between its marker and the next marker (characteristics, if it comes after)
+    if (careerIdx !== -1) {
+      var careerStart = careerIdx + careerMatch[0].length;
+      var careerEnd   = (charIdx !== -1 && charIdx > careerIdx) ? charIdx : text.length;
+      result.career = text.slice(careerStart, careerEnd).trim();
+    }
+
+    // Characteristics = everything after its marker to the end
+    if (charIdx !== -1) {
+      var charStart = charIdx + charMatch[0].length;
+      result.characteristics = text.slice(charStart).trim();
+    }
+
+    // Fallback: nothing matched any marker → whole text is "feedback"
+    if (!result.feedback && !result.career && !result.characteristics) {
+      result.feedback = text;
+    }
+
+    return result;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     HELPER: split a block of text into sentence-level lines so each
+     sentence renders on its own line. Used for the Feedback and
+     Characteristics sections.
+
+     If the text contains "•" separators, it's split on those first
+     (each GAS-authored bullet point may itself contain several
+     sentences), then each resulting chunk is further split into
+     individual sentences. Plain text with no "•" markers is split
+     straight into sentences.
+  ───────────────────────────────────────────────────────────── */
+  function splitIntoSentences(chunk) {
+    var text = chunk.trim();
+    if (!text) return [];
+    var sentences = text.match(/[^.!?]+[.!?]+(?=\s+|$)/g);
+    if (sentences && sentences.length) {
+      return sentences.map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    return [text];
+  }
+
+  function textToLines(raw) {
+    if (!raw) return [];
+    var text = raw.trim();
+    if (!text) return [];
+
+    var chunks = text.indexOf("•") !== -1
+      ? text.split("•").map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; })
+      : [text];
+
+    var lines = [];
+    chunks.forEach(function(chunk) {
+      splitIntoSentences(chunk).forEach(function(s) { lines.push(s); });
+    });
+    return lines;
+  }
+
+  function linesToListItems(raw) {
+    var lines = textToLines(raw);
+    if (!lines.length) return "<li>—</li>";
+    return lines.map(function(l){ return "<li>" + l + "</li>"; }).join("");
+  }
+
   /* side_image layout
      ┌─────────────────────────────────────────────────────┐
      │  Subtest name                       [Level pill]    │  full-width header
@@ -392,6 +493,28 @@ import LOGO    from '../../images/fitLogo.png';
      │                     │  • Bullet two                 │
      └─────────────────────┴───────────────────────────────┘
      One card per row — no grid wrapping.
+
+     NOTE: this 50/50 split is now used only as the fallback layout for
+     "narrow" images (e.g. Left/Right Brain art) that would look
+     stretched or leave excess empty space if forced full-width.
+
+     The new DEFAULT layout (built inline below, for images whose
+     natural aspect ratio is wide enough) is "stacked":
+       ┌─────────────────────────────────────────────────────┐
+       │  Subtest name                       [Level pill]    │  header
+       │  Score: X / Y  (range)  [mini bar]                  │
+       ├─────────────────────────────────────────────────────┤
+       │              IMAGE — full width, medium height       │  (skipped if no image)
+       ├─────────────────────────────────────────────────────┤
+       │  FEEDBACK                                            │
+       │  Sentence one. Sentence two. ...                     │
+       │  CAREER SUGGESTIONS                                  │
+       │  Architect, Industrial Designer, etc.                │
+       │  CHARACTERISTICS                                     │
+       │  Sentence one. Sentence two. ...                     │
+       └─────────────────────────────────────────────────────┘
+     Which layout applies is decided per-image once its natural size
+     is known — see applyNarrowLayout() further down.
   */
   function renderSubtestsSideImage(subtests, themeColor, subtestImageUrls, imageSizePct) {
     var wrap = document.createElement("div");
@@ -405,51 +528,17 @@ import LOGO    from '../../images/fitLogo.png';
 
       // Per-subtest image URL — falls back to blank if not set
       var stImgUrl = (subtestImageUrls[si] || "").trim();
-      
-      // FIX 1: Removed inline 'width' percentage from the img tag itself. 
-      // It should just fill 100% of its available container space.
-     // var imgWidthStyle = 'width:100%;height:100%;object-fit:cover;display:block;';
-      var thumbHTML = stImgUrl
-        ? '<img src="' + stImgUrl + '" alt="' + st.subtest_name + '" style="' + '" />'
-        : '';   // blank → triggers cards fallback below
 
-      var bulletItems = feedbackToBullets(st.feedback);
+      // Parse the raw feedback into Feedback / Career Suggestions / Characteristics
+      var sections = parseFeedbackSections(st.feedback);
 
-      // If no image URL for this subtest → render as a standard card (cards fallback)
-      if (!stImgUrl) {
-        var fallbackCard = document.createElement("div");
-        fallbackCard.className = "subtest-card";
-        fallbackCard.style.borderLeftColor = colour;
-        fallbackCard.innerHTML =
-          '<div class="subtest-card-header">' +
-            '<h4>' + st.subtest_name + '</h4>' +
-            '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
-          '</div>' +
-          '<div class="subtest-score">' +
-            'Score: <strong>' + st.raw_score + '</strong>' +
-            '<span style="color:#adb5bd"> / ' + st.max_score + '</span>' +
-            '&nbsp;<span style="color:#adb5bd">(' + (st.score_range || "") + ')</span>' +
-          '</div>' +
-          '<div class="score-mini-bar-wrap"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
-          '<div class="subtest-feedback">' + (st.feedback || "—") + '</div>';
-        wrap.appendChild(fallbackCard);
-        return;   // skip si-card for this subtest
-      }
+      var levelPillHTML = '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>';
 
-      // Has image → full si-card with image | bullets
-      // image-half width is controlled by imageSizePct from sheet
-      var feedbackPct = (100 - imageSizePct) + "%";
-      var card = document.createElement("div");
-      card.className = "si-card";
-      card.style.borderLeftColor = colour;
-      card.style.borderTopColor  = colour;
-
-      card.innerHTML =
-        /* ── Top: name + score, full width ── */
+      var headerHTML =
         '<div class="si-card-top">' +
           '<div class="si-card-header">' +
             '<h4 class="si-subtest-name">' + st.subtest_name + '</h4>' +
-            '<span class="level-pill" style="background:' + levelColour(st.level_label) + '">' + (st.level_label || "—") + '</span>' +
+            levelPillHTML +
           '</div>' +
           '<div class="si-score-row">' +
             '<span class="si-score-text">' +
@@ -459,19 +548,124 @@ import LOGO    from '../../images/fitLogo.png';
             '</span>' +
             '<div class="score-mini-bar-wrap si-bar"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
           '</div>' +
-        '</div>' +
-        /* ── Bottom: image | bullets, widths set by imageSizePct ── */
-        '<div class="si-card-body" style="grid-template-columns:' + imageSizePct + '% ' + feedbackPct + '">' +
-          '<div class="si-image-half">' + 
-             '<div class="si-image-container">' + thumbHTML + '</div>' + 
-          '</div>' +
-          '<div class="si-feedback-half">' +
-            '<div class="si-feedback-label" style="color:' + colour + '">Feedback</div>' +
-            '<ul class="si-bullet-list">' + bulletItems + '</ul>' +
-          '</div>' +
         '</div>';
 
+      // ── Stacked body content: Feedback → Career Suggestions → Characteristics ──
+      var stackedSectionsHTML = '';
+
+      // Feedback (bulleted if it had "•" markers, otherwise sentence-per-line)
+      stackedSectionsHTML +=
+        '<div class="si-subsection">' +
+          '<div class="si-subsection-label" style="color:' + colour + '">Feedback</div>' +
+          '<ul class="si-bullet-list">' + linesToListItems(sections.feedback) + '</ul>' +
+        '</div>';
+
+      // Career Suggestions — short flowing line, not bulleted
+      if (sections.career) {
+        stackedSectionsHTML +=
+          '<div class="si-subsection">' +
+            '<div class="si-subsection-label" style="color:' + colour + '">Career Suggestions</div>' +
+            '<div class="si-career-text">' + sections.career + '</div>' +
+          '</div>';
+      }
+
+      // Characteristics — one sentence per line
+      if (sections.characteristics) {
+        stackedSectionsHTML +=
+          '<div class="si-subsection">' +
+            '<div class="si-subsection-label" style="color:' + colour + '">Characteristics</div>' +
+            '<ul class="si-bullet-list">' + linesToListItems(sections.characteristics) + '</ul>' +
+          '</div>';
+      }
+
+      // No image at all → stacked layout with no image strip
+      if (!stImgUrl) {
+        var card = document.createElement("div");
+        card.className = "si-card";
+        card.style.borderLeftColor = colour;
+        card.style.borderTopColor  = colour;
+        card.innerHTML = headerHTML +
+          '<div class="si-card-body--stacked">' +
+            '<div class="si-card-sections">' + stackedSectionsHTML + '</div>' +
+          '</div>';
+        wrap.appendChild(card);
+        return;
+      }
+
+      // Has image → build the card now with a full-width image strip by
+      // default (stacked layout). Once the image loads, check its natural
+      // aspect ratio: narrow/portrait images (e.g. Left/Right Brain art)
+      // switch to the original 50/50 side-by-side layout instead, since
+      // stretching them full-width would look distorted or leave excess
+      // empty space.
+      var card = document.createElement("div");
+      card.className = "si-card";
+      card.style.borderLeftColor = colour;
+      card.style.borderTopColor  = colour;
+
+      var bodyStacked = document.createElement("div");
+      bodyStacked.className = "si-card-body--stacked";
+
+      var imageStrip = document.createElement("div");
+      imageStrip.className = "si-image-full";
+      var imgEl = document.createElement("img");
+      imgEl.src = stImgUrl;
+      imgEl.alt = st.subtest_name;
+
+      // Stamp the image's natural aspect-ratio onto the strip container
+      // so @media print doesn't collapse its height across page breaks.
+      // On screen, width:100% + height:auto on the img already handles sizing.
+      function setStripRatio() {
+        if (imgEl.naturalWidth && imgEl.naturalHeight) {
+          imageStrip.style.aspectRatio = (imgEl.naturalWidth / imgEl.naturalHeight).toFixed(4);
+        }
+      }
+
+      imageStrip.appendChild(imgEl);
+
+      var sectionsWrap = document.createElement("div");
+      sectionsWrap.className = "si-card-sections";
+      sectionsWrap.innerHTML = stackedSectionsHTML;
+
+      bodyStacked.appendChild(imageStrip);
+      bodyStacked.appendChild(sectionsWrap);
+
+      card.innerHTML = headerHTML;
+      card.appendChild(bodyStacked);
       wrap.appendChild(card);
+
+      // Decide layout once the image's natural size is known.
+      // A "narrow" image (tall/portrait, or unusually thin) is swapped to
+      // the original 50% image / 50% feedback layout.
+      function applyNarrowLayout() {
+        var feedbackPct = (100 - imageSizePct) + "%";
+        var bodySplit = document.createElement("div");
+        bodySplit.className = "si-card-body";
+        bodySplit.style.gridTemplateColumns = imageSizePct + "% " + feedbackPct;
+        bodySplit.innerHTML =
+          '<div class="si-image-half"><div class="si-image-container">' +
+            '<img src="' + stImgUrl + '" alt="' + st.subtest_name + '" />' +
+          '</div></div>' +
+          '<div class="si-feedback-half">' + stackedSectionsHTML + '</div>';
+        card.replaceChild(bodySplit, bodyStacked);
+      }
+
+      if (imgEl.complete && imgEl.naturalWidth > 0) {
+        // Image already in browser cache — handle synchronously
+        setStripRatio();
+        var ratio = imgEl.naturalWidth / imgEl.naturalHeight;
+        if (ratio < 0.85) applyNarrowLayout();
+      } else {
+        imgEl.addEventListener("load", function() {
+          setStripRatio();
+          var ratio = imgEl.naturalWidth / imgEl.naturalHeight;
+          if (ratio < 0.85) applyNarrowLayout();
+        });
+        imgEl.addEventListener("error", function() {
+          // Broken image → collapse the strip so no empty grey band appears
+          imageStrip.style.display = "none";
+        });
+      }
     });
     return wrap;
   }
