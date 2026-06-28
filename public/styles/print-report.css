@@ -508,6 +508,32 @@ body {
 .subtest-score strong { color: var(--ink); font-size: 0.88rem; }
 .subtest-feedback { font-size: 0.76rem;  line-height: 1.55; }
 
+/* Bullet list used in "cards" and "full_width" layouts — one sentence per bullet.
+   --bullet-color is set inline by JS to match the test's theme colour. */
+.subtest-feedback-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.subtest-feedback-list li {
+  font-size: 0.76rem;
+  color: var(--ink);
+  line-height: 1.6;
+  padding-left: 13px;
+  position: relative;
+}
+.subtest-feedback-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--bullet-color, var(--blue));
+  font-weight: 700;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    SUMMARY PAGE  (page 2 — test index + guidance note)
    ═══════════════════════════════════════════════════════════════════ */

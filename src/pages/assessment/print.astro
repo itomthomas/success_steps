@@ -362,7 +362,7 @@ import LOGO    from '../../images/fitLogo.png';
           '&nbsp;<span style="color:#adb5bd">(' + st.score_range + ')</span>' +
         '</div>' +
         '<div class="score-mini-bar-wrap"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
-        '<div class="subtest-feedback">' + (st.feedback || "—") + '</div>';
+        '<ul class="subtest-feedback-list" style="--bullet-color:' + colour + '">' + linesToListItems(st.feedback) + '</ul>';
       grid.appendChild(card);
     });
     return grid;
@@ -693,7 +693,7 @@ import LOGO    from '../../images/fitLogo.png';
           '&nbsp;<span style="color:#adb5bd">(' + st.score_range + ')</span>' +
         '</div>' +
         '<div class="score-mini-bar-wrap"><div class="score-mini-bar" style="width:' + pct + '%;background:' + colour + '"></div></div>' +
-        '<div class="subtest-fw-feedback">' + (st.feedback || "—") + '</div>';
+        '<ul class="subtest-feedback-list" style="--bullet-color:' + colour + '">' + linesToListItems(st.feedback) + '</ul>';
       wrap.appendChild(row);
     });
     return wrap;
@@ -1062,6 +1062,22 @@ import LOGO    from '../../images/fitLogo.png';
       var profile = data.profile || {};
       var tests   = data.results || [];
       var root    = document.getElementById("reportRoot");
+
+      /* Set document.title → browsers use this as the default PDF filename
+         when the user clicks "Save as PDF / Print".
+         Format: BrainMapping_<FirstName><DD><Mon><YYYY>
+         e.g.   BrainMapping_Martina25Jun2026                              */
+      (function setPdfFilename() {
+        var firstName = (profile.name || "").split(" ")[0] || "Report";
+        var dateStr   = "";
+        if (profile.createdAt) {
+          var d = new Date(profile.createdAt);
+          var months = ["Jan","Feb","Mar","Apr","May","Jun",
+                        "Jul","Aug","Sep","Oct","Nov","Dec"];
+          dateStr = d.getDate() + months[d.getMonth()] + d.getFullYear();
+        }
+        document.title = "BrainMapping_" + firstName + dateStr;
+      })();
 
       /* 1 — Cover */
       root.appendChild(buildCoverPage(profile));
