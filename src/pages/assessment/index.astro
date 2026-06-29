@@ -932,7 +932,7 @@ Page unload protection auto-saves
   // ── Save COP progress into testProgress so submit gate works ─────
   function saveCOPProgress(test) {
     const count        = Object.keys(careerSelections).length;
-    const professions  = Object.values(careerSelections).join(",");
+    const professions  = Object.values(careerSelections).join(";");
 
     // Store as a single answer on the placeholder question ID
     testProgress[test.test_id].answers["MIQ-COP_Q1"] =
@@ -956,7 +956,7 @@ Page unload protection auto-saves
     const saved = testProgress[test.test_id].answers["MIQ-COP_Q1"];
     if (!saved) return;
 
-    saved.split(",").forEach(name => {
+    saved.split(";").forEach(name => {
       const trimmed = name.trim();
       if (!trimmed) return;
 

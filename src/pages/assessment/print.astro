@@ -283,7 +283,7 @@ import LOGO    from '../../images/fitLogo.png';
   /* ═══════════════════════════════════════════════════════════════
      PAGE 2 — SUMMARY + GUIDANCE NOTE
   ═══════════════════════════════════════════════════════════════ */
-  function buildSummaryPage(tests, name) {
+  function buildSummaryPage(tests, name, careerPicks) {
     var tableRows = tests.map(function(test, i) {
       var subtests    = test.subtests || [];
       var maxPossible = subtests.reduce(function(s, st){ return s + (Number(st.max_score) || 0); }, 0);
@@ -313,18 +313,53 @@ import LOGO    from '../../images/fitLogo.png';
         '<thead><tr><th style="width:44px;">#</th><th>Assessment</th><th>Subtests</th><th>Score</th></tr></thead>' +
         '<tbody>' + tableRows + '</tbody>' +
       '</table>' +
+      buildCareerPicksHTML(careerPicks);
+
+    sec.appendChild(body);
+    sec.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
+    return sec;
+  }
+  /* ═══════════════════════════════════════════════════════════════
+    PAGE 3 — GUIDANCE NOTE (own page)
+  ═══════════════════════════════════════════════════════════════ */
+  function buildGuidancePage(name) {
+    var sec = document.createElement("section");
+    sec.className = "page";
+    sec.innerHTML = pageHeaderHTML(name);
+
+    var body = document.createElement("div");
+    body.className = "page-body";
+    body.innerHTML =
+      '<h2 class="section-title">For Students, Parents &amp; Teachers</h2>' +
       '<div class="guidance-card">' +
         '<div class="guidance-header">' +
           '<div class="guidance-icon">💙</div>' +
-          '<div class="guidance-title"><span>A note for</span>Students · Parents · Teachers</div>' +
+          '<div class="guidance-title">' +
+            '<span>A note for</span>Students · Parents · Teachers' +
+          '</div>' +
         '</div>' +
         '<div class="guidance-body">' +
-          '<p>We warmly encourage parents and teachers to carefully read and reflect on this report before initiating any conversation with their child or student. This assessment is not a measure of worth — it is a map of <strong>inner strengths, hidden talents, and areas of growth</strong> waiting to be nurtured.</p>' +
-          '<p>Please use the insights shared here to build a <strong>supportive, stress-free environment</strong> — one where your child feels safe to explore, question, and discover who they truly are. Avoid comparing scores or outcomes with others; every profile is unique and equally valuable.</p>' +
-          '<p>If questions arise, our team is available to walk you through the findings in a one-to-one counselling session so the report translates into meaningful, positive action for your child.</p>' +
+          '<p>We warmly encourage parents and teachers to carefully read and reflect on ' +
+          'this report before initiating any conversation with their child or student. ' +
+          'This assessment is not a measure of worth — it is a map of ' +
+          '<strong>inner strengths, hidden talents, and areas of growth</strong> ' +
+          'waiting to be nurtured.</p>' +
+          '<p>Please use the insights shared here to build a ' +
+          '<strong>supportive, stress-free environment</strong> — one where your child ' +
+          'feels safe to explore, question, and discover who they truly are. Avoid ' +
+          'comparing scores or outcomes with others; every profile is unique and ' +
+          'equally valuable.</p>' +
+          '<p>If questions arise, our team is available to walk you through the findings ' +
+          'in a one-to-one counselling session so the report translates into meaningful, ' +
+          'positive action for your child.</p>' +
         '</div>' +
         '<div class="guidance-sign">' +
-          '<div><div class="guidance-sign-name">Dr. Antony Augusthy</div><div class="guidance-sign-title">Neurocognitive Psychologist · Success Steps NLP Academy</div></div>' +
+          '<div>' +
+            '<div class="guidance-sign-name">Dr. Antony Augusthy</div>' +
+            '<div class="guidance-sign-title">' +
+              'Neurocognitive Psychologist · Success Steps NLP Academy' +
+            '</div>' +
+          '</div>' +
           '<div class="guidance-wishes">🌟 Wishing you and your child every success!</div>' +
         '</div>' +
       '</div>';
@@ -333,7 +368,91 @@ import LOGO    from '../../images/fitLogo.png';
     sec.insertAdjacentHTML("beforeend", PAGE_FOOTER_HTML);
     return sec;
   }
+  /* ═══════════════════════════════════════════════════════════════
+   CAREER PICKS SECTION — rendered inside buildSummaryPage()
+   Shows the student's 10 chosen professions grouped by category,
+   connecting their aspirations to MIQ intelligence domains.
+  ═══════════════════════════════════════════════════════════════ */
+  function buildCareerPicksHTML(careerPicks) {
+    if (!careerPicks || !careerPicks.length) return "";
 
+    // Group picks by category
+    var grouped = {};
+    var order   = [];   // preserve insertion order
+    careerPicks.forEach(function(pick) {
+      var cat = pick.category || "Other";
+      if (!grouped[cat]) { grouped[cat] = []; order.push(cat); }
+      grouped[cat].push(pick.profession);
+    });
+
+    // Category → accent colour (maps loosely to intelligence types)
+    var CAT_COLOURS = {
+      "Linguistic":      "#0d6efd",
+      "Logical":         "#0dcaf0",
+      "Spatial":         "#6f42c1",
+      "Musical":         "#d63384",
+      "Kinesthetic":     "#fd7e14",
+      "Naturalist":      "#198754",
+      "Interpersonal":   "#20c997",
+      "Intrapersonal":   "#6c757d",
+      "Existential":     "#0a2342",
+      "Other":           "#adb5bd"
+    };
+
+    // Build one pill per profession
+    var pillsHTML = careerPicks.map(function(pick) {
+      var colour = CAT_COLOURS[pick.category] || CAT_COLOURS["Other"];
+      return (
+        '<div class="cop-pill" style="border-color:' + colour + '">' +
+          '<span class="cop-pill-name">' + pick.profession + '</span>' +
+          '<span class="cop-pill-cat" style="color:' + colour + '">' +
+            pick.category +
+          '</span>' +
+        '</div>'
+      );
+    }).join("");
+
+    // Build category legend dots
+    var legendHTML = order.map(function(cat) {
+      var colour = CAT_COLOURS[cat] || CAT_COLOURS["Other"];
+      var count  = grouped[cat].length;
+      return (
+        '<span class="cop-legend-item">' +
+          '<span class="cop-legend-dot" style="background:' + colour + '"></span>' +
+          cat + ' (' + count + ')' +
+        '</span>'
+      );
+    }).join("");
+
+    return (
+      '<div class="cop-section">' +
+
+        /* Header */
+        '<div class="cop-header">' +
+          '<div class="cop-header-left">' +
+            '<div class="cop-icon">🎯</div>' +
+            '<div>' +
+              '<div class="cop-title">Career Aspirations</div>' +
+              '<div class="cop-subtitle">' +
+                'The student\'s top ' + careerPicks.length +
+                ' profession choices — grouped by intelligence domain' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="cop-count-badge">' +
+            careerPicks.length + ' selected' +
+          '</span>' +
+        '</div>' +
+
+        /* Profession pills grid */
+        '<div class="cop-pills-grid">' + pillsHTML + '</div>' +
+
+        /* Category legend */
+        '<div class="cop-legend">' + legendHTML + '</div>' +
+
+      '</div>'
+    );
+  }
   /* ═══════════════════════════════════════════════════════════════
      SUBTEST RENDERERS — three layout modes
   ═══════════════════════════════════════════════════════════════ */
@@ -780,6 +899,9 @@ import LOGO    from '../../images/fitLogo.png';
   ═══════════════════════════════════════════════════════════════ */
   function buildTestPage(test, ti, name) {
     var subtests         = test.subtests || [];
+    var subtests = (test.subtests || []).filter(function(st) {
+      return st.subtest_id !== "MIQ09-C9";
+    });
     var display          = test.display  || {};
     var themeColor       = display.themeColor       || "#0d6efd";
     var sectionColor     = display.sectionColor     || "#f0f7ff";
@@ -1082,12 +1204,14 @@ import LOGO    from '../../images/fitLogo.png';
       /* 1 — Cover */
       root.appendChild(buildCoverPage(profile));
 
-      /* 2 — Summary + guidance */
+      /* 2 — Summary + career picks */
       if (tests.length) {
-        root.appendChild(buildSummaryPage(tests, profile.name));
+        root.appendChild(buildSummaryPage(tests, profile.name, data.careerPicks || []));
       }
+      /* 3 — Guidance note (own page) */
+      root.appendChild(buildGuidancePage(profile.name));
 
-      /* 3 — One page per test */
+      /* 4 — One page per test */
       if (!tests.length) {
         var empty = document.createElement("section");
         empty.className = "page";
@@ -1104,11 +1228,11 @@ import LOGO    from '../../images/fitLogo.png';
         });
       }
 
-      /* 4 — Show report */
+      /* 5 — Show report */
       document.getElementById("loadingState").style.display = "none";
       root.style.display = "block";
 
-      /* 5 — Draw charts after DOM is ready */
+      /* 6 — Draw charts after DOM is ready */
       await new Promise(function(resolve){ setTimeout(resolve, 60); });
       tests.forEach(function(test, ti) {
         drawCharts(test, ti);
